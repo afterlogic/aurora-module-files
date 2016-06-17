@@ -21,7 +21,8 @@ class FilesModule extends AApiModule
 			'AllowSharing' => true, // AppData.User.AllowFilesSharing
 			'PublicHash' => '', // AppData.FileStoragePubHash
 			'PublicName' => '', // AppData.FileStoragePubParams.Name
-			'UploadSizeLimitMb' => 0 // AppData.App.FileSizeLimit
+			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
+			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0
 		);
 	}
 	
