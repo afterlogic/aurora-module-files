@@ -213,6 +213,23 @@ class FilesModule extends AApiModule
 		return $this->GetRawFile($Type, $Path, $Name, $FileName, $AuthToken, false, true);
 	}
 
+	public function GetStorages()
+	{
+		$iUserId = \CApi::getLogginedUserId();
+		return [
+			[
+				'Type' => 'personal', 
+				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE', $iUserId), 
+				'IsExternal' => false
+			],
+			[
+				'Type' => 'corporate', 
+				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE', $iUserId), 
+				'IsExternal' => false
+			]
+		];
+	}	
+	
 	public function GetExternalStorages()
 	{
 		$oResult = array();

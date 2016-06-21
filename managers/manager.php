@@ -18,7 +18,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 
 		$this->incClass('item');
 	}
-
+	
 	/**
 	 * Checks if file exists. 
 	 * 
