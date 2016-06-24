@@ -143,7 +143,7 @@ class FilesModule extends AApiModule
 	public function UploadFile($Type, $SubPath, $Path, $FileData, $IsExt, $TenantName, $Token, $AuthToken)
 	{
 		$iUserId = \CApi::getLogginedUserId($AuthToken);
-		$oApiFileCacheManager = \CApi::GetCoreManager('filecache');
+		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
 
 		$sError = '';
 		$aResponse = array();
@@ -435,7 +435,7 @@ class FilesModule extends AApiModule
 				$iLinkType = \api_Utils::GetLinkType($sUrl);
 				if ($iLinkType === \EFileStorageLinkType::GoogleDrive)
 				{
-					$oApiTenants = \CApi::GetCoreManager('tenants');
+					$oApiTenants = \CApi::GetSystemManager('tenants');
 					if ($oApiTenants)
 					{
 						$oTenant = (0 < $iUserId->IdTenant) ? $oApiTenants->getTenantById($iUserId->IdTenant) :
@@ -535,7 +535,7 @@ class FilesModule extends AApiModule
 		
 		if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
 		{
-			$oApiIntegrator = \CApi::GetCoreManager('integrator');
+			$oApiIntegrator = \CApi::GetSystemManager('integrator');
 
 			if ($oApiIntegrator)
 			{

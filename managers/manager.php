@@ -464,7 +464,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 		$iUsageSize = 0;
 		$iFreeSize = 0;
 		
-		$oApiTenants = \CApi::GetCoreManager('tenants');
+		$oApiTenants = \CApi::GetSystemManager('tenants');
 		$oTenant = $oApiTenants ? $oApiTenants->getTenantById($oAccount->IdTenant) : null;
 		if ($oTenant)
 		{
