@@ -6,6 +6,12 @@ class FilesModule extends AApiModule
 	
 	protected $oMinModuleDecorator = null;
 	
+	protected $aSettingsMap = array(
+		'EnableUploadSizeLimit' => array(0, 'int'),
+		'UploadSizeLimitMb' => array(0, 'int'),
+		'Disabled' => array(false, 'bool'),
+	);
+
 	public function init() 
 	{
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
@@ -24,6 +30,19 @@ class FilesModule extends AApiModule
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0
 		);
+	}
+	
+	/**
+	 * Updates module's settings - saves them to config.json file.
+	 * 
+	 * @param boolean $EnableUploadSizeLimit Enable file upload size limit setting.
+	 * @param int $UploadSizeLimitMb Upload file size limit setting in Mb.
+	 */
+	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb)
+	{
+		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
+		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
+		$this->saveModuleConfig();
 	}
 	
 	public function GetMinModuleDecorator()
