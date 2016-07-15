@@ -7,9 +7,10 @@ class FilesModule extends AApiModule
 	protected $oMinModuleDecorator = null;
 	
 	protected $aSettingsMap = array(
-		'EnableUploadSizeLimit' => array(0, 'int'),
-		'UploadSizeLimitMb' => array(0, 'int'),
+		'EnableUploadSizeLimit' => array(true, 'bool'),
+		'UploadSizeLimitMb' => array(5, 'int'),
 		'Disabled' => array(false, 'bool'),
+		'EnableCorporate' => array(true, 'bool'),
 	);
 
 	public function init() 
@@ -19,16 +20,22 @@ class FilesModule extends AApiModule
 		$this->AddEntry('files-pub', 'EntryFilesPub');
 	}
 	
+	/**
+	 * Returns module settings for specified user.
+	 * 
+	 * @param \CUser $oUser User settings are obtained for.
+	 * 
+	 * @return array
+	 */
 	public function GetAppData($oUser = null)
 	{
 		return array(
 			'EnableModule' => true, // AppData.User.FilesEnable
-			'AllowCollaboration' => true, // AppData.User.IsCollaborationSupported
-			'AllowSharing' => true, // AppData.User.AllowFilesSharing
 			'PublicHash' => '', // AppData.FileStoragePubHash
 			'PublicName' => '', // AppData.FileStoragePubParams.Name
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
-			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0
+			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0,
+			'EnableCorporate' => $this->getConfig('EnableCorporate', false),
 		);
 	}
 	
@@ -37,11 +44,13 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param boolean $EnableUploadSizeLimit Enable file upload size limit setting.
 	 * @param int $UploadSizeLimitMb Upload file size limit setting in Mb.
+	 * @param boolean $EnableCorporate Enable corporate storage in Files.
 	 */
-	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb)
+	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate)
 	{
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
+		$this->setConfig('EnableCorporate', $EnableCorporate);
 		$this->saveModuleConfig();
 	}
 	
@@ -232,36 +241,45 @@ class FilesModule extends AApiModule
 		return $this->GetRawFile($Type, $Path, $Name, $FileName, $AuthToken, false, true);
 	}
 
+	/**
+	 * Returns storages avaliable for logged in user.
+	 * 
+	 * @return boolean
+	 */
 	public function GetStorages()
 	{
 		$iUserId = \CApi::getLogginedUserId();
-		return [
+		$aStorages = [
 			[
 				'Type' => 'personal', 
 				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE', $iUserId), 
 				'IsExternal' => false
-			],
-			[
+			]
+		];
+		if ($this->getConfig('EnableCorporate', false))
+		{
+			$aStorages[] = [
 				'Type' => 'corporate', 
 				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE', $iUserId), 
 				'IsExternal' => false
-			]
-		];
+			];
+		}
+		return $aStorages;
 	}	
 	
 	public function GetExternalStorages()
 	{
 		$oResult = array();
 		return $oResult; // TODO
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
-		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
-		
-		\CApi::Plugin()->RunHook('filestorage.get-external-storages', array($iUserId, &$oResult));
-
-		return $oResult;
+//		$iUserId = \CApi::getLogginedUserId();
+//		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+//		{
+//			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+//		}
+//		
+//		\CApi::Plugin()->RunHook('filestorage.get-external-storages', array($iUserId, &$oResult));
+//
+//		return $oResult;
 	}
 
 	public function GetFiles($Type, $Path, $Pattern)
