@@ -11,6 +11,7 @@ class FilesModule extends AApiModule
 		'UploadSizeLimitMb' => array(5, 'int'),
 		'Disabled' => array(false, 'bool'),
 		'EnableCorporate' => array(true, 'bool'),
+		'UserSpaceLimitMb' => array(100, 'int'),
 	);
 
 	public function init() 
@@ -36,6 +37,7 @@ class FilesModule extends AApiModule
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0,
 			'EnableCorporate' => $this->getConfig('EnableCorporate', false),
+			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
 		);
 	}
 	
@@ -45,13 +47,16 @@ class FilesModule extends AApiModule
 	 * @param boolean $EnableUploadSizeLimit Enable file upload size limit setting.
 	 * @param int $UploadSizeLimitMb Upload file size limit setting in Mb.
 	 * @param boolean $EnableCorporate Enable corporate storage in Files.
+	 * @param int $UserSpaceLimitMb User space limit setting in Mb.
 	 */
-	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate)
+	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate, $UserSpaceLimitMb)
 	{
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
 		$this->setConfig('EnableCorporate', $EnableCorporate);
+		$this->setConfig('UserSpaceLimitMb', $UserSpaceLimitMb);
 		$this->saveModuleConfig();
+		return true;
 	}
 	
 	public function GetMinModuleDecorator()
@@ -168,6 +173,20 @@ class FilesModule extends AApiModule
 		return false;		
 	}
 	
+	/**
+	 * Uploads file from client side.
+	 * 
+	 * @param string $Type Type of storage
+	 * @param string $SubPath
+	 * @param string $Path Path to folder than should contain uploaded file.
+	 * @param array $FileData Uploaded file information.
+	 * @param bool $IsExt
+	 * @param string $TenantName
+	 * @param string $Token
+	 * @param string $AuthToken Authentication token.
+	 * @return array
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function UploadFile($Type, $SubPath, $Path, $FileData, $IsExt, $TenantName, $Token, $AuthToken)
 	{
 		$iUserId = \CApi::getLogginedUserId($AuthToken);
@@ -176,12 +195,18 @@ class FilesModule extends AApiModule
 		$sError = '';
 		$aResponse = array();
 
-		if ($iUserId) {
-			
-			if (is_array($FileData)) {
+		if ($iUserId)
+		{
+			if (is_array($FileData))
+			{
+				$iSize = (int) $FileData['size'];
+				$aQuota = $this->getQuota($iUserId);
+				if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
+				{
+					throw new \System\Exceptions\ClientException(\System\Notifications::CanNotUploadFileQuota);
+				}
 				
 				$sUploadName = $FileData['name'];
-				$iSize = (int) $FileData['size'];
 				$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
 				$sSavedName = 'upload-post-'.md5($FileData['name'].$FileData['tmp_name']);
@@ -282,6 +307,32 @@ class FilesModule extends AApiModule
 //		return $oResult;
 	}
 
+	/**
+	 * Returns used space and space limit for specified user.
+	 * 
+	 * @param int $iUserId User identifier.
+	 * 
+	 * @return array
+	 */
+	private function getQuota($iUserId)
+	{
+		return array(
+			'Used' => $this->oApiFilesManager->getUserUsedSpace($iUserId, [\EFileStorageTypeStr::Personal]),
+			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
+		);
+	}
+
+	/**
+	 * Returns file list and user quota information.
+	 * 
+	 * @param string $Type Type of storage.
+	 * @param string $Path Path to folder files are obtained from.
+	 * @param string $Pattern
+	 * 
+	 * @return array
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function GetFiles($Type, $Path, $Pattern)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -289,12 +340,12 @@ class FilesModule extends AApiModule
 		{
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
-
+		
 		return array(
 			'Items' => $this->oApiFilesManager->getFiles($iUserId, $Type, $Path, $Pattern),
-			'Quota' => $this->oApiFilesManager->getQuota($iUserId)
+			'Quota' => $this->getQuota($iUserId)
 		);
-	}	
+	}
 
 	public function GetPublicFiles($Hash, $Path)
 	{
@@ -302,37 +353,23 @@ class FilesModule extends AApiModule
 		$oResult = array();
 
 		$mMin = \CApi::ExecuteMethod('Min::GetMinByHash', array('Hash' => $Hash));
-		if (!empty($mMin['__hash__'])) {
-			
+		if (!empty($mMin['__hash__']))
+		{
 			$iUserId = $mMin['UserId'];
-			if ($iUserId) {
-				
-				if (!$this->oApiCapabilityManager->isFilesSupported($iUserId)) {
-					
+			if ($iUserId)
+			{
+				if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+				{
 					throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 				}
-				$Path =  implode('/', array($mMin['Path'], $mMin['Name']))  . $Path;
+				$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
 				$oResult['Items'] = $this->oApiFilesManager->getFiles($iUserId, $mMin['Type'], $Path);
-				$oResult['Quota'] = $this->oApiFilesManager->getQuota($iUserId);
-				
+				$oResult['Quota'] = $this->getQuota($iUserId);
 			}
 		}
 
 		return $oResult;
-	}	
-
-	public function GetQuota()
-	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId)) {
-			
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
-		
-		return array(
-			'Quota' => $this->oApiFilesManager->getQuota($iUserId)
-		);
 	}	
 
 	public function CreateFolder($Type, $Path, $FolderName)

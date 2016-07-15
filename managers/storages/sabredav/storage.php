@@ -858,37 +858,28 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	}
 
 	/**
-	 * @param int $iUserId
-	 * @param string $sType
-	 *
-	 * @return array
+	 * Returns user used space in bytes for specified storages.
+	 * 
+	 * @param int $iUserId User identificator.
+	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
+	 * 
+	 * @return int;
 	 */
-	public function getRealQuota($iUserId, $sType)
+	public function getUserUsedSpace($iUserId, $aTypes)
 	{
 		$iUsageSize = 0;
-		$iFreeSize = 0;
 		
 		if ($iUserId)
 		{
-			$sRootPath = $this->getRootPath($iUserId, \EFileStorageTypeStr::Personal, true);
-			$aSize = \api_Utils::GetDirectorySize($sRootPath);
-			$iUsageSize += (int) $aSize['size'];
-
-			$sRootPath = $this->getRootPath($iUserId, \EFileStorageTypeStr::Corporate, true);
-			$aSize = \api_Utils::GetDirectorySize($sRootPath);
-			$iUsageSize += (int) $aSize['size'];
-
-			$oApiTenants = \CApi::GetSystemManager('tenants');
-			if ($oApiTenants)
+			foreach ($aTypes as $sType)
 			{
-				$oTenant = $oApiTenants->getTenantById($iUserId->IdTenant);
-				if ($oTenant)
-				{
-					$iFreeSize = ($oTenant->FilesUsageDynamicQuotaInMB * 1024 * 1024) - $iUsageSize;
-				}
+				$sRootPath = $this->getRootPath($iUserId, $sType, true);
+				$aSize = \api_Utils::GetDirectorySize($sRootPath);
+				$iUsageSize += (int) $aSize['size'];
 			}
-		}		
-		return array($iUsageSize, $iFreeSize);
+		}
+		
+		return $iUsageSize;
 	}
 
 	/**
