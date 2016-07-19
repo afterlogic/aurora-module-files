@@ -15,8 +15,6 @@ class CApiFilesManager extends AApiManagerWithStorage
 	public function __construct(CApiGlobalManager &$oManager, $sForcedStorage = '', AApiModule $oModule = null)
 	{
 		parent::__construct('', $oManager, $sForcedStorage, $oModule);
-
-		$this->incClass('item');
 	}
 	
 	/**
@@ -440,16 +438,16 @@ class CApiFilesManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * Returns user used space in bytes for specified storages.
+	 * Returns quota information for specific storage, used and available space. 
 	 * 
-	 * @param int $iUserId User identificator.
-	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
+	 * @param CAccount $oAccount Account object 
+	 * @param string $sType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * 
-	 * @return int;
+	 * @return array array( $iUsageSize, $iFreeSize ); 
 	 */
-	public function getUserUsedSpace($iUserId, $aTypes = array(EFileStorageTypeStr::Personal))
+	public function getRealQuota($oAccount, $sType = EFileStorageTypeStr::Personal)
 	{
-		return $this->oStorage->getUserUsedSpace($iUserId, $aTypes);
+		return $this->oStorage->getRealQuota($oAccount, $sType);
 	}
 	
 	/**

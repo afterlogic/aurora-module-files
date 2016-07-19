@@ -16,6 +16,7 @@ class FilesModule extends AApiModule
 
 	public function init() 
 	{
+		$this->incClass('item');
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
 		$this->AddEntry('files-pub', 'EntryFilesPub');
