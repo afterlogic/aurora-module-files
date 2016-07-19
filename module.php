@@ -201,10 +201,13 @@ class FilesModule extends AApiModule
 			if (is_array($FileData))
 			{
 				$iSize = (int) $FileData['size'];
-				$aQuota = $this->getQuota($iUserId);
-				if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
+				if ($Type === \EFileStorageTypeStr::Personal)
 				{
-					throw new \System\Exceptions\ClientException(\System\Notifications::CanNotUploadFileQuota);
+					$aQuota = $this->getQuota($iUserId);
+					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
+					{
+						throw new \System\Exceptions\ClientException(\System\Notifications::CanNotUploadFileQuota);
+					}
 				}
 				
 				$sUploadName = $FileData['name'];
