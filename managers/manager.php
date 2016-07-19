@@ -438,16 +438,16 @@ class CApiFilesManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * Returns quota information for specific storage, used and available space. 
+	 * Returns user used space in bytes for specified storages.
 	 * 
-	 * @param CAccount $oAccount Account object 
-	 * @param string $sType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iUserId User identificator.
+	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
 	 * 
-	 * @return array array( $iUsageSize, $iFreeSize ); 
+	 * @return int;
 	 */
-	public function getRealQuota($oAccount, $sType = EFileStorageTypeStr::Personal)
+	public function getUserUsedSpace($iUserId, $aTypes = array(EFileStorageTypeStr::Personal))
 	{
-		return $this->oStorage->getRealQuota($oAccount, $sType);
+		return $this->oStorage->getUserUsedSpace($iUserId, $aTypes);
 	}
 	
 	/**
