@@ -12,6 +12,7 @@ class FilesModule extends AApiModule
 		'Disabled' => array(false, 'bool'),
 		'EnableCorporate' => array(true, 'bool'),
 		'UserSpaceLimitMb' => array(100, 'int'),
+		'CustomTabTitle' => array('', 'string'),
 	);
 
 	public function init() 
@@ -39,6 +40,7 @@ class FilesModule extends AApiModule
 			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0,
 			'EnableCorporate' => $this->getConfig('EnableCorporate', false),
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
+			'CustomTabTitle' => $this->getConfig('CustomTabTitle', ''),
 		);
 	}
 	
