@@ -22,6 +22,7 @@ class FilesModule extends AApiModule
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
 		$this->AddEntry('files-pub', 'EntryFilesPub');
+		$this->subscribeEvent('System::GenerateHTML', array($this, 'onGenerateHTML'));
 	}
 	
 	/**
@@ -703,5 +704,10 @@ class FilesModule extends AApiModule
 		}
 		return false;
 	}	
+	
+	public function onGenerateHTML(&$sModuleHash)
+	{
+		$sModuleHash = \MailSo\Base\Http::NewInstance()->HasQuery('files-pub') ? '-files-pub' : '';
+	}
 
 }
