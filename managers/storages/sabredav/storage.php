@@ -31,26 +31,16 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	}
 
 	/**
-	 * @param CAccount|CHelpdeskUser $oAccount
+	 * @param CAccount|CHelpdeskUser $iUserId
 	 * @param string $sType
 	 * @param string $sPath
 	 * @param string $sFileName
 	 * 
 	 * @return string
 	 */
-	public function generateShareHash($oAccount, $sType, $sPath, $sFileName)
+	public function generateShareHash($iUserId, $sType, $sPath, $sFileName)
 	{
-		$sId = '';
-		if ($oAccount instanceof CAccount)
-		{
-			$sId = $oAccount->IdAccount;
-		}
-		else if ($oAccount instanceof CHelpdeskUser)
-		{
-			$sId = 'hd/'.$oAccount->IdHelpdeskUser;
-		}
-
-		return implode('|', array($sId, $sType, $sPath, $sFileName));
+		return implode('|', array($iUserId, $sType, $sPath, $sFileName));
 	}
 	
 	public function getApiMinManager()
@@ -323,7 +313,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	{
 		$mResult = false;
 
-		$sID = implode('|', array($iUserId,	$sType, $sPath, $sName));
+		$sID = $this->generateShareHash($iUserId, $sType, $sPath, $sName);
 		$oMin = $this->getApiMinManager();
 		$mMin = $oMin->getMinByID($sID);
 		if (!empty($mMin['__hash__']))
@@ -358,7 +348,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 */
 	public function deletePublicLink($iUserId, $sType, $sPath, $sName)
 	{
-		$sID = implode('|', array($iUserId,	$sType, $sPath, $sName));
+		$sID = $this->generateShareHash($iUserId, $sType, $sPath, $sName);
 
 		$oMin = $this->getApiMinManager();
 
@@ -432,13 +422,13 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$sID = '';
 					if ($oValue instanceof \Afterlogic\DAV\FS\Directory)
 					{
-//						$sID = $this->generateShareHash($oAccount, $sType, $sFilePath, $oValue->getName());
+						$sID = $this->generateShareHash($iUserId, $sType, $sFilePath, $oValue->getName());
 						$oItem->IsFolder = true;
 					}
 
 					if ($oValue instanceof \Afterlogic\DAV\FS\File)
 					{
-//						$sID = $this->generateShareHash($oAccount, $sType, $sFilePath, $oValue->getName());
+						$sID = $this->generateShareHash($iUserId, $sType, $sFilePath, $oValue->getName());
 						$oItem->IsFolder = false;
 						$oItem->Size = $oValue->getSize();
 						$oFileInfo = null;

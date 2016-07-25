@@ -115,7 +115,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Creates public link for specific file or folder. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * @param string $sName Filename. 
@@ -124,14 +124,14 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return string|bool
 	 */
-	public function createPublicLink($oAccount, $iType, $sPath, $sName, $sSize, $bIsFolder)
+	public function createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder)
 	{
 		$bResult = false;
 		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.create-public-link', array($oAccount, $iType, $sPath, $sName, &$bResult, &$bBreak));
+		\CApi::Plugin()->RunHook('filestorage.create-public-link', array($iUserId, $iType, $sPath, $sName, &$bResult, &$bBreak));
 		if (!$bBreak)
 		{
-			$bResult = $this->oStorage->createPublicLink($oAccount, $iType, $sPath, $sName, $sSize, $bIsFolder);
+			$bResult = $this->oStorage->createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder);
 		}
 		return $bResult;
 	}
@@ -139,21 +139,21 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Removes public link created for specific file or folder. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * @param string $sName Filename. 
 	 * 
 	 * @return bool
 	 */
-	public function deletePublicLink($oAccount, $iType, $sPath, $sName)
+	public function deletePublicLink($iUserId, $iType, $sPath, $sName)
 	{
 		$bResult = false;
 		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.delete-public-link', array($oAccount, $iType, $sPath, $sName, &$bResult, &$bBreak));
+		\CApi::Plugin()->RunHook('filestorage.delete-public-link', array($iUserId, $iType, $sPath, $sName, &$bResult, &$bBreak));
 		if (!$bBreak)
 		{
-			$bResult = $this->oStorage->deletePublicLink($oAccount, $iType, $sPath, $sName);
+			$bResult = $this->oStorage->deletePublicLink($iUserId, $iType, $sPath, $sName);
 		}
 		return $bResult;
 	}
