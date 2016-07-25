@@ -13,7 +13,7 @@ class FilesModule extends AApiModule
 		'EnableCorporate' => array(true, 'bool'),
 		'UserSpaceLimitMb' => array(100, 'int'),
 		'CustomTabTitle' => array('', 'string'),
-		'MaxFileSizeForMakingThumbnail' => array(1024 * 1024 * 5, 'int'), // 5MB
+		'MaxFileSizeForMakingThumbnail' => array(5242880, 'int'), // 5MB
 	);
 
 	public function init() 
