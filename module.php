@@ -488,7 +488,7 @@ class FilesModule extends AApiModule
 		return $this->oApiFilesManager->createPublicLink($iUserId, $Type, $Path, $Name, $Size, $IsFolder);
 	}	
 	
-	public function DeletePublicLink($sType, $sPath, $sName)
+	public function DeletePublicLink($Type, $Path, $Name)
 	{
 		$iUserId = \CApi::getLogginedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
@@ -496,7 +496,7 @@ class FilesModule extends AApiModule
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
 		
-		return $this->oApiFilesManager->deletePublicLink($iUserId, $sType, $sPath, $sName);
+		return $this->oApiFilesManager->deletePublicLink($iUserId, $Type, $Path, $Name);
 	}
 	
 	/**
