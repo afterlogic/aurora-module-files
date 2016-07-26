@@ -276,7 +276,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns storages avaliable for logged in user.
 	 * 
-	 * @return boolean
+	 * @return array
 	 */
 	public function GetStorages()
 	{
