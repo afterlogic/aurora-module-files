@@ -63,7 +63,11 @@ class FilesModule extends AApiModule
 		return true;
 	}
 	
-	public function GetMinModuleDecorator()
+	/**
+         * 
+         * @return type
+         */
+        public function GetMinModuleDecorator()
 	{
 		if ($this->oMinModuleDecorator === null)
 		{
