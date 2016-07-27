@@ -64,7 +64,7 @@ class FilesModule extends AApiModule
 	}
 	
 	/**
-         * 
+         * Gets Min module decorator
          * @return type
          */
         public function GetMinModuleDecorator()
