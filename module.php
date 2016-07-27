@@ -16,8 +16,6 @@ class FilesModule extends AApiModule
 		'MaxFileSizeForMakingThumbnail' => array(5242880, 'int'), // 5MB
 	);
 
-	/* UNCOMMENT */
-
 	public function init() 
 	{
 		$this->incClass('item');
