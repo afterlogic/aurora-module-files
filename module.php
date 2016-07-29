@@ -111,7 +111,8 @@ class FilesModule extends AApiModule
 			$oFileInfo = $this->oApiFilesManager->getFileInfo($iUserId, $sType, $sPath, $sName);
 			
 			
-			if ($oFileInfo->IsLink) {
+			if ($oFileInfo && $oFileInfo->IsLink) 
+			{
 				
 				$iLinkType = \api_Utils::GetLinkType($oFileInfo->LinkUrl);
 
