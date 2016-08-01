@@ -46,6 +46,27 @@ class FilesModule extends AApiModule
 	}
 	
 	/**
+	 * @api {post} ?/Api/ UpdateSettings
+	 * @apiName UpdateSettings
+	 * @apiGroup Files
+	 * @apiDescription Updates module's settings - saves them to config.json file.
+	 * 
+	 * @apiParam {string=Core} Module Module name
+	 * @apiParam {string=GetTenants} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {boolean} EnableUploadSizeLimit Enable file upload size limit setting.
+	 * @apiParam {int} UploadSizeLimitMb Upload file size limit setting in Mb.
+	 * @apiParam {boolean} EnableCorporate Enable corporate storage in Files.
+	 * @apiParam {int} UserSpaceLimitMb User space limit setting in Mb.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {bool} Result Indicates if request execution was successfull
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	/**
 	 * Updates module's settings - saves them to config.json file.
 	 * 
 	 * @param boolean $EnableUploadSizeLimit Enable file upload size limit setting.
