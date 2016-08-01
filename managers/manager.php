@@ -166,18 +166,18 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * @param string $sPath Path to the folder. 
 	 * @param string $sPattern Search string. 
 	 * 
-	 * @return array  array of \CFileStorageItem. 
+	 * @return array|bool array of \CFileStorageItem. 
 	 */
 	public function getFiles($iUserId, $sType, $sPath, $sPattern = '')
 	{
-		$bResult = false;
+		$mResult = false;
 		$bBreak = false;
 //		\CApi::Plugin()->RunHook('filestorage.get-files', array($oAccount, $sType, $sPath, $sPattern, &$bResult, &$bBreak));
 		if (!$bBreak)
 		{
-			$bResult = $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern);
+			$mResult = $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern);
 		}
-		return $bResult;
+		return $mResult;
 	}
 
 	/**

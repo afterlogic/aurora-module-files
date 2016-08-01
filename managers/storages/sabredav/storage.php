@@ -409,7 +409,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				foreach ($aItems as $oValue) 
 				{
 					$sFilePath = str_replace($sRootPath, '', dirname($oValue->getPath()));
-					$aProps = array();//TODO: $oValue->getProperties(array('Owner', 'Shared', 'Name' ,'Link', 'LinkType'));
+					$aProps = $oValue->getProperties(array('Owner', 'Shared', 'Name' ,'Link', 'LinkType'));
 					$oItem /*@var $oItem \CFileStorageItem */ = new  \CFileStorageItem();
 					
 					$oItem->Type = $sType;

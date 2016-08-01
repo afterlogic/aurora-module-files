@@ -353,8 +353,20 @@ class FilesModule extends AApiModule
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
 		
+		$aUsers = array();
+		$aFiles = $this->oApiFilesManager->getFiles($iUserId, $Type, $Path, $Pattern);
+		foreach ($aFiles as $oFile)
+		{
+			if (!isset($aUsers[$oFile->Owner]))
+			{
+				$oUser = \CApi::GetModuleDecorator('Core')->GetUser($oFile->Owner);
+				$aUsers[$oFile->Owner] = $oUser ? $oUser->Name : '';
+			}
+			$oFile->Owner = $aUsers[$oFile->Owner];
+		}
+		
 		return array(
-			'Items' => $this->oApiFilesManager->getFiles($iUserId, $Type, $Path, $Pattern),
+			'Items' => $aFiles,
 			'Quota' => $this->getQuota($iUserId)
 		);
 	}
