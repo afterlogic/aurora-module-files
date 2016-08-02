@@ -409,7 +409,10 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				foreach ($aItems as $oValue) 
 				{
 					$sFilePath = str_replace($sRootPath, '', dirname($oValue->getPath()));
-					$aProps = $oValue->getProperties(array('Owner', 'Shared', 'Name' ,'Link', 'LinkType'));
+					if ($oValue instanceof Afterlogic\DAV\FS\File)
+					{
+						$aProps = $oValue->getProperties(array('Owner', 'Shared', 'Name' ,'Link', 'LinkType'));
+					}
 					$oItem /*@var $oItem \CFileStorageItem */ = new  \CFileStorageItem();
 					
 					$oItem->Type = $sType;
