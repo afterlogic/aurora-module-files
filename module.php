@@ -52,7 +52,7 @@ class FilesModule extends AApiModule
 	 * @apiDescription Updates module's settings - saves them to config.json file.
 	 * 
 	 * @apiParam {string=Core} Module Module name
-	 * @apiParam {string=GetTenants} Method Method name
+	 * @apiParam {string=UpdateSettings} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
 	 * @apiParam {boolean} EnableUploadSizeLimit Enable file upload size limit setting.
@@ -60,11 +60,39 @@ class FilesModule extends AApiModule
 	 * @apiParam {boolean} EnableCorporate Enable corporate storage in Files.
 	 * @apiParam {int} UserSpaceLimitMb User space limit setting in Mb.
 	 * 
+	 * @apiParamExample {json} Request-Example:
+    	{
+			Module: 'Core',
+			Method: 'UpdateSettings',
+			AuthToken: 'token_value',
+			EnableUploadSizeLimit: true,
+			UploadSizeLimitMb: 5,
+			EnableCorporate: true,
+			UserSpaceLimitMb: 10,
+		}
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {bool} Result Indicates if request execution was successfull
 	 * @apiSuccess {int} ErrorCode Error code
 	 * @apiSuccess {float} Time Request execution time on the server
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+    	{
+			Module: 'Core',
+			Method: 'UpdateSettings',
+			Result: true,
+			'@Time': 0.31426095962524
+		}
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+    	{
+			Module: 'Core',
+			Method: 'UpdateSettings',
+			Result: false,
+			ErrorCode: 102,
+			'@Time': 0.31426095962524
+		}
 	 */
 	/**
 	 * Updates module's settings - saves them to config.json file.
