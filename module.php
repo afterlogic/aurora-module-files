@@ -51,7 +51,7 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiDescription Updates module's settings - saves them to config.json file.
 	 * 
-	 * @apiParam {string=Core} Module Module name
+	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=UpdateSettings} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
@@ -61,15 +61,15 @@ class FilesModule extends AApiModule
 	 * @apiParam {int} UserSpaceLimitMb User space limit setting in Mb.
 	 * 
 	 * @apiParamExample {json} Request-Example:
-    	{
-			Module: 'Core',
-			Method: 'UpdateSettings',
-			AuthToken: 'token_value',
-			EnableUploadSizeLimit: true,
-			UploadSizeLimitMb: 5,
-			EnableCorporate: true,
-			UserSpaceLimitMb: 10,
-		}
+{
+	Module: 'Files',
+	Method: 'UpdateSettings',
+	AuthToken: 'token_value',
+	EnableUploadSizeLimit: true,
+	UploadSizeLimitMb: 5,
+	EnableCorporate: true,
+	UserSpaceLimitMb: 10,
+}
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -78,21 +78,21 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {float} Time Request execution time on the server
 	 * 
 	 * @apiSuccessExample {json} Success response example:
-    	{
-			Module: 'Core',
-			Method: 'UpdateSettings',
-			Result: true,
-			'@Time': 0.31426095962524
-		}
+{
+	Module: 'Files',
+	Method: 'UpdateSettings',
+	Result: true,
+	'@Time': 0.31426095962524
+}
 	 * 
 	 * @apiSuccessExample {json} Error response example:
-    	{
-			Module: 'Core',
-			Method: 'UpdateSettings',
-			Result: false,
-			ErrorCode: 102,
-			'@Time': 0.31426095962524
-		}
+{
+	Module: 'Files',
+	Method: 'UpdateSettings',
+	Result: false,
+	ErrorCode: 102,
+	'@Time': 0.31426095962524
+}
 	 */
 	/**
 	 * Updates module's settings - saves them to config.json file.
