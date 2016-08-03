@@ -113,10 +113,11 @@ class FilesModule extends AApiModule
 	}
 	
 	/**
-         * Gets Min module decorator
-         * @return type
-         */
-        public function GetMinModuleDecorator()
+	* Returns Min module decorator.
+	 * 
+	* @return \CApiModuleDecorator
+	*/
+	private function getMinModuleDecorator()
 	{
 		if ($this->oMinModuleDecorator === null)
 		{
@@ -126,7 +127,19 @@ class FilesModule extends AApiModule
 		return $this->oMinModuleDecorator;
 	}
 	
-	private function GetRawFile($sType, $sPath, $sName, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
+	/**
+	 * Downloads file, views file or makes thumbnail for file.
+	 * 
+	 * @param string $sType Storage type - personal, corporate.
+	 * @param string $sPath Path to folder contained file.
+	 * @param string $sFileName File name.
+	 * @param string $sAuthToken Authorization token.
+	 * @param boolean $bDownload Indicates if file should be downloaded or viewed.
+	 * @param boolean $bThumbnail Indicates if thumbnail should be created for file.
+	 * 
+	 * @return boolean
+	 */
+	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
 	{
 		if ($bThumbnail)
 		{
@@ -134,7 +147,7 @@ class FilesModule extends AApiModule
 		}
 
 		$sHash = ""; // TODO: 
-		$oModuleDecorator = $this->GetMinModuleDecorator();
+		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator) ? $oModuleDecorator->GetMinByHash($sHash) : array();
 		
 		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getLogginedUserId($sAuthToken);
@@ -150,14 +163,13 @@ class FilesModule extends AApiModule
  */
 		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
-				/*$oTenant &&*/ isset($sType, $sPath, $sName)) {
+				/*$oTenant &&*/ isset($sType, $sPath, $sFileName)) {
 			
 			$mResult = false;
 			
-			$sFileName = $sName;
 			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 			
-			$oFileInfo = $this->oApiFilesManager->getFileInfo($iUserId, $sType, $sPath, $sName);
+			$oFileInfo = $this->oApiFilesManager->getFileInfo($iUserId, $sType, $sPath, $sFileName);
 			
 			
 			if ($oFileInfo && $oFileInfo->IsLink) 
@@ -199,7 +211,7 @@ class FilesModule extends AApiModule
 				}
 			} else {
 				
-				$mResult = $this->oApiFilesManager->getFile($iUserId, $sType, $sPath, $sName);
+				$mResult = $this->oApiFilesManager->getFile($iUserId, $sType, $sPath, $sFileName);
 			}
 			if (false !== $mResult) {
 				
@@ -234,18 +246,21 @@ class FilesModule extends AApiModule
 	/**
 	 * Uploads file from client side.
 	 * 
-	 * @param string $Type Type of storage
-	 * @param string $SubPath
+	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to folder than should contain uploaded file.
-	 * @param array $FileData Uploaded file information.
-	 * @param bool $IsExt
-	 * @param string $TenantName
-	 * @param string $Token
+	 * @param array $FileData Uploaded file information. Contains fields size, name, tmp_name.
 	 * @param string $AuthToken Authentication token.
-	 * @return array
+	 * 
+	 * @return array Array with fields Name, TempName, MimeType, Size, Hash.
+	 *		Name - original file name
+	 *		TempName - temporary file name
+	 *		MimeType - mime type of file
+	 *		Size - file size
+	 *		Hash - hash used for file download, file view or getting file thumbnail
+	 * 
 	 * @throws \System\Exceptions\ClientException
 	 */
-	public function UploadFile($Type, $SubPath, $Path, $FileData, $IsExt, $TenantName, $Token, $AuthToken)
+	public function UploadFile($Type, $Path, $FileData, $AuthToken)
 	{
 		$iUserId = \CApi::getLogginedUserId($AuthToken);
 		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
@@ -312,25 +327,58 @@ class FilesModule extends AApiModule
 		return $aResponse;
 	}
 	
-	public function DownloadFile($Type, $Path, $Name, $FileName, $MimeType, $Size, $Iframed, $AuthToken)
+	/**
+	 * Downloads file.
+	 * 
+	 * @param string $Type Storage type - personal, corporate.
+	 * @param string $Path Path to folder contained file.
+	 * @param string $FileName File name.
+	 * @param string $AuthToken Authorization token.
+	 * 
+	 * @return boolean
+	 */
+	public function DownloadFile($Type, $Path, $FileName, $AuthToken)
 	{
-		return $this->GetRawFile($Type, $Path, $Name, $FileName, $AuthToken, true);
+		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, true);
 	}
 	
-	public function ViewFile($Type, $Path, $Name, $FileName, $MimeType, $Size, $Iframed, $AuthToken)
+	/**
+	 * Views file.
+	 * 
+	 * @param string $Type Storage type - personal, corporate.
+	 * @param string $Path Path to folder contained file.
+	 * @param string $FileName File name.
+	 * @param string $AuthToken Authorization token.
+	 * 
+	 * @return boolean
+	 */
+	public function ViewFile($Type, $Path, $FileName, $AuthToken)
 	{
-		return $this->GetRawFile($Type, $Path, $Name, $FileName, $AuthToken, false);
+		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, false);
 	}
 
-	public function GetFileThumbnail($Type, $Path, $Name, $FileName, $MimeType, $Size, $Iframed, $AuthToken)
+	/**
+	 * Makes thumbnail for file.
+	 * 
+	 * @param string $Type Storage type - personal, corporate.
+	 * @param string $Path Path to folder contained file.
+	 * @param string $FileName File name.
+	 * @param string $AuthToken Authorization token.
+	 * 
+	 * @return boolean
+	 */
+	public function GetFileThumbnail($Type, $Path, $FileName, $AuthToken)
 	{
-		return $this->GetRawFile($Type, $Path, $Name, $FileName, $AuthToken, false, true);
+		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, false, true);
 	}
 
 	/**
 	 * Returns storages avaliable for logged in user.
 	 * 
-	 * @return array
+	 * @return array Array of items with fields Type, DisplayName, IsExternal
+	 *			Type - storage type - personal, corporate
+	 *			DisplayName - storage display name
+	 *			IsExternal - indicates if storage external or not
 	 */
 	public function GetStorages()
 	{
