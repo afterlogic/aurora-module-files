@@ -114,7 +114,7 @@ class FilesModule extends AApiModule
 	
 	/**
 	* Returns Min module decorator.
-	 * 
+	* 
 	* @return \CApiModuleDecorator
 	*/
 	private function getMinModuleDecorator()
@@ -252,11 +252,11 @@ class FilesModule extends AApiModule
 	 * @param string $AuthToken Authentication token.
 	 * 
 	 * @return array Array with fields Name, TempName, MimeType, Size, Hash.
-	 *		Name - original file name
-	 *		TempName - temporary file name
-	 *		MimeType - mime type of file
-	 *		Size - file size
-	 *		Hash - hash used for file download, file view or getting file thumbnail
+	 *		Name string Original file name
+	 *		TempName string Temporary file name
+	 *		MimeType string Mime type of file
+	 *		Size int File size
+	 *		Hash string Hash used for file download, file view or getting file thumbnail
 	 * 
 	 * @throws \System\Exceptions\ClientException
 	 */
@@ -376,9 +376,9 @@ class FilesModule extends AApiModule
 	 * Returns storages avaliable for logged in user.
 	 * 
 	 * @return array Array of items with fields Type, DisplayName, IsExternal
-	 *			Type - storage type - personal, corporate
-	 *			DisplayName - storage display name
-	 *			IsExternal - indicates if storage external or not
+	 *			Type string Storage type - personal, corporate
+	 *			DisplayName string Storage display name
+	 *			IsExternal bool Indicates if storage external or not
 	 */
 	public function GetStorages()
 	{
@@ -401,6 +401,10 @@ class FilesModule extends AApiModule
 		return $aStorages;
 	}	
 	
+	/**
+	 * @ignore
+	 * @return array
+	 */
 	public function GetExternalStorages()
 	{
 		$oResult = array();
@@ -421,7 +425,9 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param int $iUserId User identifier.
 	 * 
-	 * @return array
+	 * @return array Array of items with fields Used, Limit
+	 *			Used int Amount of space used by user
+	 *			Limit int Limit of space for user
 	 */
 	private function getQuota($iUserId)
 	{
@@ -438,7 +444,11 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to folder files are obtained from.
 	 * @param string $Pattern
 	 * 
-	 * @return array
+	 * @return array Array of items with fields Items, Quota
+	 *			Items array Array of files objects
+	 *			Quota array Array of items with fields Used, Limit
+	 *					Used int Amount of space used by user
+	 *					Limit int Limit of space for user
 	 * 
 	 * @throws \System\Exceptions\ClientException
 	 */
