@@ -244,6 +244,31 @@ class FilesModule extends AApiModule
 	}
 	
 	/**
+	 * @api {post} ?/Api/ UploadFile
+	 * @apiDescription Uploads file from client side.
+	 * @apiName UploadFile
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=UploadFile} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage - personal, corporate.
+	 * @apiParam {string} Path Path to folder than should contain uploaded file.
+	 * @apiParam {array} FileData Uploaded file information. Contains fields size, name, tmp_name.
+	 * @apiParam {string} AuthToken Authentication token.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {string} Result.Name Original file name.
+	 * @apiSuccess {string} Result.TempName Temporary file name.
+	 * @apiSuccess {string} Result.MimeType Mime type of file.
+	 * @apiSuccess {int} Result.Size File size.
+	 * @apiSuccess {string} Result.Hash Hash used for file download, file view or getting file thumbnail.
+	 * @apiSuccess {int} ErrorCode
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	/**
 	 * Uploads file from client side.
 	 * 
 	 * @param string $Type Type of storage - personal, corporate.
