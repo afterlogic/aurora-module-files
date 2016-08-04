@@ -478,6 +478,20 @@ class FilesModule extends AApiModule
 		);
 	}
 
+	/**
+	 * Returns list of public files.
+	 * 
+	 * @param string $Hash Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.
+	 * @param string $Path Path to folder contained files to return.
+	 * 
+	 * @return array Array of items with fields Items, Quota
+	 *			Items array Array of files objects
+	 *			Quota array Array of items with fields Used, Limit
+	 *					Used int Amount of space used by user
+	 *					Limit int Limit of space for user
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
 		$iUserId = null;
@@ -503,6 +517,17 @@ class FilesModule extends AApiModule
 		return $oResult;
 	}	
 
+	/**
+	 * Creates folder.
+	 * 
+	 * @param string $Type Type of storage - personal, corporate.
+	 * @param string $Path Path to new folder.
+	 * @param string $FolderName New folder name.
+	 * 
+	 * @return boolean
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function CreateFolder($Type, $Path, $FolderName)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -514,6 +539,18 @@ class FilesModule extends AApiModule
 		return $this->oApiFilesManager->createFolder($iUserId, $Type, $Path, $FolderName);
 	}
 	
+	/**
+	 * Creates link.
+	 * 
+	 * @param string $Type Type of storage - personal, corporate.
+	 * @param string $Path Path to new link.
+	 * @param string $Link Link value.
+	 * @param string $Name Link name.
+	 * 
+	 * @return boolean
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function CreateLink($Type, $Path, $Link, $Name)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -525,7 +562,17 @@ class FilesModule extends AApiModule
 		return $this->oApiFilesManager->createLink($iUserId, $Type, $Path, $Link, $Name);
 	}
 	
-	public function Delete($Type, $Path, $Items)
+	/**
+	 * Deletes files and folder specified with list.
+	 * 
+	 * @param string $Type Type of storage - personal, corporate.
+	 * @param array $Items Array of items to delete.
+	 * 
+	 * @return boolean
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
+	public function Delete($Type, $Items)
 	{
 		$iUserId = \CApi::getLogginedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
@@ -533,16 +580,29 @@ class FilesModule extends AApiModule
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
 
-		$oResult = false;
+		$bResult = false;
 		
 		foreach ($Items as $oItem)
 		{
-			$oResult = $this->oApiFilesManager->delete($iUserId, $Type, $oItem['Path'], $oItem['Name']);
+			$bResult = $this->oApiFilesManager->delete($iUserId, $Type, $oItem['Path'], $oItem['Name']);
 		}
 		
-		return $oResult;
+		return $bResult;
 	}	
 
+	/**
+	 * Renames folder, file or link.
+	 * 
+	 * @param string $Type Type of storage - personal, corporate.
+	 * @param string $Path Path to item to rename.
+	 * @param string $Name Current name of the item.
+	 * @param string $NewName New name of the item.
+	 * @param boolean $IsLink Indicates if the item is link or not.
+	 * 
+	 * @return boolean
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function Rename($Type, $Path, $Name, $NewName, $IsLink)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -551,10 +611,10 @@ class FilesModule extends AApiModule
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
 		
-		$NewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
+		$sClearedNewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
+		$sCorrectedNewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $Type, $Path, $sClearedNewName);
 		
-		$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $Type, $Path, $NewName);
-		return $this->oApiFilesManager->rename($iUserId, $Type, $Path, $Name, $NewName, $IsLink);
+		return $this->oApiFilesManager->rename($iUserId, $Type, $Path, $Name, $sCorrectedNewName, $IsLink);
 	}	
 
 	public function Copy($FromType, $ToType, $FromPath, $ToPath, $Files)
