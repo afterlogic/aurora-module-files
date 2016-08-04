@@ -251,12 +251,13 @@ class FilesModule extends AApiModule
 	 * @param array $FileData Uploaded file information. Contains fields size, name, tmp_name.
 	 * @param string $AuthToken Authentication token.
 	 * 
-	 * @return array Array with fields Name, TempName, MimeType, Size, Hash.
-	 *		Name string Original file name
-	 *		TempName string Temporary file name
-	 *		MimeType string Mime type of file
-	 *		Size int File size
-	 *		Hash string Hash used for file download, file view or getting file thumbnail
+	 * @return array {
+	 *		*string* **Name** Original file name.
+	 *		*string* **TempName** Temporary file name.
+	 *		*string* **MimeType** Mime type of file.
+	 *		*int* **Size** File size.
+	 *		*string* **Hash** Hash used for file download, file view or getting file thumbnail.
+	 * }
 	 * 
 	 * @throws \System\Exceptions\ClientException
 	 */
@@ -375,10 +376,11 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns storages avaliable for logged in user.
 	 * 
-	 * @return array Array of items with fields Type, DisplayName, IsExternal
-	 *			Type string Storage type - personal, corporate
-	 *			DisplayName string Storage display name
-	 *			IsExternal bool Indicates if storage external or not
+	 * @return array {
+	 *		*string* **Type** Storage type - personal, corporate.
+	 *		*string* **DisplayName** Storage display name.
+	 *		*bool* **IsExternal** Indicates if storage external or not.
+	 * }
 	 */
 	public function GetStorages()
 	{
@@ -425,9 +427,10 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param int $iUserId User identifier.
 	 * 
-	 * @return array Array of items with fields Used, Limit
-	 *			Used int Amount of space used by user
-	 *			Limit int Limit of space for user
+	 * @return array {
+	 *		*int* **Used** Amount of space used by user.
+	 *		*int* **Limit** Limit of space for user.
+	 * }
 	 */
 	private function getQuota($iUserId)
 	{
@@ -442,13 +445,12 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param string $Type Type of storage.
 	 * @param string $Path Path to folder files are obtained from.
-	 * @param string $Pattern
+	 * @param string $Pattern String for search files and folders with such string in name.
 	 * 
-	 * @return array Array of items with fields Items, Quota
-	 *			Items array Array of files objects
-	 *			Quota array Array of items with fields Used, Limit
-	 *					Used int Amount of space used by user
-	 *					Limit int Limit of space for user
+	 * @return array {
+	 *		*array* **Items** Array of files objects.
+	 *		*array* **Quota** Array of items with fields Used, Limit.
+	 * }
 	 * 
 	 * @throws \System\Exceptions\ClientException
 	 */
@@ -484,11 +486,10 @@ class FilesModule extends AApiModule
 	 * @param string $Hash Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.
 	 * @param string $Path Path to folder contained files to return.
 	 * 
-	 * @return array Array of items with fields Items, Quota
-	 *			Items array Array of files objects
-	 *			Quota array Array of items with fields Used, Limit
-	 *					Used int Amount of space used by user
-	 *					Limit int Limit of space for user
+	 * @return array {
+	 *		*array* **Items** Array of files objects.
+	 *		*array* **Quota** Array of items with fields Used, Limit.
+	 * }
 	 * 
 	 * @throws \System\Exceptions\ClientException
 	 */
