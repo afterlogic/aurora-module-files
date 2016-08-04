@@ -265,7 +265,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Result.MimeType Mime type of file.
 	 * @apiSuccess {int} Result.Size File size.
 	 * @apiSuccess {string} Result.Hash Hash used for file download, file view or getting file thumbnail.
-	 * @apiSuccess {int} ErrorCode
+	 * @apiSuccess {int} ErrorCode Error code
 	 * @apiSuccess {float} Time Request execution time on the server
 	 */
 	/**
