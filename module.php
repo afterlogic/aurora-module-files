@@ -643,6 +643,22 @@ class FilesModule extends AApiModule
 		return $this->oApiFilesManager->rename($iUserId, $Type, $Path, $Name, $sCorrectedNewName, $IsLink);
 	}	
 
+	/**
+	 * Copies files and/or folders from one folder to another.
+	 * 
+	 * @param string $FromType storage type of folder items will be copied from.
+	 * @param string $ToType storage type of folder items will be copied to.
+	 * @param string $FromPath folder items will be copied from.
+	 * @param string $ToPath folder items will be copied to.
+	 * @param array $Files list of items to copy {
+	 *		*string* **Name** Name of item to copy.
+	 *		*boolean* **IsFolder** Indicates if the item to copy is folder or not.
+	 * }
+	 * 
+	 * @return boolean
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function Copy($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -651,7 +667,7 @@ class FilesModule extends AApiModule
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
 
-		$oResult = null;
+		$bResult = false;
 		
 		foreach ($Files as $aItem)
 		{
@@ -659,12 +675,28 @@ class FilesModule extends AApiModule
 			if (!$bFolderIntoItself)
 			{
 				$sNewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
-				$oResult = $this->oApiFilesManager->copy($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+				$bResult = $this->oApiFilesManager->copy($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $sNewName);
 			}
 		}
-		return $oResult;
+		return $bResult;
 	}	
 
+	/**
+	 * Moves files and/or folders from one folder to another.
+	 * 
+	 * @param string $FromType storage type of folder items will be moved from.
+	 * @param string $ToType storage type of folder items will be moved to.
+	 * @param string $FromPath folder items will be moved from.
+	 * @param string $ToPath folder items will be moved to.
+	 * @param array $Files list of items to move {
+	 *		*string* **Name** Name of item to copy.
+	 *		*boolean* **IsFolder** Indicates if the item to copy is folder or not.
+	 * }
+	 * 
+	 * @return boolean
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function Move($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -672,20 +704,33 @@ class FilesModule extends AApiModule
 		{
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
-		$oResult = null;
+		$bResult = null;
 		
 		foreach ($Files as $aItem)
 		{
 			$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 			if (!$bFolderIntoItself)
 			{
-				$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
-				$oResult = $this->oApiFilesManager->move($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+				$sNewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
+				$bResult = $this->oApiFilesManager->move($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $sNewName);
 			}
 		}
-		return $oResult;
+		return $bResult;
 	}	
 	
+	/**
+	 * Creates public link for file or folder.
+	 * 
+	 * @param string $Type Type of storage contains the item.
+	 * @param string $Path Path to the item.
+	 * @param string $Name Name of the item.
+	 * @param int $Size Size of the file.
+	 * @param boolean $IsFolder Indicates if the item is folder or not.
+	 * 
+	 * @return string|false Pulic link to the item.
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function CreatePublicLink($Type, $Path, $Name, $Size, $IsFolder)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -693,11 +738,22 @@ class FilesModule extends AApiModule
 		{
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 		}
-		$IsFolder = $IsFolder === '1' ? true : false;
 		
-		return $this->oApiFilesManager->createPublicLink($iUserId, $Type, $Path, $Name, $Size, $IsFolder);
+		$bFolder = $IsFolder === '1' ? true : false;
+		return $this->oApiFilesManager->createPublicLink($iUserId, $Type, $Path, $Name, $Size, $bFolder);
 	}	
 	
+	/**
+	 * Deletes public link from file or folder.
+	 * 
+	 * @param string $Type Type of storage contains the item.
+	 * @param string $Path Path to the item.
+	 * @param string $Name Name of the item.
+	 * 
+	 * @return bool
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
 	public function DeletePublicLink($Type, $Path, $Name)
 	{
 		$iUserId = \CApi::getLogginedUserId();
@@ -708,18 +764,27 @@ class FilesModule extends AApiModule
 		
 		return $this->oApiFilesManager->deletePublicLink($iUserId, $Type, $Path, $Name);
 	}
-	
+
 	/**
-	 * @return array
+	 * @ignore
+	 * 
+	 * @param string $Url
+	 * 
+	 * @return array|bool {
+	 *		Name
+	 *		Thumb
+	 *		Size
+	 *		LinkType
+	 * }
 	 */
-	public function CheckUrl()
+	public function CheckUrl($Url)
 	{
 		$iUserId = \CApi::getLogginedUserId();
 		$mResult = false;
 
 		if ($iUserId)
 		{
-			$sUrl = trim($this->getParamValue('Url', ''));
+			$sUrl = $Url;
 
 			if (!empty($sUrl))
 			{
