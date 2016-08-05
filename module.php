@@ -127,19 +127,13 @@ class FilesModule extends AApiModule
 		return $this->oMinModuleDecorator;
 	}
 	
-	/**
-	 * Downloads file, views file or makes thumbnail for file.
-	 * 
-	 * @param string $sType Storage type - personal, corporate.
-	 * @param string $sPath Path to folder contained file.
-	 * @param string $sFileName File name.
-	 * @param string $sAuthToken Authorization token.
-	 * @param boolean $bDownload Indicates if file should be downloaded or viewed.
-	 * @param boolean $bThumbnail Indicates if thumbnail should be created for file.
-	 * 
-	 * @return boolean
-	 */
-	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
+
+	protected function checkStorageType($Type)
+	{
+		return in_array($Type, array('personal', 'corporate'));
+	}	
+	
+	private function GetRawFile($sType, $sPath, $sName, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
 	{
 		if ($bThumbnail)
 		{
@@ -434,17 +428,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetExternalStorages()
 	{
-		$oResult = array();
-		return $oResult; // TODO
-//		$iUserId = \CApi::getLogginedUserId();
-//		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
-//		{
-//			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-//		}
-//		
-//		\CApi::Plugin()->RunHook('filestorage.get-external-storages', array($iUserId, &$oResult));
-//
-//		return $oResult;
+		return array();
 	}
 
 	/**
@@ -481,28 +465,31 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFiles($Type, $Path, $Pattern)
 	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if ($this->checkStorageType($Type))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
-		
-		$aUsers = array();
-		$aFiles = $this->oApiFilesManager->getFiles($iUserId, $Type, $Path, $Pattern);
-		foreach ($aFiles as $oFile)
-		{
-			if (!isset($aUsers[$oFile->Owner]))
+			$iUserId = \CApi::getLogginedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				$oUser = \CApi::GetModuleDecorator('Core')->GetUser($oFile->Owner);
-				$aUsers[$oFile->Owner] = $oUser ? $oUser->Name : '';
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 			}
-			$oFile->Owner = $aUsers[$oFile->Owner];
+
+			$aUsers = array();
+			$aFiles = $this->oApiFilesManager->getFiles($iUserId, $Type, $Path, $Pattern);
+			foreach ($aFiles as $oFile)
+			{
+				if (!isset($aUsers[$oFile->Owner]))
+				{
+					$oUser = \CApi::GetModuleDecorator('Core')->GetUser($oFile->Owner);
+					$aUsers[$oFile->Owner] = $oUser ? $oUser->Name : '';
+				}
+				$oFile->Owner = $aUsers[$oFile->Owner];
+			}
+
+			return array(
+				'Items' => $aFiles,
+				'Quota' => $this->getQuota($iUserId)
+			);
 		}
-		
-		return array(
-			'Items' => $aFiles,
-			'Quota' => $this->getQuota($iUserId)
-		);
 	}
 
 	/**
@@ -556,13 +543,16 @@ class FilesModule extends AApiModule
 	 */
 	public function CreateFolder($Type, $Path, $FolderName)
 	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId)) {
-			
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
+		if ($this->checkStorageType($Type))
+		{
+			$iUserId = \CApi::getLogginedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId)) {
 
-		return $this->oApiFilesManager->createFolder($iUserId, $Type, $Path, $FolderName);
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			}
+
+			return $this->oApiFilesManager->createFolder($iUserId, $Type, $Path, $FolderName);
+		}
 	}
 	
 	/**
@@ -579,13 +569,16 @@ class FilesModule extends AApiModule
 	 */
 	public function CreateLink($Type, $Path, $Link, $Name)
 	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if ($this->checkStorageType($Type))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
+			$iUserId = \CApi::getLogginedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			{
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			}
 
-		return $this->oApiFilesManager->createLink($iUserId, $Type, $Path, $Link, $Name);
+			return $this->oApiFilesManager->createLink($iUserId, $Type, $Path, $Link, $Name);
+		}
 	}
 	
 	/**
@@ -600,20 +593,23 @@ class FilesModule extends AApiModule
 	 */
 	public function Delete($Type, $Items)
 	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if ($this->checkStorageType($Type))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
+			$iUserId = \CApi::getLogginedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			{
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			}
 
-		$bResult = false;
-		
-		foreach ($Items as $oItem)
-		{
-			$bResult = $this->oApiFilesManager->delete($iUserId, $Type, $oItem['Path'], $oItem['Name']);
+			$oResult = false;
+
+			foreach ($Items as $oItem)
+			{
+				$oResult = $this->oApiFilesManager->delete($iUserId, $Type, $oItem['Path'], $oItem['Name']);
+			}
+
+			return $oResult;
 		}
-		
-		return $bResult;
 	}	
 
 	/**
@@ -631,16 +627,19 @@ class FilesModule extends AApiModule
 	 */
 	public function Rename($Type, $Path, $Name, $NewName, $IsLink)
 	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if ($this->checkStorageType($Type))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			$iUserId = \CApi::getLogginedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			{
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			}
+
+			$NewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
+
+			$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $Type, $Path, $NewName);
+			return $this->oApiFilesManager->rename($iUserId, $Type, $Path, $Name, $NewName, $IsLink);
 		}
-		
-		$sClearedNewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
-		$sCorrectedNewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $Type, $Path, $sClearedNewName);
-		
-		return $this->oApiFilesManager->rename($iUserId, $Type, $Path, $Name, $sCorrectedNewName, $IsLink);
 	}	
 
 	/**
@@ -661,24 +660,27 @@ class FilesModule extends AApiModule
 	 */
 	public function Copy($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
-
-		$bResult = false;
-		
-		foreach ($Files as $aItem)
-		{
-			$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
-			if (!$bFolderIntoItself)
+			$iUserId = \CApi::getLogginedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				$sNewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
-				$bResult = $this->oApiFilesManager->copy($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $sNewName);
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 			}
+
+			$oResult = null;
+
+			foreach ($Files as $aItem)
+			{
+				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
+				if (!$bFolderIntoItself)
+				{
+					$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
+					$oResult = $this->oApiFilesManager->copy($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+				}
+			}
+			return $oResult;
 		}
-		return $bResult;
 	}	
 
 	/**
@@ -699,23 +701,26 @@ class FilesModule extends AApiModule
 	 */
 	public function Move($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
-		$iUserId = \CApi::getLogginedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
-		}
-		$bResult = null;
-		
-		foreach ($Files as $aItem)
-		{
-			$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
-			if (!$bFolderIntoItself)
+			$iUserId = \CApi::getLogginedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				$sNewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
-				$bResult = $this->oApiFilesManager->move($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $sNewName);
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
 			}
+			$oResult = null;
+
+			foreach ($Files as $aItem)
+			{
+				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
+				if (!$bFolderIntoItself)
+				{
+					$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
+					$oResult = $this->oApiFilesManager->move($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+				}
+			}
+			return $oResult;
 		}
-		return $bResult;
 	}	
 	
 	/**
