@@ -73,7 +73,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicates if request execution was successfull
+	 * @apiSuccess {boolean} Result Indicates if request execution was successfull
 	 * @apiSuccess {int} ErrorCode Error code
 	 * @apiSuccess {float} Time Request execution time on the server
 	 * 
