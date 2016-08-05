@@ -126,14 +126,14 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder)
 	{
-		$bResult = false;
+		$mResult = false;
 		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.create-public-link', array($iUserId, $iType, $sPath, $sName, &$bResult, &$bBreak));
+		\CApi::Plugin()->RunHook('filestorage.create-public-link', array($iUserId, $iType, $sPath, $sName, &$mResult, &$bBreak));
 		if (!$bBreak)
 		{
-			$bResult = $this->oStorage->createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder);
+			$mResult = $this->oStorage->createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder);
 		}
-		return $bResult;
+		return $mResult;
 	}
 	
 	/**
