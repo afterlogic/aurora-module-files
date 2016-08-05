@@ -133,7 +133,19 @@ class FilesModule extends AApiModule
 		return in_array($Type, array('personal', 'corporate'));
 	}	
 	
-	private function GetRawFile($sType, $sPath, $sName, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
+	/**
+	 * Downloads file, views file or makes thumbnail for file.
+	 * 
+	 * @param string $sType Storage type - personal, corporate.
+	 * @param string $sPath Path to folder contained file.
+	 * @param string $sFileName File name.
+	 * @param string $sAuthToken Authorization token.
+	 * @param boolean $bDownload Indicates if file should be downloaded or viewed.
+	 * @param boolean $bThumbnail Indicates if thumbnail should be created for file.
+	 * 
+	 * @return boolean
+	 */
+	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
 	{
 		if ($bThumbnail)
 		{
