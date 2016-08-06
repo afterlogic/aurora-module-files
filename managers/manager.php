@@ -223,7 +223,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 		{
 			if (!$bOverride)
 			{
-				$sFileName = $this->oStorage->getNonExistingFileName($oAccount, $iType, $sPath, $sFileName);
+				$sFileName = $this->oStorage->getNonExistentFileName($oAccount, $iType, $sPath, $sFileName);
 			}
 			$bResult = $this->oStorage->createFile($oAccount, $iType, $sPath, $sFileName, $mData);
 		}
@@ -483,9 +483,9 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return string
 	 */
-	public function getNonExistingFileName($oAccount, $iType, $sPath, $sFileName)
+	public function getNonExistentFileName($oAccount, $iType, $sPath, $sFileName)
 	{
-		return $this->oStorage->getNonExistingFileName($oAccount, $iType, $sPath, $sFileName);
+		return $this->oStorage->getNonExistentFileName($oAccount, $iType, $sPath, $sFileName);
 	}	
 	
 	/**

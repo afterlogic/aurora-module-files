@@ -87,7 +87,7 @@ class CApiFilesStorage extends AApiManagerStorage
 
 	}
 	
-	public function getNonExistingFileName($oAccount, $iType, $sPath, $sFileName)
+	public function getNonExistentFileName($oAccount, $iType, $sPath, $sFileName)
 	{
 	
 	}	

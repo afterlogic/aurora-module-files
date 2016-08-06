@@ -838,7 +838,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						$oChildren = $oItem->getChildren();
 						foreach ($oChildren as $oChild)
 						{
-							$sChildNewName = $this->getNonExistingFileName($iUserId, $sToType, $sToPath . '/' . $sNewName, $oChild->getName());
+							$sChildNewName = $this->getNonExistentFileName($iUserId, $sToType, $sToPath . '/' . $sNewName, $oChild->getName());
 							$this->copy($iUserId, $sFromType, $sToType, $sFromPath . '/' . $sName, $sToPath . '/' . $sNewName, $oChild->getName(), $sChildNewName, $bMove);
 						}
 					}
@@ -886,7 +886,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 *
 	 * @return string
 	 */
-	public function getNonExistingFileName($oAccount, $iType, $sPath, $sFileName)
+	public function getNonExistentFileName($oAccount, $iType, $sPath, $sFileName)
 	{
 		$iIndex = 0;
 		$sFileNamePathInfo = pathinfo($sFileName);

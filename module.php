@@ -649,7 +649,7 @@ class FilesModule extends AApiModule
 
 			$NewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
 
-			$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $Type, $Path, $NewName);
+			$NewName = $this->oApiFilesManager->getNonExistentFileName($iUserId, $Type, $Path, $NewName);
 			return $this->oApiFilesManager->rename($iUserId, $Type, $Path, $Name, $NewName, $IsLink);
 		}
 	}	
@@ -687,7 +687,7 @@ class FilesModule extends AApiModule
 				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
-					$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
+					$NewName = $this->oApiFilesManager->getNonExistentFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
 					$oResult = $this->oApiFilesManager->copy($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
 				}
 			}
@@ -727,7 +727,7 @@ class FilesModule extends AApiModule
 				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
-					$NewName = $this->oApiFilesManager->getNonExistingFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
+					$NewName = $this->oApiFilesManager->getNonExistentFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
 					$oResult = $this->oApiFilesManager->move($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
 				}
 			}
