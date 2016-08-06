@@ -456,7 +456,7 @@ class FilesModule extends AApiModule
 	private function getQuota($iUserId)
 	{
 		return array(
-			'Used' => $this->oApiFilesManager->getUserUsedSpace($iUserId, [\EFileStorageTypeStr::Personal]),
+			'Used' => $this->oApiFilesManager->getUserSpaceUsed($iUserId, [\EFileStorageTypeStr::Personal]),
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
 		);
 	}

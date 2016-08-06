@@ -861,7 +861,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 * 
 	 * @return int;
 	 */
-	public function getUserUsedSpace($iUserId, $aTypes)
+	public function getUserSpaceUsed($iUserId, $aTypes)
 	{
 		$iUsageSize = 0;
 		

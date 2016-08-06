@@ -438,16 +438,16 @@ class CApiFilesManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * Returns user used space in bytes for specified storages.
+	 * Returns space used by the user in specified storages, in bytes.
 	 * 
 	 * @param int $iUserId User identificator.
 	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
 	 * 
 	 * @return int;
 	 */
-	public function getUserUsedSpace($iUserId, $aTypes = array(EFileStorageTypeStr::Personal))
+	public function getUserSpaceUsed($iUserId, $aTypes = array(EFileStorageTypeStr::Personal))
 	{
-		return $this->oStorage->getUserUsedSpace($iUserId, $aTypes);
+		return $this->oStorage->getUserSpaceUsed($iUserId, $aTypes);
 	}
 	
 	/**
