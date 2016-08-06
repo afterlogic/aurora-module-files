@@ -27,11 +27,9 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns module settings for specified user.
 	 * 
-	 * @param \CUser $oUser User settings are obtained for.
-	 * 
 	 * @return array
 	 */
-	public function GetAppData($oUser = null)
+	public function GetAppData()
 	{
 		return array(
 			'EnableModule' => true, // AppData.User.FilesEnable
