@@ -156,7 +156,7 @@ class FilesModule extends AApiModule
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator) ? $oModuleDecorator->GetMinByHash($sHash) : array();
 		
-		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getLogginedUserId($sAuthToken);
+		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getAuthenticatedUserId($sAuthToken);
 
 		$oTenant = null;
 
@@ -294,7 +294,7 @@ class FilesModule extends AApiModule
 	 */
 	public function UploadFile($Type, $Path, $FileData, $AuthToken)
 	{
-		$iUserId = \CApi::getLogginedUserId($AuthToken);
+		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
 
 		$sError = '';
@@ -415,7 +415,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetStorages()
 	{
-		$iUserId = \CApi::getLogginedUserId();
+		$iUserId = \CApi::getAuthenticatedUserId();
 		$aStorages = [
 			[
 				'Type' => 'personal', 
@@ -479,7 +479,7 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getLogginedUserId();
+			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
 				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -557,7 +557,7 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getLogginedUserId();
+			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId)) {
 
 				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -583,7 +583,7 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getLogginedUserId();
+			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
 				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -607,7 +607,7 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getLogginedUserId();
+			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
 				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -641,7 +641,7 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getLogginedUserId();
+			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
 				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -674,7 +674,7 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			$iUserId = \CApi::getLogginedUserId();
+			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
 				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -715,7 +715,7 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			$iUserId = \CApi::getLogginedUserId();
+			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
 				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -750,7 +750,7 @@ class FilesModule extends AApiModule
 	 */
 	public function CreatePublicLink($Type, $Path, $Name, $Size, $IsFolder)
 	{
-		$iUserId = \CApi::getLogginedUserId();
+		$iUserId = \CApi::getAuthenticatedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 		{
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -773,7 +773,7 @@ class FilesModule extends AApiModule
 	 */
 	public function DeletePublicLink($Type, $Path, $Name)
 	{
-		$iUserId = \CApi::getLogginedUserId();
+		$iUserId = \CApi::getAuthenticatedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 		{
 			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
@@ -796,7 +796,7 @@ class FilesModule extends AApiModule
 	 */
 	public function CheckUrl($Url)
 	{
-		$iUserId = \CApi::getLogginedUserId();
+		$iUserId = \CApi::getAuthenticatedUserId();
 		$mResult = false;
 
 		if ($iUserId)
