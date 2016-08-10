@@ -910,7 +910,7 @@ class FilesModule extends AApiModule
 
 			if ($oApiIntegrator)
 			{
-				$oCoreClientModule = \CApi::GetModule('CoreClient');
+				$oCoreClientModule = \CApi::GetModule('CoreWebclient');
 				if ($oCoreClientModule instanceof \AApiModule) {
 					$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
 					if (is_string($sResult)) {
