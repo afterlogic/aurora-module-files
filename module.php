@@ -356,6 +356,27 @@ class FilesModule extends AApiModule
 		
 		return $aResponse;
 	}
+
+	/**
+	 * @api {post} ?/Api/ DownloadFile
+	 * @apiDescription Downloads file.
+	 * @apiName DownloadFile
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=DownloadFile} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Storage type - personal, corporate.
+	 * @apiParam {string} Path Path to folder contained file.
+	 * @apiParam {string} FileName File name.
+	 * @apiParam {string} AuthToken Authorization token.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
 	
 	/**
 	 * Downloads file.
@@ -371,6 +392,27 @@ class FilesModule extends AApiModule
 	{
 		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, true);
 	}
+
+	/**
+	 * @api {post} ?/Api/ ViewFile
+	 * @apiDescription Views file.
+	 * @apiName ViewFile
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=ViewFile} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Storage type - personal, corporate.
+	 * @apiParam {string} Path Path to folder contained file.
+	 * @apiParam {string} FileName File name.
+	 * @apiParam {string} AuthToken Authorization token.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
 	
 	/**
 	 * Views file.
@@ -388,6 +430,27 @@ class FilesModule extends AApiModule
 	}
 
 	/**
+	 * @api {post} ?/Api/ GetFileThumbnail
+	 * @apiDescription Makes thumbnail for file.
+	 * @apiName GetFileThumbnail
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=GetFileThumbnail} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Storage type - personal, corporate.
+	 * @apiParam {string} Path Path to folder contained file.
+	 * @apiParam {string} FileName File name.
+	 * @apiParam {string} AuthToken Authorization token.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
+	/**
 	 * Makes thumbnail for file.
 	 * 
 	 * @param string $Type Storage type - personal, corporate.
@@ -402,6 +465,26 @@ class FilesModule extends AApiModule
 		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, false, true);
 	}
 
+	/**
+	 * @api {post} ?/Api/ GetStorages
+	 * @apiDescription Returns storages avaliable for logged in user.
+	 * @apiName GetStorages
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=GetStorages} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {string} Result.Type Storage type - personal, corporate.
+	 * @apiSuccess {string} Result.DisplayName Storage display name.
+	 * @apiSuccess {bool} Result.IsExternal Indicates if storage external or not.
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
 	/**
 	 * Returns storages avaliable for logged in user.
 	 * 
@@ -442,6 +525,26 @@ class FilesModule extends AApiModule
 	}
 
 	/**
+	 * @api {post} ?/Api/ getQuota
+	 * @apiDescription Returns used space and space limit for specified user.
+	 * @apiName getQuota
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=getQuota} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {int} iUserId User identifier.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {int} Result.Used Amount of space used by user.
+	 * @apiSuccess {int} Result.Limit Limit of space for user.
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
+	/**
 	 * Returns used space and space limit for specified user.
 	 * 
 	 * @param int $iUserId User identifier.
@@ -459,6 +562,28 @@ class FilesModule extends AApiModule
 		);
 	}
 
+	/**
+	 * @api {post} ?/Api/ GetFiles
+	 * @apiDescription Returns file list and user quota information.
+	 * @apiName GetFiles
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=GetFiles} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage.
+	 * @apiParam {string} Path Path to folder files are obtained from.
+	 * @apiParam {string} Pattern String for search files and folders with such string in name.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {array} Result.Items Array of files objects.
+	 * @apiSuccess {array} Result.Quota Array of items with fields Used, Limit.
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
 	/**
 	 * Returns file list and user quota information.
 	 * 
@@ -503,6 +628,27 @@ class FilesModule extends AApiModule
 	}
 
 	/**
+	 * @api {post} ?/Api/ GetPublicFiles
+	 * @apiDescription Returns list of public files.
+	 * @apiName GetPublicFiles
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=GetPublicFiles} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Hash Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.
+	 * @apiParam {string} Path Path to folder contained files to return.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {array} Result.Items Array of files objects.
+	 * @apiSuccess {array} Result.Quota Array of items with fields Used, Limit.
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+
+	/**
 	 * Returns list of public files.
 	 * 
 	 * @param string $Hash Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.
@@ -541,6 +687,26 @@ class FilesModule extends AApiModule
 	}	
 
 	/**
+	 * @api {post} ?/Api/ CreateFolder
+	 * @apiDescription Creates folder.
+	 * @apiName CreateFolder
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=CreateFolder} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage - personal, corporate.
+	 * @apiParam {string} Path Path to new folder.
+	 * @apiParam {string} FolderName New folder name.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
+	/**
 	 * Creates folder.
 	 * 
 	 * @param string $Type Type of storage - personal, corporate.
@@ -564,6 +730,27 @@ class FilesModule extends AApiModule
 			return $this->oApiFilesManager->createFolder($iUserId, $Type, $Path, $FolderName);
 		}
 	}
+
+	/**
+	 * @api {post} ?/Api/ CreateLink
+	 * @apiDescription Creates link.
+	 * @apiName CreateLink
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=CreateLink} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage - personal, corporate.
+	 * @apiParam {string} Path Path to new link.
+	 * @apiParam {string} Link Link value.
+	 * @apiParam {string} Name Link name.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
 	
 	/**
 	 * Creates link.
@@ -590,6 +777,25 @@ class FilesModule extends AApiModule
 			return $this->oApiFilesManager->createLink($iUserId, $Type, $Path, $Link, $Name);
 		}
 	}
+
+	/**
+	 * @api {post} ?/Api/ Delete
+	 * @apiDescription Deletes files and folder specified with list.
+	 * @apiName Delete
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=Delete} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage - personal, corporate.
+	 * @apiParam {array} Items Array of items to delete.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
 	
 	/**
 	 * Deletes files and folder specified with list.
@@ -623,6 +829,28 @@ class FilesModule extends AApiModule
 	}	
 
 	/**
+	 * @api {post} ?/Api/ Rename
+	 * @apiDescription Renames folder, file or link.
+	 * @apiName Rename
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=Rename} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage - personal, corporate.
+	 * @apiParam {string} Path Path to item to rename.
+	 * @apiParam {string} Name Current name of the item.
+	 * @apiParam {string} NewName New name of the item.
+	 * @apiParam {boolean} IsLink Indicates if the item is link or not.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
+	/**
 	 * Renames folder, file or link.
 	 * 
 	 * @param string $Type Type of storage - personal, corporate.
@@ -652,6 +880,28 @@ class FilesModule extends AApiModule
 		}
 	}	
 
+	/**
+	 * @api {post} ?/Api/ Copy
+	 * @apiDescription Copies files and/or folders from one folder to another.
+	 * @apiName Copy
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=Copy} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} FromType storage type of folder items will be copied from.
+	 * @apiParam {string} ToType storage type of folder items will be copied to.
+	 * @apiParam {string} FromPath folder items will be copied from.
+	 * @apiParam {string} ToPath folder items will be copied to.
+	 * @apiParam {array} Files list of items to copy
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
 	/**
 	 * Copies files and/or folders from one folder to another.
 	 * 
@@ -694,6 +944,28 @@ class FilesModule extends AApiModule
 	}	
 
 	/**
+	 * @api {post} ?/Api/ Move
+	 * @apiDescription Moves files and/or folders from one folder to another.
+	 * @apiName Move
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=Move} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} FromType storage type of folder items will be moved from.
+	 * @apiParam {string} ToType storage type of folder items will be moved to.
+	 * @apiParam {string} FromPath folder items will be moved from.
+	 * @apiParam {string} ToPath folder items will be moved to.
+	 * @apiParam {array} Files list of items to move
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+	
+	/**
 	 * Moves files and/or folders from one folder to another.
 	 * 
 	 * @param string $FromType storage type of folder items will be moved from.
@@ -734,6 +1006,28 @@ class FilesModule extends AApiModule
 	}	
 	
 	/**
+	 * @api {post} ?/Api/ CreatePublicLink
+	 * @apiDescription Creates public link for file or folder.
+	 * @apiName CreatePublicLink
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=CreatePublicLink} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage contains the item.
+	 * @apiParam {string} Path Path to the item.
+	 * @apiParam {string} Name Name of the item.
+	 * @apiParam {int} Size Size of the file.
+	 * @apiParam {boolean} IsFolder Indicates if the item is folder or not.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {mixed} Result Public link to the item.
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+
+	/**
 	 * Creates public link for file or folder.
 	 * 
 	 * @param string $Type Type of storage contains the item.
@@ -742,7 +1036,7 @@ class FilesModule extends AApiModule
 	 * @param int $Size Size of the file.
 	 * @param boolean $IsFolder Indicates if the item is folder or not.
 	 * 
-	 * @return string|false Pulic link to the item.
+	 * @return string|false Public link to the item.
 	 * 
 	 * @throws \System\Exceptions\ClientException
 	 */
@@ -758,6 +1052,26 @@ class FilesModule extends AApiModule
 		return $this->oApiFilesManager->createPublicLink($iUserId, $Type, $Path, $Name, $Size, $bFolder);
 	}	
 	
+	/**
+	 * @api {post} ?/Api/ DeletePublicLink
+	 * @apiDescription Deletes public link from file or folder.
+	 * @apiName DeletePublicLink
+	 * @apiGroup Files
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=DeletePublicLink} Method Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParam {string} Type Type of storage contains the item.
+	 * @apiParam {string} Path Path to the item.
+	 * @apiParam {string} Name Name of the item.
+	 * 
+	 * @apiSuccess {string} Module Module name
+	 * @apiSuccess {string} Method Method name
+	 * @apiSuccess {bool} Result 
+	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {float} Time Request execution time on the server
+	 */
+
 	/**
 	 * Deletes public link from file or folder.
 	 * 
