@@ -22,6 +22,7 @@ class FilesModule extends AApiModule
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
 		$this->AddEntry('files-pub', 'EntryFilesPub');
+		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
 	}
 	
 	/**
@@ -145,95 +146,47 @@ class FilesModule extends AApiModule
 	 */
 	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
 	{
-		if ($bThumbnail)
-		{
-//			\CApiResponseManager::verifyCacheByKey($sRawKey);
-		}
-
 		$sHash = ""; // TODO: 
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator) ? $oModuleDecorator->GetMinByHash($sHash) : array();
 		
 		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getAuthenticatedUserId($sAuthToken);
 
-		$oTenant = null;
-
-/*		$oApiTenants = \CApi::GetCoreManager('tenants');
-		if ($iUserId && $oApiTenants) {
-			$oTenant = (0 < $iUserId->IdTenant) ? $oApiTenants->getTenantById($iUserId->IdTenant) :
-				$oApiTenants->getDefaultGlobalTenant();
-		}
- * 
- */
-		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
-				/*$oTenant &&*/ isset($sType, $sPath, $sFileName)) {
-			
-			$mResult = false;
-			
+			isset($sType, $sPath, $sFileName)) 
+		{
 			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 			
-			$oFileInfo = $this->oApiFilesManager->getFileInfo($iUserId, $sType, $sPath, $sFileName);
+			$mResult = false;
+			$this->broadcastEvent(
+				'GetFile', 
+				array(
+					'Type' => $sType,
+					'Path' => $sPath,
+					'Name' => $sFileName,
+					'@Result' => &$mResult
+				)
+			);			
 			
-			
-			if ($oFileInfo && $oFileInfo->IsLink) 
+			if (false !== $mResult) 
 			{
-				
-				$iLinkType = \api_Utils::GetLinkType($oFileInfo->LinkUrl);
-
-				if (isset($iLinkType)) {
-					
-					if (\EFileStorageLinkType::GoogleDrive === $iLinkType) {
-						
-						$oSocial = $oTenant->getSocialByName('google');
-						if ($oSocial) {
-							
-							$oInfo = \api_Utils::GetGoogleDriveFileInfo($oFileInfo->LinkUrl, $oSocial->SocialApiKey);
-							$sFileName = isset($oInfo->title) ? $oInfo->title : $sFileName;
-							$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
-
-							if (isset($oInfo->downloadUrl)) {
-								
-								$mResult = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
-								$this->oHttp->SaveUrlToFile($oInfo->downloadUrl, $mResult); // todo
-								rewind($mResult);
-							}
-						}
-					} else/* if (\EFileStorageLinkType::DropBox === (int)$aFileInfo['LinkType'])*/ {
-						
-						if (\EFileStorageLinkType::DropBox === $iLinkType) {
-							
-							$oFileInfo->LinkUrl = str_replace('www.dropbox.com', 'dl.dropboxusercontent.com', $oFileInfo->LinkUrl);
-						}
-						$mResult = \MailSo\Base\ResourceRegistry::CreateMemoryResource();
-						$sFileName = basename($oFileInfo->LinkUrl);
-						$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
-						
-						$this->oHttp->SaveUrlToFile($oFileInfo->LinkUrl, $mResult); // todo
-						rewind($mResult);
-					}
-				}
-			} else {
-				
-				$mResult = $this->oApiFilesManager->getFile($iUserId, $sType, $sPath, $sFileName);
-			}
-			if (false !== $mResult) {
-				
-				if (is_resource($mResult)) {
-					
+				if (is_resource($mResult)) 
+				{
 //					$sFileName = $this->clearFileName($oFileInfo->Name, $sContentType); // todo
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
 					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
 			
-					if ($bThumbnail) {
-						
+					if ($bThumbnail) 
+					{
 //						$this->cacheByKey($sRawKey);	// todo
 						\CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName);
-					} else if ($sContentType === 'text/html') {
-						
+					} 
+					else if ($sContentType === 'text/html') 
+					{
 						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult)));
-					} else {
-						
+					} 
+					else 
+					{
 						\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
 					}
 					
@@ -383,14 +336,14 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
-	 * @param string $FileName File name.
+	 * @param string $Name File name.
 	 * @param string $AuthToken Authorization token.
 	 * 
 	 * @return boolean
 	 */
-	public function DownloadFile($Type, $Path, $FileName, $AuthToken)
+	public function DownloadFile($Type, $Path, $Name, $AuthToken)
 	{
-		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, true);
+		return $this->getRawFile($Type, $Path, $Name, $AuthToken, true);
 	}
 
 	/**
@@ -419,14 +372,14 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
-	 * @param string $FileName File name.
+	 * @param string $Name File name.
 	 * @param string $AuthToken Authorization token.
 	 * 
 	 * @return boolean
 	 */
-	public function ViewFile($Type, $Path, $FileName, $AuthToken)
+	public function ViewFile($Type, $Path, $Name, $AuthToken)
 	{
-		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, false);
+		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false);
 	}
 
 	/**
@@ -455,14 +408,14 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
-	 * @param string $FileName File name.
+	 * @param string $Name File name.
 	 * @param string $AuthToken Authorization token.
 	 * 
 	 * @return boolean
 	 */
-	public function GetFileThumbnail($Type, $Path, $FileName, $AuthToken)
+	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken)
 	{
-		return $this->getRawFile($Type, $Path, $FileName, $AuthToken, false, true);
+		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false, true);
 	}
 
 	/**
@@ -561,6 +514,31 @@ class FilesModule extends AApiModule
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
 		);
 	}
+	
+	/**
+	 * Returns file contents.
+	 * 
+	 * @param string $Type Type of storage.
+	 * @param string $Path Path to folder files are obtained from.
+	 * @param string $FileName Name of file.
+	 * 
+	 * @return string/resource/bool
+	 * 
+	 * @throws \System\Exceptions\ClientException
+	 */
+	public function onGetFile($Type, $Path, $Name, &$Result)
+	{
+		if ($this->checkStorageType($Type))
+		{
+			$iUserId = \CApi::getAuthenticatedUserId();
+			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			{
+				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			}
+			
+			$Result = $this->oApiFilesManager->getFile($iUserId, $Type, $Path, $Name);
+		}
+	}	
 
 	/**
 	 * @api {post} ?/Api/ GetFiles
