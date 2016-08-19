@@ -241,7 +241,7 @@ class FilesModule extends AApiModule
 	 *		*string* **Hash** Hash used for file download, file view or getting file thumbnail.
 	 * }
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function UploadFile($Type, $Path, $FileData, $AuthToken)
 	{
@@ -261,7 +261,7 @@ class FilesModule extends AApiModule
 					$aQuota = $this->getQuota($iUserId);
 					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
 					{
-						throw new \System\Exceptions\ClientException(\System\Notifications::CanNotUploadFileQuota);
+						throw new \System\Exceptions\AuroraApiException(\System\Notifications::CanNotUploadFileQuota);
 					}
 				}
 				
@@ -524,7 +524,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return string/resource/bool
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function onGetFile($Type, $Path, $Name, &$Result)
 	{
@@ -533,7 +533,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 			
 			$Result = $this->oApiFilesManager->getFile($iUserId, $Type, $Path, $Name);
@@ -574,7 +574,7 @@ class FilesModule extends AApiModule
 	 *		*array* **Quota** Array of items with fields Used, Limit.
 	 * }
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function GetFiles($Type, $Path, $Pattern)
 	{
@@ -583,7 +583,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$aUsers = array();
@@ -637,7 +637,7 @@ class FilesModule extends AApiModule
 	 *		*array* **Quota** Array of items with fields Used, Limit.
 	 * }
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
@@ -652,7 +652,7 @@ class FilesModule extends AApiModule
 			{
 				if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 				{
-					throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+					throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 				}
 				$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
@@ -693,7 +693,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function CreateFolder($Type, $Path, $FolderName)
 	{
@@ -702,7 +702,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId)) {
 
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			return $this->oApiFilesManager->createFolder($iUserId, $Type, $Path, $FolderName);
@@ -740,7 +740,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function CreateLink($Type, $Path, $Link, $Name)
 	{
@@ -749,7 +749,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			return $this->oApiFilesManager->createLink($iUserId, $Type, $Path, $Link, $Name);
@@ -783,7 +783,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Delete($Type, $Items)
 	{
@@ -792,7 +792,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$oResult = false;
@@ -839,7 +839,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Rename($Type, $Path, $Name, $NewName, $IsLink)
 	{
@@ -848,7 +848,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$NewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
@@ -894,7 +894,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Copy($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
@@ -903,7 +903,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$oResult = null;
@@ -957,7 +957,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Move($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
@@ -966,7 +966,7 @@ class FilesModule extends AApiModule
 			$iUserId = \CApi::getAuthenticatedUserId();
 			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 			{
-				throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 			$oResult = null;
 
@@ -1016,14 +1016,14 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return string|false Public link to the item.
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function CreatePublicLink($Type, $Path, $Name, $Size, $IsFolder)
 	{
 		$iUserId = \CApi::getAuthenticatedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
 		$bFolder = $IsFolder === '1' ? true : false;
@@ -1059,14 +1059,14 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return bool
 	 * 
-	 * @throws \System\Exceptions\ClientException
+	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function DeletePublicLink($Type, $Path, $Name)
 	{
 		$iUserId = \CApi::getAuthenticatedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 		{
-			throw new \System\Exceptions\ClientException(\System\Notifications::FilesNotAllowed);
+			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
 		return $this->oApiFilesManager->deletePublicLink($iUserId, $Type, $Path, $Name);
