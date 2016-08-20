@@ -103,6 +103,8 @@ class FilesModule extends AApiModule
 	 */
 	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate, $UserSpaceLimitMb)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::TenantAdmin);
+		
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
 		$this->setConfig('EnableCorporate', $EnableCorporate);
@@ -245,6 +247,8 @@ class FilesModule extends AApiModule
 	 */
 	public function UploadFile($Type, $Path, $FileData, $AuthToken)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
 
@@ -258,7 +262,7 @@ class FilesModule extends AApiModule
 				$iSize = (int) $FileData['size'];
 				if ($Type === \EFileStorageTypeStr::Personal)
 				{
-					$aQuota = $this->getQuota($iUserId);
+					$aQuota = $this->GetQuota($iUserId);
 					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
 					{
 						throw new \System\Exceptions\AuroraApiException(\System\Notifications::CanNotUploadFileQuota);
@@ -343,6 +347,8 @@ class FilesModule extends AApiModule
 	 */
 	public function DownloadFile($Type, $Path, $Name, $AuthToken)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, true);
 	}
 
@@ -379,6 +385,8 @@ class FilesModule extends AApiModule
 	 */
 	public function ViewFile($Type, $Path, $Name, $AuthToken)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false);
 	}
 
@@ -415,6 +423,8 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false, true);
 	}
 
@@ -449,6 +459,8 @@ class FilesModule extends AApiModule
 	 */
 	public function GetStorages()
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		$iUserId = \CApi::getAuthenticatedUserId();
 		$aStorages = [
 			[
@@ -474,16 +486,18 @@ class FilesModule extends AApiModule
 	 */
 	public function GetExternalStorages()
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		return array();
 	}
 
 	/**
-	 * @api {post} ?/Api/ getQuota
+	 * @api {post} ?/Api/ GetQuota
 	 * @apiDescription Returns used space and space limit for specified user.
-	 * @apiName getQuota
+	 * @apiName GetQuota
 	 * @apiGroup Files
 	 * @apiParam {string=Files} Module Module name
-	 * @apiParam {string=getQuota} Method Method name
+	 * @apiParam {string=GetQuota} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
 	 * @apiParam {int} iUserId User identifier.
@@ -507,8 +521,10 @@ class FilesModule extends AApiModule
 	 *		*int* **Limit** Limit of space for user.
 	 * }
 	 */
-	private function getQuota($iUserId)
+	public function GetQuota($iUserId)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		return array(
 			'Used' => $this->oApiFilesManager->getUserSpaceUsed($iUserId, [\EFileStorageTypeStr::Personal]),
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
@@ -578,6 +594,8 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFiles($Type, $Path, $Pattern)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->checkStorageType($Type))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -600,7 +618,7 @@ class FilesModule extends AApiModule
 
 			return array(
 				'Items' => $aFiles,
-				'Quota' => $this->getQuota($iUserId)
+				'Quota' => $this->GetQuota($iUserId)
 			);
 		}
 	}
@@ -641,6 +659,8 @@ class FilesModule extends AApiModule
 	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		$iUserId = null;
 		$oResult = array();
 
@@ -657,7 +677,7 @@ class FilesModule extends AApiModule
 				$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
 				$oResult['Items'] = $this->oApiFilesManager->getFiles($iUserId, $mMin['Type'], $Path);
-				$oResult['Quota'] = $this->getQuota($iUserId);
+				$oResult['Quota'] = $this->GetQuota($iUserId);
 			}
 		}
 
@@ -697,6 +717,8 @@ class FilesModule extends AApiModule
 	 */
 	public function CreateFolder($Type, $Path, $FolderName)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->checkStorageType($Type))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -744,6 +766,8 @@ class FilesModule extends AApiModule
 	 */
 	public function CreateLink($Type, $Path, $Link, $Name)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->checkStorageType($Type))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -787,6 +811,8 @@ class FilesModule extends AApiModule
 	 */
 	public function Delete($Type, $Items)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->checkStorageType($Type))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -843,6 +869,8 @@ class FilesModule extends AApiModule
 	 */
 	public function Rename($Type, $Path, $Name, $NewName, $IsLink)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->checkStorageType($Type))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -898,6 +926,8 @@ class FilesModule extends AApiModule
 	 */
 	public function Copy($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -961,6 +991,8 @@ class FilesModule extends AApiModule
 	 */
 	public function Move($FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -1020,6 +1052,8 @@ class FilesModule extends AApiModule
 	 */
 	public function CreatePublicLink($Type, $Path, $Name, $Size, $IsFolder)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		$iUserId = \CApi::getAuthenticatedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 		{
@@ -1063,6 +1097,8 @@ class FilesModule extends AApiModule
 	 */
 	public function DeletePublicLink($Type, $Path, $Name)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		$iUserId = \CApi::getAuthenticatedUserId();
 		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 		{
