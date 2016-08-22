@@ -154,6 +154,8 @@ class FilesModule extends AApiModule
 		
 		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getAuthenticatedUserId($sAuthToken);
 
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
 			isset($sType, $sPath, $sFileName)) 
 		{
@@ -247,9 +249,9 @@ class FilesModule extends AApiModule
 	 */
 	public function UploadFile($Type, $Path, $FileData, $AuthToken)
 	{
+		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
 
 		$sError = '';
@@ -347,8 +349,6 @@ class FilesModule extends AApiModule
 	 */
 	public function DownloadFile($Type, $Path, $Name, $AuthToken)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, true);
 	}
 
@@ -385,8 +385,6 @@ class FilesModule extends AApiModule
 	 */
 	public function ViewFile($Type, $Path, $Name, $AuthToken)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false);
 	}
 
@@ -423,8 +421,6 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false, true);
 	}
 
