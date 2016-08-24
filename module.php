@@ -32,6 +32,8 @@ class FilesModule extends AApiModule
 	 */
 	public function GetAppData()
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		
 		return array(
 			'EnableModule' => true, // AppData.User.FilesEnable
 			'PublicHash' => '', // AppData.FileStoragePubHash
@@ -349,6 +351,7 @@ class FilesModule extends AApiModule
 	 */
 	public function DownloadFile($Type, $Path, $Name, $AuthToken)
 	{
+		// checkUserRoleIsAtLeast is called in getRawFile
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, true);
 	}
 
@@ -385,6 +388,7 @@ class FilesModule extends AApiModule
 	 */
 	public function ViewFile($Type, $Path, $Name, $AuthToken)
 	{
+		// checkUserRoleIsAtLeast is called in getRawFile
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false);
 	}
 
@@ -421,6 +425,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken)
 	{
+		// checkUserRoleIsAtLeast is called in getRawFile
 		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false, true);
 	}
 
@@ -455,7 +460,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetStorages()
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$iUserId = \CApi::getAuthenticatedUserId();
 		$aStorages = [
@@ -482,7 +487,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetExternalStorages()
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		return array();
 	}
@@ -519,7 +524,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetQuota($iUserId)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		return array(
 			'Used' => $this->oApiFilesManager->getUserSpaceUsed($iUserId, [\EFileStorageTypeStr::Personal]),
@@ -590,7 +595,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFiles($Type, $Path, $Pattern)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		if ($this->checkStorageType($Type))
 		{
@@ -655,7 +660,7 @@ class FilesModule extends AApiModule
 	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$iUserId = null;
 		$oResult = array();
@@ -1118,6 +1123,8 @@ class FilesModule extends AApiModule
 	 */
 	public function CheckUrl($Url)
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
 		$iUserId = \CApi::getAuthenticatedUserId();
 		$mResult = false;
 
@@ -1289,6 +1296,8 @@ class FilesModule extends AApiModule
 	 */
 	public function MinShare()
 	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		
 		$mData = $this->getParamValue('Result', false);
 
 		if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
