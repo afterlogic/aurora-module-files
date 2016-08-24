@@ -23,6 +23,7 @@ class FilesModule extends AApiModule
 		
 		$this->AddEntry('files-pub', 'EntryFilesPub');
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
+		$this->setNonAuthorizedMethods(array('GetPublicFiles'));
 	}
 	
 	/**
