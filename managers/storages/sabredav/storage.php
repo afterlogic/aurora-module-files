@@ -521,7 +521,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 							'FileName' => $oValue->getName(),
 							'MimeType' => $oItem->ContentType,
 							'Size' => $oValue->getSize(),
-							'Iframed' => $oItem->Iframed
+							'Iframed' => $oItem->Iframed,
 						));
 					}
 					
@@ -532,7 +532,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					
 					if ($oItem && '.asc' === \strtolower(\substr(\trim($oItem->Name), -4)))
 					{
-						$mResult = $this->getFile($oAccount, $oItem->Type, $oItem->Path, $oItem->Name);
+						$mResult = $this->getFile($iUserId, $oItem->Type, $oItem->Path, $oItem->Name);
 
 						if (is_resource($mResult))
 						{
