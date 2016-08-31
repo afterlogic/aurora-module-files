@@ -148,15 +148,21 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 */
-	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $bDownload = true, $bThumbnail = false)
+	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $SharedHash = null, $bDownload = true, $bThumbnail = false)
 	{
-		$sHash = ""; // TODO: 
 		$oModuleDecorator = $this->getMinModuleDecorator();
-		$mMin = ($oModuleDecorator) ? $oModuleDecorator->GetMinByHash($sHash) : array();
+		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
 		
 		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getAuthenticatedUserId($sAuthToken);
 
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		if ($iUserId && $SharedHash !== null)
+		{
+			\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		}
+		else 
+		{
+			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		}
 		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
 			isset($sType, $sPath, $sFileName)) 
@@ -167,6 +173,7 @@ class FilesModule extends AApiModule
 			$this->broadcastEvent(
 				'GetFile', 
 				array(
+					'UserId' => $iUserId,
 					'Type' => $sType,
 					'Path' => $sPath,
 					'Name' => $sFileName,
@@ -349,10 +356,10 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 */
-	public function DownloadFile($Type, $Path, $Name, $AuthToken)
+	public function DownloadFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return $this->getRawFile($Type, $Path, $Name, $AuthToken, true);
+		return $this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, true);
 	}
 
 	/**
@@ -386,10 +393,10 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 */
-	public function ViewFile($Type, $Path, $Name, $AuthToken)
+	public function ViewFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false);
+		return $this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false);
 	}
 
 	/**
@@ -423,10 +430,10 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 */
-	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken)
+	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return $this->getRawFile($Type, $Path, $Name, $AuthToken, false, true);
+		return $this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false, true);
 	}
 
 	/**
@@ -543,17 +550,16 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function onGetFile($Type, $Path, $Name, &$Result)
+	public function onGetFile($UserId, $Type, $Path, $Name, &$Result)
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 			
-			$Result = $this->oApiFilesManager->getFile($iUserId, $Type, $Path, $Name);
+			$Result = $this->oApiFilesManager->getFile($UserId, $Type, $Path, $Name);
 		}
 	}	
 
