@@ -23,6 +23,7 @@ class FilesModule extends AApiModule
 		
 		$this->AddEntry('files-pub', 'EntryFilesPub');
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
+		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
 	}
 	
 	/**
@@ -176,7 +177,8 @@ class FilesModule extends AApiModule
 					'UserId' => $iUserId,
 					'Type' => $sType,
 					'Path' => $sPath,
-					'Name' => $sFileName,
+					'Name' => &$sFileName,
+					'IsThumb' => $bThumbnail,
 					'@Result' => &$mResult
 				)
 			);			
@@ -295,8 +297,18 @@ class FilesModule extends AApiModule
 				}
 				if ($rData)
 				{
-					$this->oApiFilesManager->createFile($iUserId, $Type, $Path, $sUploadName, $rData, false);
-
+					$this->broadcastEvent(
+						'CreateFile', 
+						array(
+							'UserId' => $iUserId,
+							'Type' => $Type,
+							'Path' => $Path,
+							'Name' => $sUploadName,
+							'Data' => $rData,
+							'@Result' => &$mResult
+						)
+					);			
+					
 					$aResponse['File'] = array(
 						'Name' => $sUploadName,
 						'TempName' => $sSavedName,
@@ -550,7 +562,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function onGetFile($UserId, $Type, $Path, $Name, &$Result)
+	public function onGetFile($UserId, $Type, $Path, $Name, $IsThumb, &$Result)
 	{
 		if ($this->checkStorageType($Type))
 		{
@@ -562,6 +574,15 @@ class FilesModule extends AApiModule
 			$Result = $this->oApiFilesManager->getFile($UserId, $Type, $Path, $Name);
 		}
 	}	
+	
+	
+	public function onCreateFile($UserId, $Type, $Path, $Name, $Data, &$Result)
+	{
+		if ($this->checkStorageType($Type))
+		{
+			$Result = $this->oApiFilesManager->createFile($UserId, $Type, $Path, $Name, $Data, false);
+		}
+	}
 
 	/**
 	 * @api {post} ?/Api/ GetFiles

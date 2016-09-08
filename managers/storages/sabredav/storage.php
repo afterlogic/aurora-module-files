@@ -437,6 +437,12 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						$oFileInfo = null;
 						$oEmbedFileInfo = null;
 								
+						
+						$this->oManager->GetModule()->broadcastEvent(
+								'PopulateFileItem', 
+								array($aProps, &$oItem)
+						);
+						
 						if (isset($aProps['Link']))
 						{
 							$oItem->IsLink = true;
@@ -479,10 +485,6 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 									$oItem->Size = $aRemoteFileInfo['size'];
 								}
 							}
-						}
-						else
-						{
-							$oItem->IsLink = false;
 						}
 						
 						$oItem->LastModified = $oValue->getLastModified();
