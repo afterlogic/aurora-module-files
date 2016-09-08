@@ -207,12 +207,8 @@ class FilesModule extends AApiModule
 					
 					@fclose($mResult);
 				}
-
-				return true;
 			}
 		}
-
-		return false;		
 	}
 	
 	/**
@@ -371,7 +367,7 @@ class FilesModule extends AApiModule
 	public function DownloadFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return $this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, true);
+		$this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, true);
 	}
 
 	/**
@@ -408,7 +404,7 @@ class FilesModule extends AApiModule
 	public function ViewFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return $this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false);
+		$this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false);
 	}
 
 	/**
@@ -445,7 +441,7 @@ class FilesModule extends AApiModule
 	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return $this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false, true);
+		$this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false, true);
 	}
 
 	/**
