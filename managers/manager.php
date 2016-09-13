@@ -29,14 +29,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function isFileExists($oAccount, $iType, $sPath, $sName)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.file-exists', array($oAccount, $iType, $sPath, $sName, &$bResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$bResult = $this->oStorage->isFileExists($oAccount, $iType, $sPath, $sName);
-		}
-		return $bResult;
+		return $this->oStorage->isFileExists($oAccount, $iType, $sPath, $sName);
 	}
 
 	/**
@@ -66,14 +59,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function getFileInfo($oAccount, $iType, $sPath, $sName)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.get-file-info', array($oAccount, $iType, $sPath, $sName, &$bResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$bResult = $this->oStorage->getFileInfo($oAccount, $iType, $sPath, $sName);
-		}
-		return $bResult;
+		return $this->oStorage->getFileInfo($oAccount, $iType, $sPath, $sName);
 	}
 
 	/**
@@ -102,14 +88,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function getFile($oAccount, $iType, $sPath, $sName)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.get-file', array($oAccount, $iType, $sPath, $sName, &$bResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$bResult = $this->oStorage->getFile($oAccount, $iType, $sPath, $sName);
-		}
-		return $bResult;
+		return $this->oStorage->getFile($oAccount, $iType, $sPath, $sName);
 	}
 
 	/**
@@ -126,14 +105,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder)
 	{
-		$mResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.create-public-link', array($iUserId, $iType, $sPath, $sName, &$mResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$mResult = $this->oStorage->createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder);
-		}
-		return $mResult;
+		return $this->oStorage->createPublicLink($iUserId, $iType, $sPath, $sName, $sSize, $bIsFolder);
 	}
 	
 	/**
@@ -148,14 +120,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function deletePublicLink($iUserId, $iType, $sPath, $sName)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.delete-public-link', array($iUserId, $iType, $sPath, $sName, &$bResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$bResult = $this->oStorage->deletePublicLink($iUserId, $iType, $sPath, $sName);
-		}
-		return $bResult;
+		return $this->oStorage->deletePublicLink($iUserId, $iType, $sPath, $sName);
 	}
 
 	/**
@@ -170,14 +135,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function getFiles($iUserId, $sType, $sPath, $sPattern = '')
 	{
-		$mResult = false;
-		$bBreak = false;
-//		\CApi::Plugin()->RunHook('filestorage.get-files', array($oAccount, $sType, $sPath, $sPattern, &$bResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$mResult = $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern);
-		}
-		return $mResult;
+		return $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern);
 	}
 
 	/**
@@ -192,14 +150,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function createFolder($iUserId, $iType, $sPath, $sFolderName)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.create-folder', array($iUserId, $iType, $sPath, $sFolderName, &$bResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$bResult = $this->oStorage->createFolder($iUserId, $iType, $sPath, $sFolderName);
-		}
-		return $bResult;
+		return $this->oStorage->createFolder($iUserId, $iType, $sPath, $sFolderName);
 	}
 	
 	/**
@@ -216,18 +167,11 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function createFile($oAccount, $iType, $sPath, $sFileName, $mData, $bOverride = true)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.create-file', array($oAccount, $iType, $sPath, $sFileName, $mData, &$bResult, &$bBreak));
-		if (!$bBreak)
+		if (!$bOverride)
 		{
-			if (!$bOverride)
-			{
-				$sFileName = $this->oStorage->getNonExistentFileName($oAccount, $iType, $sPath, $sFileName);
-			}
-			$bResult = $this->oStorage->createFile($oAccount, $iType, $sPath, $sFileName, $mData);
+			$sFileName = $this->oStorage->getNonExistentFileName($oAccount, $iType, $sPath, $sFileName);
 		}
-		return $bResult;
+		return $this->oStorage->createFile($oAccount, $iType, $sPath, $sFileName, $mData);
 	}
 	
 	/**
@@ -258,20 +202,14 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function delete($oAccount, $iType, $sPath, $sName)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.delete', array($oAccount, $iType, $sPath, $sName, &$bResult, &$bBreak));
-		if (!$bBreak)
+		$bResult = $this->oStorage->delete($oAccount, $iType, $sPath, $sName);
+		if ($oAccount && $oAccount instanceof CAccount)
 		{
-			$bResult = $this->oStorage->delete($oAccount, $iType, $sPath, $sName);
-			if ($oAccount && $oAccount instanceof CAccount)
-			{
-				\CApi::ExecuteMethod('Min::DeleteMinByID', 
-						array(
-							'ID' => $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sName)
-						)
-				);
-			}
+			\CApi::ExecuteMethod('Min::DeleteMinByID', 
+					array(
+						'ID' => $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sName)
+					)
+			);
 		}
 		
 		return $bResult;
@@ -333,31 +271,25 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function rename($oAccount, $iType, $sPath, $sName, $sNewName, $bIsLink)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.rename', array($oAccount, $iType, $sPath, $sName, $sNewName, &$bResult, &$bBreak));
-		if (!$bBreak)
+		$bResult = $bIsLink ? $this->oStorage->renameLink($oAccount, $iType, $sPath, $sName, $sNewName) : $this->oStorage->rename($oAccount, $iType, $sPath, $sName, $sNewName);
+		if ($bResult)
 		{
-			$bResult = $bIsLink ? $this->oStorage->renameLink($oAccount, $iType, $sPath, $sName, $sNewName) : $this->oStorage->rename($oAccount, $iType, $sPath, $sName, $sNewName);
-			if ($bResult)
-			{
-				$sID = $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sName);
-				$sNewID = $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sNewName);
+			$sID = $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sName);
+			$sNewID = $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sNewName);
 
-				$mData = \CApi::ExecuteMethod('Min::GetMinByID', array('ID' => $sID));
-				if ($mData && $oAccount)
+			$mData = \CApi::ExecuteMethod('Min::GetMinByID', array('ID' => $sID));
+			if ($mData && $oAccount)
+			{
+				$aData = $this->generateMinArray($oAccount, $iType, $sPath, $sNewName, $mData['Size']);
+				if ($aData)
 				{
-					$aData = $this->generateMinArray($oAccount, $iType, $sPath, $sNewName, $mData['Size']);
-					if ($aData)
-					{
-						\CApi::ExecuteMethod('Min::UpdateMinByID', 
-								array(
-									'ID' => $sID,
-									'Data' => $aData,
-									'NewID' => $sNewID,
-								)
-						);
-					}
+					\CApi::ExecuteMethod('Min::UpdateMinByID', 
+							array(
+								'ID' => $sID,
+								'Data' => $aData,
+								'NewID' => $sNewID,
+							)
+					);
 				}
 			}
 		}
@@ -379,33 +311,27 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function move($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.move', array($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName, &$bResult, &$bBreak));
-		if (!$bBreak)
+		$GLOBALS['__FILESTORAGE_MOVE_ACTION__'] = true;
+		$bResult = $this->oStorage->copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName, true);
+		$GLOBALS['__FILESTORAGE_MOVE_ACTION__'] = false;
+		if ($bResult)
 		{
-			$GLOBALS['__FILESTORAGE_MOVE_ACTION__'] = true;
-			$bResult = $this->oStorage->copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName, true);
-			$GLOBALS['__FILESTORAGE_MOVE_ACTION__'] = false;
-			if ($bResult)
-			{
-				$sID = $this->oStorage->generateShareHash($oAccount, $iFromType, $sFromPath, $sName);
-				$sNewID = $this->oStorage->generateShareHash($oAccount, $iToType, $sToPath, $sNewName);
+			$sID = $this->oStorage->generateShareHash($oAccount, $iFromType, $sFromPath, $sName);
+			$sNewID = $this->oStorage->generateShareHash($oAccount, $iToType, $sToPath, $sNewName);
 
-				$mData = \CApi::ExecuteMethod('Min::GetMinByID', array('ID' => $sID));
-				if ($mData)
+			$mData = \CApi::ExecuteMethod('Min::GetMinByID', array('ID' => $sID));
+			if ($mData)
+			{
+				$aData = $this->generateMinArray($oAccount, $iToType, $sToPath, $sNewName, $mData['Size']);
+				if ($aData)
 				{
-					$aData = $this->generateMinArray($oAccount, $iToType, $sToPath, $sNewName, $mData['Size']);
-					if ($aData)
-					{
-						\CApi::ExecuteMethod('Min::UpdateMinByID', 
-							array(
-								'ID' => $sID,
-								'Data' => $aData,
-								'NewID' => $sNewID,
-							)
-						);
-					}
+					\CApi::ExecuteMethod('Min::UpdateMinByID', 
+						array(
+							'ID' => $sID,
+							'Data' => $aData,
+							'NewID' => $sNewID,
+						)
+					);
 				}
 			}
 		}
@@ -427,14 +353,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName = null)
 	{
-		$bResult = false;
-		$bBreak = false;
-		\CApi::Plugin()->RunHook('filestorage.copy', array($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName, &$bResult, &$bBreak));
-		if (!$bBreak)
-		{
-			$bResult = $this->oStorage->copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName);
-		}
-		return $bResult;
+		return $this->oStorage->copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName);
 	}
 
 	/**

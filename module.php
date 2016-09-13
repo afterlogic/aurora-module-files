@@ -24,6 +24,10 @@ class FilesModule extends AApiModule
 		$this->AddEntry('files-pub', 'EntryFilesPub');
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
 		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
+		$this->subscribeEvent('Files::GetLinkType', array($this, 'onGetLinkType'));
+		$this->subscribeEvent('Files::CheckUrl', array($this, 'onCheckUrl'));
+		
+		$this->subscribeEvent('Files::PopulateFileItem', array($this, 'onPopulateFileItem'));
 	}
 	
 	/**
@@ -579,6 +583,11 @@ class FilesModule extends AApiModule
 			$Result = $this->oApiFilesManager->createFile($UserId, $Type, $Path, $Name, $Data, false);
 		}
 	}
+	
+	public function onGetLinkType($Link, &$Result)
+	{
+		$Result = '';
+	}	
 
 	/**
 	 * @api {post} ?/Api/ GetFiles
@@ -791,7 +800,7 @@ class FilesModule extends AApiModule
 	public function CreateLink($Type, $Path, $Link, $Name)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
+
 		if ($this->checkStorageType($Type))
 		{
 			$iUserId = \CApi::getAuthenticatedUserId();
@@ -1147,106 +1156,15 @@ class FilesModule extends AApiModule
 	public function CheckUrl($Url)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
-		$iUserId = \CApi::getAuthenticatedUserId();
 		$mResult = false;
-
-		if ($iUserId)
-		{
-			$sUrl = $Url;
-
-			if (!empty($sUrl))
-			{
-				$iLinkType = \api_Utils::GetLinkType($sUrl);
-				if ($iLinkType === \EFileStorageLinkType::GoogleDrive)
-				{
-					$oApiTenants = \CApi::GetSystemManager('tenants');
-					if ($oApiTenants)
-					{
-						$oTenant = (0 < $iUserId->IdTenant) ? $oApiTenants->getTenantById($iUserId->IdTenant) :
-							$oApiTenants->getDefaultGlobalTenant();
-					}
-					$oSocial = $oTenant->getSocialByName('google');
-					if ($oSocial)
-					{
-						$oInfo = \api_Utils::GetGoogleDriveFileInfo($sUrl, $oSocial->SocialApiKey);
-						if ($oInfo)
-						{
-							$mResult['Size'] = 0;
-							if (isset($oInfo->fileSize))
-							{
-								$mResult['Size'] = $oInfo->fileSize;
-							}
-							else
-							{
-								$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
-								$mResult['Size'] = $aRemoteFileInfo['size'];
-							}
-							$mResult['Name'] = isset($oInfo->title) ? $oInfo->title : '';
-							$mResult['Thumb'] = isset($oInfo->thumbnailLink) ? $oInfo->thumbnailLink : null;
-						}
-					}
-				}
-				else
-				{
-					//$sUrl = \api_Utils::GetRemoteFileRealUrl($sUrl);
-					$oInfo = \api_Utils::GetOembedFileInfo($sUrl);
-					if ($oInfo)
-					{
-						$mResult['Size'] = isset($oInfo->fileSize) ? $oInfo->fileSize : '';
-						$mResult['Name'] = isset($oInfo->title) ? $oInfo->title : '';
-						$mResult['LinkType'] = $iLinkType;
-						$mResult['Thumb'] = isset($oInfo->thumbnail_url) ? $oInfo->thumbnail_url : null;
-					}
-					else
-					{
-						if (\api_Utils::GetLinkType($sUrl) === \EFileStorageLinkType::DropBox)
-						{
-							$sUrl = str_replace('?dl=0', '', $sUrl);
-						}
-
-						$sUrl = \api_Utils::GetRemoteFileRealUrl($sUrl);
-						if ($sUrl)
-						{
-							$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
-							$sFileName = basename($sUrl);
-							$sFileExtension = \api_Utils::GetFileExtension($sFileName);
-
-							if (empty($sFileExtension))
-							{
-								$sFileExtension = \api_Utils::GetFileExtensionFromMimeContentType($aRemoteFileInfo['content-type']);
-								$sFileName .= '.'.$sFileExtension;
-							}
-
-							if ($sFileExtension === 'htm')
-							{
-								$oCurl = curl_init();
-								\curl_setopt_array($oCurl, array(
-									CURLOPT_URL => $sUrl,
-									CURLOPT_FOLLOWLOCATION => true,
-									CURLOPT_ENCODING => '',
-									CURLOPT_RETURNTRANSFER => true,
-									CURLOPT_AUTOREFERER => true,
-									CURLOPT_SSL_VERIFYPEER => false, //required for https urls
-									CURLOPT_CONNECTTIMEOUT => 5,
-									CURLOPT_TIMEOUT => 5,
-									CURLOPT_MAXREDIRS => 5
-								));
-								$sContent = curl_exec($oCurl);
-								//$aInfo = curl_getinfo($oCurl);
-								curl_close($oCurl);
-
-								preg_match('/<title>(.*?)<\/title>/s', $sContent, $aTitle);
-								$sTitle = isset($aTitle['1']) ? trim($aTitle['1']) : '';
-							}
-
-							$mResult['Name'] = isset($sTitle) && strlen($sTitle)> 0 ? $sTitle : urldecode($sFileName);
-							$mResult['Size'] = $aRemoteFileInfo['size'];
-						}
-					}
-				}
-			}
-		}
+		
+		$this->broadcastEvent(
+			'CheckUrl', 
+			array(
+				'Url' => $Url,
+				'@Result' => &$mResult
+			)
+		);
 		
 		return $mResult;
 	}	
@@ -1349,5 +1267,73 @@ class FilesModule extends AApiModule
 		}
 		return false;
 	}	
+	
+	public function onCheckUrl($sUrl, &$mResult)
+	{
+		$iUserId = \CApi::getAuthenticatedUserId();
 
+		if ($iUserId)
+		{
+			if (!empty($sUrl))
+			{
+				$sUrl = \api_Utils::GetRemoteFileRealUrl($sUrl);
+				if ($sUrl)
+				{
+					$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
+					$sFileName = basename($sUrl);
+					$sFileExtension = \api_Utils::GetFileExtension($sFileName);
+
+					if (empty($sFileExtension))
+					{
+						$sFileExtension = \api_Utils::GetFileExtensionFromMimeContentType($aRemoteFileInfo['content-type']);
+						$sFileName .= '.'.$sFileExtension;
+					}
+
+					if ($sFileExtension === 'htm' || $sFileExtension === 'html')
+					{
+						$sTitle = $this->getHtmlTitle($sUrl);
+					}
+
+					$mResult['Name'] = isset($sTitle) && strlen($sTitle)> 0 ? $sTitle : urldecode($sFileName);
+					$mResult['Size'] = $aRemoteFileInfo['size'];
+				}
+			}
+		}		
+	}
+	
+	protected function getHtmlTitle($sUrl)
+	{
+		$oCurl = curl_init();
+		\curl_setopt_array($oCurl, array(
+			CURLOPT_URL => $sUrl,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_AUTOREFERER => true,
+			CURLOPT_SSL_VERIFYPEER => false, //required for https urls
+			CURLOPT_CONNECTTIMEOUT => 5,
+			CURLOPT_TIMEOUT => 5,
+			CURLOPT_MAXREDIRS => 5
+		));
+		$sContent = curl_exec($oCurl);
+		//$aInfo = curl_getinfo($oCurl);
+		curl_close($oCurl);
+
+		preg_match('/<title>(.*?)<\/title>/s', $sContent, $aTitle);
+		return isset($aTitle['1']) ? trim($aTitle['1']) : '';
+	}
+	
+	public function onPopulateFileItem(&$oItem)
+	{
+		if ($oItem->IsLink)
+		{
+			$sFileName = basename($oItem->LinkUrl);
+			$sFileExtension = \api_Utils::GetFileExtension($sFileName);
+			if ($sFileExtension === 'htm' || $sFileExtension === 'html')
+			{
+				$oItem->Name = $this->getHtmlTitle($oItem->LinkUrl);
+			}
+			return true;
+		}
+	}	
 }

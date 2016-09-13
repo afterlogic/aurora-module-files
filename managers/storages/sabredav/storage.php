@@ -411,7 +411,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$sFilePath = str_replace($sRootPath, '', dirname($oValue->getPath()));
 					if ($oValue instanceof Afterlogic\DAV\FS\File)
 					{
-						$aProps = $oValue->getProperties(array('Owner', 'Shared', 'Name' ,'Link', 'LinkType'));
+						$aProps = $oValue->getProperties(array('Owner', 'Shared', 'Name' ,'Link'));
 					}
 					$oItem /*@var $oItem \CFileStorageItem */ = new  \CFileStorageItem();
 					
@@ -434,58 +434,22 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						$sID = $this->generateShareHash($iUserId, $sType, $sFilePath, $oValue->getName());
 						$oItem->IsFolder = false;
 						$oItem->Size = $oValue->getSize();
-						$oFileInfo = null;
-						$oEmbedFileInfo = null;
-								
+
+						$aPathInfo = pathinfo($oItem->Name);
+						if (isset($aPathInfo['extension']) && strtolower($aPathInfo['extension']) === 'url')
+						{
+							$aUrlFileInfo = $this->parseIniString(stream_get_contents($oValue->get()));
+							if ($aUrlFileInfo && isset($aUrlFileInfo['URL']))
+							{
+								$oItem->IsLink = true;
+								$oItem->LinkUrl = $aUrlFileInfo['URL'];
+							}
+						}						
 						
 						$this->oManager->GetModule()->broadcastEvent(
 								'PopulateFileItem', 
-								array($aProps, &$oItem)
+								array(&$oItem)
 						);
-						
-						if (isset($aProps['Link']))
-						{
-							$oItem->IsLink = true;
-							$iLinkType = api_Utils::GetLinkType($aProps['Link']);
-							$oItem->LinkType = $iLinkType;
-							$oItem->LinkUrl = $aProps['Link'];
-							if (isset($iLinkType) && $oTenant)
-							{
-								$oEmbedFileInfo = \api_Utils::GetOembedFileInfo($oItem->LinkUrl);
-								if(\EFileStorageLinkType::GoogleDrive === $iLinkType)
-								{
-									$oSocial = $oTenant->getSocialByName('google');
-									if ($oSocial)
-									{
-										$oFileInfo = \api_Utils::GetGoogleDriveFileInfo($aProps['Link'], $oSocial->SocialApiKey);
-										if ($oFileInfo)
-										{
-											$oItem->Name = isset($oFileInfo->title) ? $oFileInfo->title : $oItem->Name;
-											$oItem->Size = isset($oFileInfo->fileSize) ? $oFileInfo->fileSize : $oItem->Size;
-										}
-									}
-								}
-								else if ($oEmbedFileInfo)
-								{
-									$oFileInfo = $oEmbedFileInfo;
-									$oItem->Name = isset($oFileInfo->title) ? $oFileInfo->title : $oItem->Name;
-									$oItem->Size = isset($oFileInfo->fileSize) ? $oFileInfo->fileSize : $oItem->Size;
-									$oItem->OembedHtml = isset($oFileInfo->html) ? $oFileInfo->html : $oItem->OembedHtml;
-								}
-								else/* if (\EFileStorageLinkType::DropBox === (int)$aProps['LinkType'])*/
-								{
-									if (\EFileStorageLinkType::DropBox === $iLinkType)
-									{
-										$aProps['Link'] = str_replace('www.dropbox.com', 'dl.dropboxusercontent.com', $aProps['Link']);
-									}
-									
-									$oItem->Name = isset($aProps['Name']) ? $aProps['Name'] : basename($aProps['Link']);
-									$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($aProps['Link']);
-
-									$oItem->Size = $aRemoteFileInfo['size'];
-								}
-							}
-						}
 						
 						$oItem->LastModified = $oValue->getLastModified();
 						$oItem->ContentType = $oValue->getContentType();
@@ -494,23 +458,9 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 							$oItem->ContentType = \api_Utils::MimeContentType($oItem->Name);
 						}
 
-						if (\CApi::GetConf('labs.allow-thumbnail', true))
+						if (\CApi::GetConf('labs.allow-thumbnail', true) && !$oItem->Thumb)
 						{
-							$iItemLinkType = $oItem->LinkType;
-							if ($oItem->IsLink && $iItemLinkType === \EFileStorageLinkType::GoogleDrive && isset($oFileInfo) && isset($oFileInfo->thumbnailLink))
-							{
-								$oItem->Thumb = true;
-								$oItem->ThumbnailLink = $oFileInfo->thumbnailLink;
-							}
-							else if ($oItem->IsLink && $oEmbedFileInfo)
-							{
-								$oItem->Thumb = true;
-								$oItem->ThumbnailLink = $oFileInfo->thumbnailLink;
-							}
-							else 
-							{
-								$oItem->Thumb = $oItem->Size < $iThumbnailLimit && \api_Utils::IsGDImageMimeTypeSuppoted($oItem->ContentType, $oItem->Name);
-							}
+							$oItem->Thumb = $oItem->Size < $iThumbnailLimit && \api_Utils::IsGDImageMimeTypeSuppoted($oItem->ContentType, $oItem->Name);
 						}
 
 						$oItem->Iframed = !$oItem->IsFolder && !$oItem->IsLink &&
@@ -585,21 +535,18 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 */
 	public function createLink($iUserId, $sType, $sPath, $sLink, $sName)
 	{
-		$iLinkType = \api_Utils::GetLinkType($sLink);
-		if (/*\EFileStorageLinkType::Unknown !== $iLinkType && */$this->init($iUserId))
+		if ($this->init($iUserId))
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
 
 			if ($oDirectory !== null)
 			{
-				$sFileName = \Sabre\VObject\UUIDUtil::getUUID();
-				$oDirectory->createFile($sFileName);
+				$sFileName = $sName . '.url';
+				
+				$oDirectory->createFile($sFileName, "[InternetShortcut]\r\nURL=\"" . $sLink . "\"\r\n");
 				$oItem = $oDirectory->getChild($sFileName);
 				$oItem->updateProperties(array(
-					'Owner' => $iUserId,
-					'Name' => $sName,
-					'Link' => $sLink,
-					'LinkType' => $iLinkType
+					'Owner' => $iUserId
 				));
 				
 				return true;
@@ -931,5 +878,20 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	public function clearCorporateFiles($oAccount)
 	{
 	}
+	
+	public function parseIniString($sIniString) 
+	{
+		$aResult = array(); 
+		foreach (explode("\n", $sIniString) as $sLine) 
+		{
+			$aValues = explode("=", $sLine, 2);
+			if (isset($aValues[0], $aValues[1]))
+			{
+				$aResult[$aValues[0]] = trim(rtrim($aValues[1], "\r"), "\"");
+			}
+		}
+		return $aResult;
+	}	
+	
 }
 

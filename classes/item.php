@@ -14,7 +14,7 @@
  * @property int $Size
  * @property bool $IsFolder
  * @property bool $IsLink
- * @property int $LinkType
+ * @property string $LinkType
  * @property string $LinkUrl
  * @property bool $LastModified
  * @property string $ContentType
@@ -47,7 +47,7 @@ class CFileStorageItem  extends api_AContainer
 			'Size' => 0,
 			'IsFolder' => false,
 			'IsLink' => false,
-			'LinkType' => EFileStorageLinkType::Unknown,
+			'LinkType' => '',
 			'LinkUrl' => '',
 			'LastModified' => 0,
 			'ContentType' => '',
@@ -86,7 +86,7 @@ class CFileStorageItem  extends api_AContainer
 			'Size' => array('int'),
 			'IsFolder' => array('bool'),
 			'IsLink' => array('bool'),
-			'LinkType' => array('int'),
+			'LinkType' => array('string'),
 			'LinkUrl' => array('string'),
 			'LastModified' => array('int'),
 			'ContentType' => array('string'),
