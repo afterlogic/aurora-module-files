@@ -1332,8 +1332,8 @@ class FilesModule extends AApiModule
 			if ($sFileExtension === 'htm' || $sFileExtension === 'html')
 			{
 				$oItem->Name = $this->getHtmlTitle($oItem->LinkUrl);
+				return true;
 			}
-			return true;
 		}
 	}	
 }
