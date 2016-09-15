@@ -31,7 +31,7 @@ class FilesModule extends AApiModule
 	}
 	
 	/**
-	 * Returns module settings for specified user.
+	 * Obtaines list of module settings for authenticated user.
 	 * 
 	 * @return array
 	 */
@@ -40,9 +40,6 @@ class FilesModule extends AApiModule
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		return array(
-			'EnableModule' => true, // AppData.User.FilesEnable
-			'PublicHash' => '', // AppData.FileStoragePubHash
-			'PublicName' => '', // AppData.FileStoragePubParams.Name
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0,
 			'EnableCorporate' => $this->getConfig('EnableCorporate', false),
