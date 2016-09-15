@@ -271,7 +271,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 */
 	public function rename($oAccount, $iType, $sPath, $sName, $sNewName, $bIsLink)
 	{
-		$bResult = $bIsLink ? $this->oStorage->renameLink($oAccount, $iType, $sPath, $sName, $sNewName) : $this->oStorage->rename($oAccount, $iType, $sPath, $sName, $sNewName);
+		$bResult = /*$bIsLink ? $this->oStorage->renameLink($oAccount, $iType, $sPath, $sName, $sNewName) : */$this->oStorage->rename($oAccount, $iType, $sPath, $sName, $sNewName);
 		if ($bResult)
 		{
 			$sID = $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sName);
