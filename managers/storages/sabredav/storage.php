@@ -322,13 +322,18 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		}
 		else
 		{
-			$mResult = $oMin->createMin($sID, array(
-					'UserId' => $iUserId,
-					'Type' => $sType, 
-					'Path' => $sPath, 
-					'Name' => $sName,
-					'Size' => $sSize,
-					'IsFolder' => $bIsFolder
+			$mResult = $oMin->createMin($sID, 
+					
+				array(
+					'Module' => 'Files',
+					'Parameters' => array (
+						'UserId' => $iUserId,
+						'Type' => $sType, 
+						'Path' => $sPath, 
+						'Name' => $sName,
+						'Size' => $sSize,
+						'IsFolder' => $bIsFolder
+					)
 				)
 			);
 		}
