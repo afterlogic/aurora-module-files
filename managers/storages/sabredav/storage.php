@@ -322,7 +322,9 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		}
 		else
 		{
-			$mResult = $oMin->createMin($sID, array(
+			$mResult = $oMin->createMin($sID, 
+					
+				array(
 					'UserId' => $iUserId,
 					'Type' => $sType, 
 					'Path' => $sPath, 
