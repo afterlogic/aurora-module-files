@@ -156,6 +156,10 @@ class FilesModule extends AApiModule
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
 		
+		if (empty($sAuthToken) && isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]))
+		{
+			$sAuthToken = $_COOKIE[\System\Service::AUTH_TOKEN_KEY];
+		}
 		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getAuthenticatedUserId($sAuthToken);
 
 		if ($iUserId && $SharedHash !== null)
@@ -346,8 +350,8 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiParam {string} Type Storage type - personal, corporate.
 	 * @apiParam {string} Path Path to folder contained file.
-	 * @apiParam {string} FileName File name.
-	 * @apiParam {string} AuthToken Authorization token.
+	 * @apiParam {string} Name File name.
+	 * @apiParam {string} SharedHash Shared hash.
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -363,6 +367,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
 	 * @param string $AuthToken Authorization token.
+	 * @param string $SharedHash Shared hash.
 	 * 
 	 * @return boolean
 	 */
@@ -383,8 +388,8 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiParam {string} Type Storage type - personal, corporate.
 	 * @apiParam {string} Path Path to folder contained file.
-	 * @apiParam {string} FileName File name.
-	 * @apiParam {string} AuthToken Authorization token.
+	 * @apiParam {string} Name File name.
+	 * @apiParam {string} SharedHash Shared hash.
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -400,6 +405,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
 	 * @param string $AuthToken Authorization token.
+	 * @param string $SharedHash Shared hash.
 	 * 
 	 * @return boolean
 	 */
@@ -420,8 +426,8 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiParam {string} Type Storage type - personal, corporate.
 	 * @apiParam {string} Path Path to folder contained file.
-	 * @apiParam {string} FileName File name.
-	 * @apiParam {string} AuthToken Authorization token.
+	 * @apiParam {string} Name File name.
+	 * @apiParam {string} SharedHash Shared hash.
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -437,6 +443,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
 	 * @param string $AuthToken Authorization token.
+	 * @param string $SharedHash Shared hash.
 	 * 
 	 * @return boolean
 	 */
