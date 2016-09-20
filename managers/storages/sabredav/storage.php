@@ -683,9 +683,12 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 			$oItem = $oDirectory->getChild($sName);
 			if ($oItem !== null)
 			{
-				$this->updateMin($iUserId, $sType, $sPath, $sName, $sNewName, $oItem);
-				$oItem->setName($sNewName);
-				return true;
+				if (strlen($sNewName) < 100)
+				{
+					$this->updateMin($iUserId, $sType, $sPath, $sName, $sNewName, $oItem);
+					$oItem->setName($sNewName);
+					return true;
+				}
 			}
 		}
 		return false;
