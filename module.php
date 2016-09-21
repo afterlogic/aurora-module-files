@@ -814,6 +814,7 @@ class FilesModule extends AApiModule
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
+			$Name = \trim(\MailSo\Base\Utils::ClearFileName($Name));
 			return $this->oApiFilesManager->createLink($iUserId, $Type, $Path, $Link, $Name);
 		}
 	}
