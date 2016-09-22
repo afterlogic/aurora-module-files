@@ -195,7 +195,7 @@ class FilesModule extends AApiModule
 				{
 //					$sFileName = $this->clearFileName($oFileInfo->Name, $sContentType); // todo
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
-					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
+//					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
 			
 					if ($bThumbnail) 
 					{
