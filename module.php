@@ -153,6 +153,9 @@ class FilesModule extends AApiModule
 	 */
 	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $SharedHash = null, $bDownload = true, $bThumbnail = false)
 	{
+		$sPath = urldecode($sPath);
+		$sFileName = urldecode($sFileName);
+		
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
 		
