@@ -47,6 +47,7 @@ class FilesModule extends AApiModule
 			'EnableCorporate' => $this->getConfig('EnableCorporate', false),
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
 			'CustomTabTitle' => $this->getConfig('CustomTabTitle', ''),
+			'PublicHash' => \System\Service::GetPaths()[2],
 		);
 	}
 	
