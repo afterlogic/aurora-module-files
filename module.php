@@ -374,7 +374,7 @@ class FilesModule extends AApiModule
 	public function DownloadFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$iUserId = \CApi::getAuthenticatedUser($AuthToken);
+		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, true);
 	}
 
@@ -413,7 +413,7 @@ class FilesModule extends AApiModule
 	public function ViewFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$iUserId = \CApi::getAuthenticatedUser($AuthToken);
+		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false);
 	}
 
@@ -452,7 +452,7 @@ class FilesModule extends AApiModule
 	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$iUserId = \CApi::getAuthenticatedUser($AuthToken);
+		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false, true);
 	}
 
@@ -1256,7 +1256,14 @@ class FilesModule extends AApiModule
 				$aHash = $oModuleDecorator->GetMinByHash($sHash);
 				if (isset($aHash['__hash__']))
 				{
-					echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
+					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']) )
+					{
+						echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
+					}
+					else 
+					{
+						header('File not found', true, 404);
+					}
 				}
 			}
 		}
