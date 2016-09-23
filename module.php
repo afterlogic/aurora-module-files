@@ -452,6 +452,10 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
+		if (empty($AuthToken) && isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]))
+		{
+			$AuthToken = $_COOKIE[\System\Service::AUTH_TOKEN_KEY];
+		}
 		// checkUserRoleIsAtLeast is called in getRawFile
 		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false, true);
