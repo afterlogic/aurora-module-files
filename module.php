@@ -21,7 +21,9 @@ class FilesModule extends AApiModule
 		$this->incClass('item');
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
-		$this->AddEntry('files-pub', 'EntryFilesPub');
+		$this->AddEntry('pub', 'EntryPub');
+		$this->AddEntry('share', 'EntryShare');		
+		
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
 		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
 		$this->subscribeEvent('Files::GetLinkType', array($this, 'onGetLinkType'));
@@ -151,7 +153,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 */
-	private function getRawFile($sType, $sPath, $sFileName, $sAuthToken, $SharedHash = null, $bDownload = true, $bThumbnail = false)
+	private function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $bDownload = true, $bThumbnail = false)
 	{
 		$sPath = urldecode($sPath);
 		$sFileName = urldecode($sFileName);
@@ -159,11 +161,7 @@ class FilesModule extends AApiModule
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
 		
-		if (empty($sAuthToken) && isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]))
-		{
-			$sAuthToken = $_COOKIE[\System\Service::AUTH_TOKEN_KEY];
-		}
-		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : \CApi::getAuthenticatedUserId($sAuthToken);
+		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
 
 		if ($iUserId && $SharedHash !== null)
 		{
@@ -377,7 +375,8 @@ class FilesModule extends AApiModule
 	public function DownloadFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, true);
+		$iUserId = \CApi::getAuthenticatedUser($AuthToken);
+		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, true);
 	}
 
 	/**
@@ -415,7 +414,8 @@ class FilesModule extends AApiModule
 	public function ViewFile($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false);
+		$iUserId = \CApi::getAuthenticatedUser($AuthToken);
+		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false);
 	}
 
 	/**
@@ -453,7 +453,8 @@ class FilesModule extends AApiModule
 	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$this->getRawFile($Type, $Path, $Name, $AuthToken, $SharedHash, false, true);
+		$iUserId = \CApi::getAuthenticatedUser($AuthToken);
+		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false, true);
 	}
 
 	/**
@@ -1178,11 +1179,13 @@ class FilesModule extends AApiModule
 		return $mResult;
 	}	
 	
-	public function EntryFilesPub()
+	public function EntryPub()
 	{
 		$sResult = '';
 		
-		$sFilesPub = \MailSo\Base\Http::NewInstance()->GetQuery('files-pub');
+		$aPaths = \System\Service::GetPaths();
+		$sFilesPub = empty($aPaths[2]) ? '' : $aPaths[2];
+
 		$mData = \CApi::ExecuteMethod('Min::GetMinByHash', array('Hash' => $sFilesPub));
 		
 		if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
@@ -1213,7 +1216,7 @@ class FilesModule extends AApiModule
 		}
 		else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
 		{
-			$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/Min/Download/';
+			$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/share/files/';
 
 			$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
 			if (!empty($sUrlRewriteBase))
@@ -1244,38 +1247,24 @@ class FilesModule extends AApiModule
 	/**
 	 * @return array
 	 */
-	public function MinShare()
+	public function EntryShare()
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$mData = $this->getParamValue('Result', false);
-
-		if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
-		{
-			$bUseUrlRewrite = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false);			
-			$sUrl = '?/Min/Download/';
-			if ($bUseUrlRewrite)
-			{
-				$sUrl = '/download/';
-			}
-			
-			$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
-			if (!empty($sUrlRewriteBase))
-			{
-				$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
-			}
+		$aPaths = \System\Service::GetPaths();
+		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
+		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
 		
-			return array(
-				'Template' => 'templates/FilesPub.html',
-				'{{Url}}' => $sUrl.$mData['__hash__'], 
-				'{{FileName}}' => $mData['Name'],
-				'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
-				'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
-				'{{BaseUrl}}' => $sUrlRewriteBase 
-			);
+		$oModuleDecorator = $this->getMinModuleDecorator();
+		if ($oModuleDecorator)
+		{
+			$aHash = $oModuleDecorator->GetMinByHash($sHash);
+			if (isset($aHash['__hash__']))
+			{
+				echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
+			}
 		}
-		return false;
-	}	
+	}		
 	
 	public function onCheckUrl($sUrl, &$mResult)
 	{

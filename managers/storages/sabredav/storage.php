@@ -337,7 +337,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		
 		$bServerUseUrlRewrite = \CApi::GetConf('labs.server-use-url-rewrite', false);
 
-		return \api_Utils::GetAppUrl() . '?files-pub=' . $mResult;
+		return \api_Utils::GetAppUrl() . '?/pub/files/' . $mResult;
 	}
 
 	/**
