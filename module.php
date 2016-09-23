@@ -22,7 +22,6 @@ class FilesModule extends AApiModule
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
 		$this->AddEntry('pub', 'EntryPub');
-		$this->AddEntry('share', 'EntryShare');		
 		
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
 		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
@@ -1181,90 +1180,87 @@ class FilesModule extends AApiModule
 	
 	public function EntryPub()
 	{
-		$sResult = '';
-		
-		$aPaths = \System\Service::GetPaths();
-		$sFilesPub = empty($aPaths[2]) ? '' : $aPaths[2];
-
-		$mData = \CApi::ExecuteMethod('Min::GetMinByHash', array('Hash' => $sFilesPub));
-		
-		if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
-		{
-			$oApiIntegrator = \CApi::GetSystemManager('integrator');
-
-			if ($oApiIntegrator)
-			{
-				$oCoreClientModule = \CApi::GetModule('CoreWebclient');
-				if ($oCoreClientModule instanceof \AApiModule) {
-					$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
-					if (is_string($sResult)) {
-						$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
-						if (0 < \strlen($sFrameOptions)) {
-							@\header('X-Frame-Options: '.$sFrameOptions);
-						}
-
-						$sAuthToken = isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]) ? $_COOKIE[\System\Service::AUTH_TOKEN_KEY] : '';
-						$sResult = strtr($sResult, array(
-							'{{AppVersion}}' => PSEVEN_APP_VERSION,
-							'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
-							'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
-							'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
-						));
-					}
-				}
-			}
-		}
-		else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
-		{
-			$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/share/files/';
-
-			$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
-			if (!empty($sUrlRewriteBase))
-			{
-				$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
-			}
-
-			$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
-			if (is_string($sResult))
-			{
-				$sResult = strtr($sResult, array(
-					'{{Url}}' => $sUrl.$mData['__hash__'], 
-					'{{FileName}}' => $mData['Name'],
-					'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
-					'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
-					'{{BaseUrl}}' => $sUrlRewriteBase 
-				));
-			}
-			else
-			{
-				\CApi::Log('Empty template.', \ELogLevel::Error);
-			}
-		}
-
-		return $sResult;
-	}
-	
-	/**
-	 * @return array
-	 */
-	public function EntryShare()
-	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$aPaths = \System\Service::GetPaths();
 		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
 		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
+		$bList = (!empty($aPaths[3]) && $aPaths[3] === 'list');
 		
-		$oModuleDecorator = $this->getMinModuleDecorator();
-		if ($oModuleDecorator)
+		if ($bList)
 		{
-			$aHash = $oModuleDecorator->GetMinByHash($sHash);
-			if (isset($aHash['__hash__']))
+			$sResult = '';
+
+			$mData = \CApi::ExecuteMethod('Min::GetMinByHash', array('Hash' => $sHash));
+
+			if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
 			{
-				echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
+				$oApiIntegrator = \CApi::GetSystemManager('integrator');
+
+				if ($oApiIntegrator)
+				{
+					$oCoreClientModule = \CApi::GetModule('CoreWebclient');
+					if ($oCoreClientModule instanceof \AApiModule) {
+						$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
+						if (is_string($sResult)) {
+							$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
+							if (0 < \strlen($sFrameOptions)) {
+								@\header('X-Frame-Options: '.$sFrameOptions);
+							}
+
+							$sAuthToken = isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]) ? $_COOKIE[\System\Service::AUTH_TOKEN_KEY] : '';
+							$sResult = strtr($sResult, array(
+								'{{AppVersion}}' => PSEVEN_APP_VERSION,
+								'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
+								'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
+								'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
+							));
+						}
+					}
+				}
+			}
+			else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
+			{
+				$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
+
+				$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
+				if (!empty($sUrlRewriteBase))
+				{
+					$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
+				}
+
+				$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
+				if (is_string($sResult))
+				{
+					$sResult = strtr($sResult, array(
+						'{{Url}}' => $sUrl.$mData['__hash__'], 
+						'{{FileName}}' => $mData['Name'],
+						'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
+						'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
+						'{{BaseUrl}}' => $sUrlRewriteBase 
+					));
+				}
+				else
+				{
+					\CApi::Log('Empty template.', \ELogLevel::Error);
+				}
+			}
+
+			return $sResult;
+		}
+		else
+		{
+			$oModuleDecorator = $this->getMinModuleDecorator();
+			if ($oModuleDecorator)
+			{
+				$aHash = $oModuleDecorator->GetMinByHash($sHash);
+				if (isset($aHash['__hash__']))
+				{
+					echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
+				}
 			}
 		}
-	}		
+	}
 	
 	public function onCheckUrl($sUrl, &$mResult)
 	{
