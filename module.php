@@ -40,15 +40,28 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		return array(
+		$aPath = \System\Service::GetPaths();
+		
+		$aAppData = array(
 			'EnableModule' => true,
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0,
 			'EnableCorporate' => $this->getConfig('EnableCorporate', false),
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
-			'CustomTabTitle' => $this->getConfig('CustomTabTitle', ''),
-			'PublicHash' => \System\Service::GetPaths()[2],
+			'CustomTabTitle' => $this->getConfig('CustomTabTitle', '')
 		);
+		if (isset($aPath[2]))
+		{
+			$sPublicHash = $aPath[2];
+			$aAppData['PublicHash'] = $sPublicHash;
+			$oModuleDecorator = $this->getMinModuleDecorator();
+			$mMin = ($oModuleDecorator && $sPublicHash !== null) ? $oModuleDecorator->GetMinByHash($sPublicHash) : array();
+			if (isset($mMin['__hash__']) && $mMin['IsFolder'])
+			{
+				$aAppData['PublicFolderName'] = $mMin['Name'];
+			}
+		}
+		return $aAppData;
 	}
 	
 	/**

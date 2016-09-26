@@ -446,7 +446,15 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 								$oItem->IsLink = true;
 								$oItem->LinkUrl = $aUrlFileInfo['URL'];
 							}
-						}						
+							if (!$oItem->ContentType && isset($aPathInfo['filename']))
+							{
+								$oItem->ContentType = \api_Utils::MimeContentType($aPathInfo['filename']);
+							}							
+						}
+						else						
+						{
+							$oItem->ContentType = $oValue->getContentType();
+						}
 						
 						$this->oManager->GetModule()->broadcastEvent(
 								'PopulateFileItem', 
@@ -454,7 +462,6 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						);
 						
 						$oItem->LastModified = $oValue->getLastModified();
-						$oItem->ContentType = $oValue->getContentType();
 						if (!$oItem->ContentType)
 						{
 							$oItem->ContentType = \api_Utils::MimeContentType($oItem->Name);
