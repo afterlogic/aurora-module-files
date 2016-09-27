@@ -236,7 +236,7 @@ class FilesModule extends AApiModule
 					if ($bThumbnail) 
 					{
 //						$this->cacheByKey($sRawKey);	// todo
-						\CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName);
+						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName, false);
 					} 
 					else if ($sContentType === 'text/html') 
 					{
@@ -493,7 +493,7 @@ class FilesModule extends AApiModule
 		}
 		// checkUserRoleIsAtLeast is called in getRawFile
 		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
-		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false, true);
+		return base64_encode($this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false, true));
 	}
 
 	/**
