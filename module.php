@@ -1,4 +1,6 @@
 <?php
+ * @package Modules
+ */
 
 class FilesModule extends AApiModule
 {
@@ -80,23 +82,24 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiDescription Updates module's settings - saves them to config.json file.
 	 * 
-	 * @apiParam {string=Files} Module Module name
-	 * @apiParam {string=UpdateSettings} Method Method name
+	 * @apiParam {string=Files} Module Module=Files name
+	 * @apiParam {string=UpdateSettings} Method=UpdateSettings Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * @apiParam {string} Parameters JSON.stringified object {
-	 * *boolean* **EnableUploadSizeLimit** Enable file upload size limit setting.
-	 * *int* **UploadSizeLimitMb** Upload file size limit setting in Mb.
-	 * *boolean* **EnableCorporate** Enable corporate storage in Files.
-	 * *int* **UserSpaceLimitMb** User space limit setting in Mb.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **EnableUploadSizeLimit** *boolean* &#09;&#09; Enable file upload size limit setting.<br>
+	 * &emsp; **UploadSizeLimitMb** *int* Upload file size limit setting in Mb.<br>
+	 * &emsp; **UserSpaceLimitMb** *int* User space limit setting in Mb.<br>
+	 * &emsp; **EnableCorporate** *boolean* Enable corporate storage in Files.<br>
 	 * }
 	 * 
 	 * @apiParamExample {json} Request-Example:
-{
-	Module: 'Files',
-	Method: 'UpdateSettings',
-	AuthToken: 'token_value',
-	Parameters: '{EnableUploadSizeLimit: true,UploadSizeLimitMb: 5,EnableCorporate: true,UserSpaceLimitMb: 10}'
-}
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'UpdateSettings',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{EnableUploadSizeLimit: true,UploadSizeLimitMb: 5,EnableCorporate: true,UserSpaceLimitMb: 10}'
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
