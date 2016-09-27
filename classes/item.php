@@ -28,8 +28,8 @@
  * @property string $Content
  * @property bool $IsExternal
  * 
- * @package FileStorage
- * @subpackage Classes
+ * @package Classes
+ * @subpackage FileStorage
  */
 class CFileStorageItem  extends api_AContainer
 {
