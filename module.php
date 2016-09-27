@@ -2,8 +2,16 @@
 
 class FilesModule extends AApiModule
 {
+	/**
+	 *
+	 * @var \CApiFilesManager
+	 */
 	public $oApiFilesManager = null;
 	
+	/**
+	 *
+	 * @var \CApiModuleDecorator
+	 */
 	protected $oMinModuleDecorator = null;
 	
 	protected $aSettingsMap = array(
@@ -27,8 +35,10 @@ class FilesModule extends AApiModule
 		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
 		$this->subscribeEvent('Files::GetLinkType', array($this, 'onGetLinkType'));
 		$this->subscribeEvent('Files::CheckUrl', array($this, 'onCheckUrl'));
-		
+
 		$this->subscribeEvent('Files::PopulateFileItem', array($this, 'onPopulateFileItem'));
+
+		$this->subscribeEvent('Core::AfterDeleteUser', array($this, 'onAfterDeleteUser'));
 	}
 	
 	/**
@@ -138,12 +148,7 @@ class FilesModule extends AApiModule
 	*/
 	private function getMinModuleDecorator()
 	{
-		if ($this->oMinModuleDecorator === null)
-		{
-			$this->oMinModuleDecorator = \CApi::GetModuleDecorator('Min');
-		}
-		
-		return $this->oMinModuleDecorator;
+		return $this->oApiFilesManager->getMinModuleDecorator();
 	}
 	
 
@@ -721,20 +726,24 @@ class FilesModule extends AApiModule
 		$iUserId = null;
 		$oResult = array();
 
-		$mMin = \CApi::ExecuteMethod('Min::GetMinByHash', array('Hash' => $Hash));
-		if (!empty($mMin['__hash__']))
+		$oMinDecorator =  $this->getMinModuleDecorator();
+		if ($oMinDecorator)
 		{
-			$iUserId = $mMin['UserId'];
-			if ($iUserId)
+			$mMin = $oMinDecorator->GetMinByHash($Hash);
+			if (!empty($mMin['__hash__']))
 			{
-				if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+				$iUserId = $mMin['UserId'];
+				if ($iUserId)
 				{
-					throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
-				}
-				$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
+					if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+					{
+						throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+					}
+					$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
-				$oResult['Items'] = $this->oApiFilesManager->getFiles($iUserId, $mMin['Type'], $Path);
-				$oResult['Quota'] = $this->GetQuota($iUserId);
+					$oResult['Items'] = $this->oApiFilesManager->getFiles($iUserId, $mMin['Type'], $Path);
+					$oResult['Quota'] = $this->GetQuota($iUserId);
+				}
 			}
 		}
 
@@ -1207,58 +1216,62 @@ class FilesModule extends AApiModule
 		{
 			$sResult = '';
 
-			$mData = \CApi::ExecuteMethod('Min::GetMinByHash', array('Hash' => $sHash));
-
-			if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
+			$oMinDecorator =  $this->getMinModuleDecorator();
+			if ($oMinDecorator)
 			{
-				$oApiIntegrator = \CApi::GetSystemManager('integrator');
+				$mData = $oMinDecorator->GetMinByHash($Hash);
 
-				if ($oApiIntegrator)
+				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
 				{
-					$oCoreClientModule = \CApi::GetModule('CoreWebclient');
-					if ($oCoreClientModule instanceof \AApiModule) {
-						$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
-						if (is_string($sResult)) {
-							$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
-							if (0 < \strlen($sFrameOptions)) {
-								@\header('X-Frame-Options: '.$sFrameOptions);
-							}
+					$oApiIntegrator = \CApi::GetSystemManager('integrator');
 
-							$sAuthToken = isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]) ? $_COOKIE[\System\Service::AUTH_TOKEN_KEY] : '';
-							$sResult = strtr($sResult, array(
-								'{{AppVersion}}' => PSEVEN_APP_VERSION,
-								'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
-								'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
-								'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
-							));
+					if ($oApiIntegrator)
+					{
+						$oCoreClientModule = \CApi::GetModule('CoreWebclient');
+						if ($oCoreClientModule instanceof \AApiModule) {
+							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
+							if (is_string($sResult)) {
+								$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
+								if (0 < \strlen($sFrameOptions)) {
+									@\header('X-Frame-Options: '.$sFrameOptions);
+								}
+
+								$sAuthToken = isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]) ? $_COOKIE[\System\Service::AUTH_TOKEN_KEY] : '';
+								$sResult = strtr($sResult, array(
+									'{{AppVersion}}' => PSEVEN_APP_VERSION,
+									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
+									'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
+									'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
+								));
+							}
 						}
 					}
 				}
-			}
-			else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
-			{
-				$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
+				else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
+				{
+					$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
 
-				$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
-				if (!empty($sUrlRewriteBase))
-				{
-					$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
-				}
+					$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
+					if (!empty($sUrlRewriteBase))
+					{
+						$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
+					}
 
-				$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
-				if (is_string($sResult))
-				{
-					$sResult = strtr($sResult, array(
-						'{{Url}}' => $sUrl.$mData['__hash__'], 
-						'{{FileName}}' => $mData['Name'],
-						'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
-						'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
-						'{{BaseUrl}}' => $sUrlRewriteBase 
-					));
-				}
-				else
-				{
-					\CApi::Log('Empty template.', \ELogLevel::Error);
+					$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
+					if (is_string($sResult))
+					{
+						$sResult = strtr($sResult, array(
+							'{{Url}}' => $sUrl.$mData['__hash__'], 
+							'{{FileName}}' => $mData['Name'],
+							'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
+							'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
+							'{{BaseUrl}}' => $sUrlRewriteBase 
+						));
+					}
+					else
+					{
+						\CApi::Log('Empty template.', \ELogLevel::Error);
+					}
 				}
 			}
 
@@ -1353,4 +1366,9 @@ class FilesModule extends AApiModule
 			}
 		}
 	}	
+	
+	public function onAfterDeleteUser($iUserId)
+	{
+		$this->oApiFilesManager->ClearFiles($iUserId);
+	}
 }

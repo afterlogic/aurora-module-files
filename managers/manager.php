@@ -18,77 +18,93 @@ class CApiFilesManager extends AApiManagerWithStorage
 	}
 	
 	/**
+	* Returns Min module decorator.
+	* 
+	* @return \CApiModuleDecorator
+	*/
+	public function getMinModuleDecorator()
+	{
+		static $oMinModuleDecorator = null;
+		if ($oMinModuleDecorator === null)
+		{
+			$oMinModuleDecorator = \CApi::GetModuleDecorator('Min');
+		}
+		
+		return $oMinModuleDecorator;
+	}	
+	
+	/**
 	 * Checks if file exists. 
 	 * 
-	 * @param CAccount $oAccount Account object. 
+	 * @param int $iUserId Account object. 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
 	 * @return bool
 	 */
-	public function isFileExists($oAccount, $iType, $sPath, $sName)
+	public function isFileExists($iUserId, $iType, $sPath, $sName)
 	{
-		return $this->oStorage->isFileExists($oAccount, $iType, $sPath, $sName);
+		return $this->oStorage->isFileExists($iUserId, $iType, $sPath, $sName);
 	}
 
 	/**
 	 * Allows for reading contents of the shared file. [Aurora only.](http://dev.afterlogic.com/aurora)
 	 * 
-	 * @param CAccount $oAccount
+	 * @param int $iUserId
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
 	 * @return resource|bool
 	 */
-	public function getSharedFile($oAccount, $iType, $sPath, $sName)
+	public function getSharedFile($iUserId, $iType, $sPath, $sName)
 	{
-		return $this->oStorage->getSharedFile($oAccount, $iType, $sPath, $sName);
+		return $this->oStorage->getSharedFile($iUserId, $iType, $sPath, $sName);
 	}
 
 	/**
 	 * Retrieves array of metadata on the specific file. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder.
 	 * @param string $sName Filename. 
 	 * 
 	 * @return CFileStorageItem
 	 */
-	public function getFileInfo($oAccount, $iType, $sPath, $sName)
+	public function getFileInfo($iUserId, $iType, $sPath, $sName)
 	{
-		return $this->oStorage->getFileInfo($oAccount, $iType, $sPath, $sName);
+		return $this->oStorage->getFileInfo($iUserId, $iType, $sPath, $sName);
 	}
 
 	/**
 	 * Retrieves array of metadata on the specific directory. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * 
 	 * @return CFileStorageItem
 	 */
-	public function getDirectoryInfo($oAccount, $iType, $sPath)
+	public function getDirectoryInfo($iUserId, $iType, $sPath)
 	{
-		return $this->oStorage->getDirectoryInfo($oAccount, $iType, $sPath);
+		return $this->oStorage->getDirectoryInfo($iUserId, $iType, $sPath);
 	}
 
 	/**
 	 * Allows for reading contents of the file. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
 	 * @return resource|bool
 	 */
-	public function getFile($oAccount, $iType, $sPath, $sName)
+	public function getFile($iUserId, $iType, $sPath, $sName)
 	{
-		return $this->oStorage->getFile($oAccount, $iType, $sPath, $sName);
+		return $this->oStorage->getFile($iUserId, $iType, $sPath, $sName);
 	}
 
 	/**
@@ -156,7 +172,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Creates a new file. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is created in the root folder. 
 	 * @param string $sFileName Filename. 
@@ -165,19 +181,19 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return bool
 	 */
-	public function createFile($oAccount, $iType, $sPath, $sFileName, $mData, $bOverride = true)
+	public function createFile($iUserId, $iType, $sPath, $sFileName, $mData, $bOverride = true)
 	{
 		if (!$bOverride)
 		{
-			$sFileName = $this->oStorage->getNonExistentFileName($oAccount, $iType, $sPath, $sFileName);
+			$sFileName = $this->oStorage->getNonExistentFileName($iUserId, $iType, $sPath, $sFileName);
 		}
-		return $this->oStorage->createFile($oAccount, $iType, $sPath, $sFileName, $mData);
+		return $this->oStorage->createFile($iUserId, $iType, $sPath, $sFileName, $mData);
 	}
 	
 	/**
 	 * Creates a link to arbitrary online content. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the link. 
 	 * @param string $sLink URL of the item to be linked. 
@@ -185,30 +201,28 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return bool
 	 */
-	public function createLink($oAccount, $iType, $sPath, $sLink, $sName)
+	public function createLink($iUserId, $iType, $sPath, $sLink, $sName)
 	{
-		return $this->oStorage->createLink($oAccount, $iType, $sPath, $sLink, $sName);
+		return $this->oStorage->createLink($iUserId, $iType, $sPath, $sLink, $sName);
 	}	
 	
 	/**
 	 * Removes file or folder. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
 	 * @return bool
 	 */
-	public function delete($oAccount, $iType, $sPath, $sName)
+	public function delete($iUserId, $iType, $sPath, $sName)
 	{
-		$bResult = $this->oStorage->delete($oAccount, $iType, $sPath, $sName);
-		if ($oAccount && $oAccount instanceof CAccount)
+		$bResult = $this->oStorage->delete($iUserId, $iType, $sPath, $sName);
+		if ($bResult)
 		{
-			\CApi::ExecuteMethod('Min::DeleteMinByID', 
-					array(
-						'ID' => $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sName)
-					)
+			$this->getMinModuleDecorator()->DeleteMinByID(
+					$this->oStorage->generateHashId($iUserId, $iType, $sPath, $sName)
 			);
 		}
 		
@@ -217,7 +231,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 
 	/**
 	 * 
-	 * @param CAccount $oAccount
+	 * @param int $iUserId
 	 * @param int $iType
 	 * @param string $sPath
 	 * @param string $sNewName
@@ -225,13 +239,13 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return array
 	 */
-	private function generateMinArray($oAccount, $iType, $sPath, $sNewName, $iSize)
+	private function generateMinArray($iUserId, $iType, $sPath, $sNewName, $iSize)
 	{
 		$aData = null;
-		if ($oAccount)
+		if ($iUserId)
 		{
 			$aData = array(
-				'AccountType' => $oAccount instanceof CAccount ? 'wm' : '',
+				'AccountType' => 'wm',
 				'Account' => 0,
 				'Type' => $iType,
 				'Path' => $sPath,
@@ -239,18 +253,18 @@ class CApiFilesManager extends AApiManagerWithStorage
 				'Size' => $iSize
 			);
 
-			if (empty($aData['AccountType']) && $oAccount instanceof CHelpdeskUser)
+			if (empty($aData['AccountType']) && $iUserId instanceof CHelpdeskUser)
 			{
 				$aData['AccountType'] = 'hd';
 			}
 
 			if ('wm' === $aData['AccountType'])
 			{
-				$aData['Account'] = $oAccount->IdAccount;
+				$aData['Account'] = $iUserId->IdAccount;
 			}
 			else if ('hd' === $aData['AccountType'])
 			{
-				$aData['Account'] = $oAccount->IdHelpdeskUser;
+				$aData['Account'] = $iUserId->IdHelpdeskUser;
 			}
 		}
 
@@ -260,7 +274,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Renames file or folder. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Name of file or folder. 
@@ -269,27 +283,22 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return bool
 	 */
-	public function rename($oAccount, $iType, $sPath, $sName, $sNewName, $bIsLink)
+	public function rename($iUserId, $iType, $sPath, $sName, $sNewName, $bIsLink)
 	{
-		$bResult = /*$bIsLink ? $this->oStorage->renameLink($oAccount, $iType, $sPath, $sName, $sNewName) : */$this->oStorage->rename($oAccount, $iType, $sPath, $sName, $sNewName);
+		$bResult = /*$bIsLink ? $this->oStorage->renameLink($iUserId, $iType, $sPath, $sName, $sNewName) : */$this->oStorage->rename($iUserId, $iType, $sPath, $sName, $sNewName);
 		if ($bResult)
 		{
-			$sID = $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sName);
-			$sNewID = $this->oStorage->generateShareHash($oAccount, $iType, $sPath, $sNewName);
+			$sID = $this->oStorage->generateHashId($iUserId, $iType, $sPath, $sName);
+			$sNewID = $this->oStorage->generateHashId($iUserId, $iType, $sPath, $sNewName);
 
-			$mData = \CApi::ExecuteMethod('Min::GetMinByID', array('ID' => $sID));
-			if ($mData && $oAccount)
+			$mData = $this->getMinModuleDecorator()->GetMinByID($sID);
+			
+			if ($mData && $iUserId)
 			{
-				$aData = $this->generateMinArray($oAccount, $iType, $sPath, $sNewName, $mData['Size']);
+				$aData = $this->generateMinArray($iUserId, $iType, $sPath, $sNewName, $mData['Size']);
 				if ($aData)
 				{
-					\CApi::ExecuteMethod('Min::UpdateMinByID', 
-							array(
-								'ID' => $sID,
-								'Data' => $aData,
-								'NewID' => $sNewID,
-							)
-					);
+					$this->getMinModuleDecorator()->UpdateMinByID($sID, $aData, $sNewID);
 				}
 			}
 		}
@@ -299,7 +308,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Move file or folder to a different location. In terms of Aurora, item can be moved to a different storage as well. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iFromType Source storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param int $iToType Destination storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sFromPath Path to the folder which contains the item. 
@@ -309,29 +318,23 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return bool
 	 */
-	public function move($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName)
+	public function move($iUserId, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName)
 	{
 		$GLOBALS['__FILESTORAGE_MOVE_ACTION__'] = true;
-		$bResult = $this->oStorage->copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName, true);
+		$bResult = $this->oStorage->copy($iUserId, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName, true);
 		$GLOBALS['__FILESTORAGE_MOVE_ACTION__'] = false;
 		if ($bResult)
 		{
-			$sID = $this->oStorage->generateShareHash($oAccount, $iFromType, $sFromPath, $sName);
-			$sNewID = $this->oStorage->generateShareHash($oAccount, $iToType, $sToPath, $sNewName);
+			$sID = $this->oStorage->generateHashId($iUserId, $iFromType, $sFromPath, $sName);
+			$sNewID = $this->oStorage->generateHashId($iUserId, $iToType, $sToPath, $sNewName);
 
-			$mData = \CApi::ExecuteMethod('Min::GetMinByID', array('ID' => $sID));
+			$mData = $this->getMinModuleDecorator()->GetMinByID($sID);
 			if ($mData)
 			{
-				$aData = $this->generateMinArray($oAccount, $iToType, $sToPath, $sNewName, $mData['Size']);
+				$aData = $this->generateMinArray($iUserId, $iToType, $sToPath, $sNewName, $mData['Size']);
 				if ($aData)
 				{
-					\CApi::ExecuteMethod('Min::UpdateMinByID', 
-						array(
-							'ID' => $sID,
-							'Data' => $aData,
-							'NewID' => $sNewID,
-						)
-					);
+					$this->getMinModuleDecorator()->UpdateMinByID($sID, $aData, $sNewID);
 				}
 			}
 		}
@@ -341,7 +344,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Copies file or folder, optionally renames it. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iFromType Source storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param int $iToType Destination storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sFromPath Path to the folder which contains the item. 
@@ -351,9 +354,9 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * 
 	 * @return bool
 	 */
-	public function copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName = null)
+	public function copy($iUserId, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName = null)
 	{
-		return $this->oStorage->copy($oAccount, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName);
+		return $this->oStorage->copy($iUserId, $iFromType, $iToType, $sFromPath, $sToPath, $sName, $sNewName);
 	}
 
 	/**
@@ -372,17 +375,17 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Returns general quota information for the account, used and available space. 
 	 * 
-	 * @param CAccount $oAccount Account object
+	 * @param int $iUserId Account object
 	 * 
 	 * @return array array( $iUsageSize, $iFreeSize ); 
 	 */
-	public function getQuota($oAccount)
+	public function getQuota($iUserId)
 	{
 		$iUsageSize = 0;
 		$iFreeSize = 0;
 		
 		$oApiTenants = \CApi::GetSystemManager('tenants');
-		$oTenant = $oApiTenants ? $oApiTenants->getTenantById($oAccount->IdTenant) : null;
+		$oTenant = $oApiTenants ? $oApiTenants->getTenantById($iUserId->IdTenant) : null;
 		if ($oTenant)
 		{
 			$iUsageSize = $oTenant->FilesUsageInMB * 1024 * 1024;
@@ -395,43 +398,43 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Allows for obtaining filename which doesn't exist in current directory. For example, if you need to store **data.txt** file but it already exists, this method will return **data_1.txt**, or **data_2.txt** if that one already exists, and so on. 
 	 * 
-	 * @param CAccount $oAccount Account object 
+	 * @param int $iUserId Account object 
 	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sFileName Filename. 
 	 * 
 	 * @return string
 	 */
-	public function getNonExistentFileName($oAccount, $iType, $sPath, $sFileName)
+	public function getNonExistentFileName($iUserId, $iType, $sPath, $sFileName)
 	{
-		return $this->oStorage->getNonExistentFileName($oAccount, $iType, $sPath, $sFileName);
+		return $this->oStorage->getNonExistentFileName($iUserId, $iType, $sPath, $sFileName);
 	}	
 	
 	/**
 	 * 
-	 * @param CAccount $oAccount
+	 * @param int $iUserId
 	 */
-	public function clearPrivateFiles($oAccount)
+	public function ClearPrivateFiles($iUserId)
 	{
-		$this->oStorage->clearPrivateFiles($oAccount);
+		$this->oStorage->clearPrivateFiles($iUserId);
 	}
 
 	/**
 	 * 
-	 * @param CAccount $oAccount
+	 * @param int $iUserId
 	 */
-	public function clearCorporateFiles($oAccount)
+	public function ClearCorporateFiles($iUserId)
 	{
-		$this->oStorage->clearPrivateFiles($oAccount);
+		$this->oStorage->clearPrivateFiles($iUserId);
 	}
 
 	/**
 	 * 
-	 * @param CAccount $oAccount
+	 * @param int $iUserId
 	 */
-	public function clearAllFiles($oAccount)
+	public function ClearFiles($iUserId)
 	{
-		$this->clearPrivateFiles($oAccount);
-		$this->clearCorporateFiles($oAccount);
+		$this->ClearPrivateFiles($iUserId);
+		$this->ClearCorporateFiles($iUserId);
 	}
 }
