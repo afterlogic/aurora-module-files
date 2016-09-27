@@ -73,27 +73,25 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=UpdateSettings} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
-	 * @apiParam {boolean} EnableUploadSizeLimit Enable file upload size limit setting.
-	 * @apiParam {int} UploadSizeLimitMb Upload file size limit setting in Mb.
-	 * @apiParam {boolean} EnableCorporate Enable corporate storage in Files.
-	 * @apiParam {int} UserSpaceLimitMb User space limit setting in Mb.
+	 * @apiParam {string} Parameters JSON.stringified object {
+	 * *boolean* **EnableUploadSizeLimit** Enable file upload size limit setting.
+	 * *int* **UploadSizeLimitMb** Upload file size limit setting in Mb.
+	 * *boolean* **EnableCorporate** Enable corporate storage in Files.
+	 * *int* **UserSpaceLimitMb** User space limit setting in Mb.
+	 * }
 	 * 
 	 * @apiParamExample {json} Request-Example:
 {
 	Module: 'Files',
 	Method: 'UpdateSettings',
 	AuthToken: 'token_value',
-	EnableUploadSizeLimit: true,
-	UploadSizeLimitMb: 5,
-	EnableCorporate: true,
-	UserSpaceLimitMb: 10,
+	Parameters: '{EnableUploadSizeLimit: true,UploadSizeLimitMb: 5,EnableCorporate: true,UserSpaceLimitMb: 10}'
 }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result Indicates if request execution was successfull
-	 * @apiSuccess {int} ErrorCode Error code
+	 * @apiSuccess {int} ErrorCode *optional* Error code
 	 * @apiSuccess {float} Time Request execution time on the server
 	 * 
 	 * @apiSuccessExample {json} Success response example:
