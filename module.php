@@ -101,9 +101,10 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module=Files name
 	 * @apiParam {string=UpdateSettings} Method=UpdateSettings Method name
 	 * @apiParam {string} AuthToken Auth token
+	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
-	 * &emsp; **EnableUploadSizeLimit** *boolean* &#09;&#09; Enable file upload size limit setting.<br>
+	 * &emsp; **EnableUploadSizeLimit** *boolean* Enable file upload size limit setting.<br>
 	 * &emsp; **UploadSizeLimitMb** *int* Upload file size limit setting in Mb.<br>
 	 * &emsp; **UserSpaceLimitMb** *int* User space limit setting in Mb.<br>
 	 * &emsp; **EnableCorporate** *boolean* Enable corporate storage in Files.<br>
@@ -124,21 +125,21 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {float} Time Request execution time on the server
 	 * 
 	 * @apiSuccessExample {json} Success response example:
-{
-	Module: 'Files',
-	Method: 'UpdateSettings',
-	Result: true,
-	'@Time': 0.31426095962524
-}
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'UpdateSettings',
+	 *	Result: true,
+	 *	'@Time': 0.31426095962524
+	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
-{
-	Module: 'Files',
-	Method: 'UpdateSettings',
-	Result: false,
-	ErrorCode: 102,
-	'@Time': 0.31426095962524
-}
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'UpdateSettings',
+	 *	Result: false,
+	 *	ErrorCode: 102,
+	 *	'@Time': 0.31426095962524
+	 * }
 	 */
 	/**
 	 * Updates module's settings - saves them to config.json file.
@@ -254,18 +255,20 @@ class FilesModule extends AApiModule
 	}
 	
 	/**
-	 * @api {post} ?/Api/ UploadFile
+	 * @api {post} ?/Upload/ UploadFile
 	 * @apiDescription Uploads file from client side.
 	 * @apiName UploadFile
 	 * @apiGroup Files
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=UploadFile} Method Method name
-	 * @apiParam {string} AuthToken Auth token
+	 * @apiParam {string} AuthToken Authentication token
 	 * 
-	 * @apiParam {string} Type Type of storage - personal, corporate.
-	 * @apiParam {string} Path Path to folder than should contain uploaded file.
-	 * @apiParam {array} FileData Uploaded file information. Contains fields size, name, tmp_name.
-	 * @apiParam {string} AuthToken Authentication token.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
+	 * &emsp; **Path** *string* Path to folder than should contain uploaded file.<br>
+	 * &emsp; **FileData** *string* Uploaded file information. Contains fields size, name, tmp_name.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -384,10 +387,13 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=DownloadFile} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Storage type - personal, corporate.
-	 * @apiParam {string} Path Path to folder contained file.
-	 * @apiParam {string} Name File name.
-	 * @apiParam {string} SharedHash Shared hash.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
+	 * &emsp; **Path** *string* Path to folder contained file.<br>
+	 * &emsp; **Name** *string* File name.<br>
+	 * &emsp; **SharedHash** *string* Shared hash.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -423,10 +429,13 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=ViewFile} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Storage type - personal, corporate.
-	 * @apiParam {string} Path Path to folder contained file.
-	 * @apiParam {string} Name File name.
-	 * @apiParam {string} SharedHash Shared hash.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
+	 * &emsp; **Path** *string* Path to folder contained file.<br>
+	 * &emsp; **Name** *string* File name.<br>
+	 * &emsp; **SharedHash** *string* Shared hash.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -462,10 +471,19 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=GetFileThumbnail} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Storage type - personal, corporate.
-	 * @apiParam {string} Path Path to folder contained file.
-	 * @apiParam {string} Name File name.
-	 * @apiParam {string} SharedHash Shared hash.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
+	 * &emsp; **Path** *string* Path to folder contained file.<br>
+	 * &emsp; **Name** *string* File name.<br>
+	 * &emsp; **SharedHash** *string* Shared hash.<br>
+	 * }
+	 * 
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * @apiParam {string} Parameters.Type Storage type - personal, corporate.<br>
+	 * @apiParam {string} Parameters..Path Path to folder contained file.<br>
+	 * @apiParam {string} Parameters.Name File name.<br>
+	 * @apiParam {string} Parameters.SharedHash Shared hash.<br>
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -568,7 +586,10 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=GetQuota} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {int} iUserId User identifier.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **iUserId** *int* User identifier.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -646,9 +667,12 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=GetFiles} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Type of storage.
-	 * @apiParam {string} Path Path to folder files are obtained from.
-	 * @apiParam {string} Pattern String for search files and folders with such string in name.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage.<br>
+	 * &emsp; **Path** *string* Path to folder files are obtained from.<br>
+	 * &emsp; **Pattern** *string* String for search files and folders with such string in name.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -713,8 +737,11 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=GetPublicFiles} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Hash Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.
-	 * @apiParam {string} Path Path to folder contained files to return.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Hash** *string* Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.<br>
+	 * &emsp; **Path** *string* Path to folder contained files to return.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -778,9 +805,12 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=CreateFolder} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Type of storage - personal, corporate.
-	 * @apiParam {string} Path Path to new folder.
-	 * @apiParam {string} FolderName New folder name.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
+	 * &emsp; **Path** *string* Path to new folder.<br>
+	 * &emsp; **FolderName** *string* New folder name.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -825,10 +855,13 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=CreateLink} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Type of storage - personal, corporate.
-	 * @apiParam {string} Path Path to new link.
-	 * @apiParam {string} Link Link value.
-	 * @apiParam {string} Name Link name.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
+	 * &emsp; **Path** *string* Path to new link.<br>
+	 * &emsp; **Link** *string* Link value.<br>
+	 * &emsp; **Name** *string* Link name.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -875,8 +908,11 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Delete} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Type of storage - personal, corporate.
-	 * @apiParam {array} Items Array of items to delete.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
+	 * &emsp; **Items** *array* Array of items to delete.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -927,11 +963,14 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Rename} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Type of storage - personal, corporate.
-	 * @apiParam {string} Path Path to item to rename.
-	 * @apiParam {string} Name Current name of the item.
-	 * @apiParam {string} NewName New name of the item.
-	 * @apiParam {boolean} IsLink Indicates if the item is link or not.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
+	 * &emsp; **Path** *string* Path to item to rename.<br>
+	 * &emsp; **Name** *string* Current name of the item.<br>
+	 * &emsp; **NewName** *string* New name of the item.<br>
+	 * &emsp; **IsLink** *boolean* Indicates if the item is link or not.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -981,11 +1020,14 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Copy} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} FromType storage type of folder items will be copied from.
-	 * @apiParam {string} ToType storage type of folder items will be copied to.
-	 * @apiParam {string} FromPath folder items will be copied from.
-	 * @apiParam {string} ToPath folder items will be copied to.
-	 * @apiParam {array} Files list of items to copy
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **FromType** *string* Storage type of folder items will be copied from.<br>
+	 * &emsp; **ToType** *string* Storage type of folder items will be copied to.<br>
+	 * &emsp; **FromPath** *string* Folder items will be copied from.<br>
+	 * &emsp; **ToPath** *string* Folder items will be copied to.<br>
+	 * &emsp; **Files** *array* List of items to copy<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -1046,11 +1088,14 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Move} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} FromType storage type of folder items will be moved from.
-	 * @apiParam {string} ToType storage type of folder items will be moved to.
-	 * @apiParam {string} FromPath folder items will be moved from.
-	 * @apiParam {string} ToPath folder items will be moved to.
-	 * @apiParam {array} Files list of items to move
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **FromType** *string* Storage type of folder items will be moved from.<br>
+	 * &emsp; **ToType** *string* Storage type of folder items will be moved to.<br>
+	 * &emsp; **FromPath** *string* Folder items will be moved from.<br>
+	 * &emsp; **ToPath** *string* Folder items will be moved to.<br>
+	 * &emsp; **Files** *array* List of items to move<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -1110,11 +1155,14 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=CreatePublicLink} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Type of storage contains the item.
-	 * @apiParam {string} Path Path to the item.
-	 * @apiParam {string} Name Name of the item.
-	 * @apiParam {int} Size Size of the file.
-	 * @apiParam {boolean} IsFolder Indicates if the item is folder or not.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage contains the item.<br>
+	 * &emsp; **Path** *string* Path to the item.<br>
+	 * &emsp; **Name** *string* Name of the item.<br>
+	 * &emsp; **Size** *int* Size of the file.<br>
+	 * &emsp; **IsFolder** *boolean* Indicates if the item is folder or not.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
@@ -1159,9 +1207,12 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=DeletePublicLink} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
-	 * @apiParam {string} Type Type of storage contains the item.
-	 * @apiParam {string} Path Path to the item.
-	 * @apiParam {string} Name Name of the item.
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage contains the item.<br>
+	 * &emsp; **Path** *string* Path to the item.<br>
+	 * &emsp; **Name** *string* Name of the item.<br>
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
