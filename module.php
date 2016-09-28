@@ -42,6 +42,12 @@ class FilesModule extends AApiModule
 	 */
 	protected $oMinModuleDecorator = null;
 
+	/***** private functions *****/
+	/**
+	 * Initializes Core Module.
+	 * 
+	 * @ignore
+	 */
 	public function init() 
 	{
 		$this->incClass('item');
@@ -59,6 +65,356 @@ class FilesModule extends AApiModule
 		$this->subscribeEvent('Core::AfterDeleteUser', array($this, 'onAfterDeleteUser'));
 	}
 	
+	/**
+	* Returns Min module decorator.
+	* 
+	* @return \CApiModuleDecorator
+	*/
+	private function getMinModuleDecorator()
+	{
+		return $this->oApiFilesManager->getMinModuleDecorator();
+	}
+	
+	/**
+	 * Checks if storage type is personal or corporate.
+	 * 
+	 * @param string $Type Storage type.
+	 * @return bool
+	 */
+	protected function checkStorageType($Type)
+	{
+		return in_array($Type, array('personal', 'corporate'));
+	}	
+	
+	/**
+	 * Downloads file, views file or makes thumbnail for file.
+	 * 
+	 * @param int $iUserId User identificator.
+	 * @param string $sType Storage type - personal, corporate.
+	 * @param string $sPath Path to folder contained file.
+	 * @param string $sFileName File name.
+	 * @param boolean $bDownload Indicates if file should be downloaded or viewed.
+	 * @param boolean $bThumbnail Indicates if thumbnail should be created for file.
+	 * 
+	 * @return boolean
+	 */
+	private function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $bDownload = true, $bThumbnail = false)
+	{
+		$sPath = urldecode($sPath);
+		$sFileName = urldecode($sFileName);
+		
+		$oModuleDecorator = $this->getMinModuleDecorator();
+		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
+		
+		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
+
+		if ($iUserId && $SharedHash !== null)
+		{
+			\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		}
+		else 
+		{
+			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		}
+		
+		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
+			isset($sType, $sPath, $sFileName)) 
+		{
+			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
+			
+			$mResult = false;
+			$this->broadcastEvent(
+				'GetFile', 
+				array(
+					'UserId' => $iUserId,
+					'Type' => $sType,
+					'Path' => $sPath,
+					'Name' => &$sFileName,
+					'IsThumb' => $bThumbnail,
+					'@Result' => &$mResult
+				)
+			);			
+			
+			if (false !== $mResult) 
+			{
+				if (is_resource($mResult)) 
+				{
+//					$sFileName = $this->clearFileName($oFileInfo->Name, $sContentType); // todo
+					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
+					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
+			
+					if ($bThumbnail) 
+					{
+//						$this->cacheByKey($sRawKey);	// todo
+						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName, false);
+					} 
+					else if ($sContentType === 'text/html') 
+					{
+						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult)));
+					} 
+					else 
+					{
+						\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
+					}
+					
+					@fclose($mResult);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Returns html title for specified URL.
+	 * @param string $sUrl
+	 * @return string
+	 */
+	protected function getHtmlTitle($sUrl)
+	{
+		$oCurl = curl_init();
+		\curl_setopt_array($oCurl, array(
+			CURLOPT_URL => $sUrl,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_AUTOREFERER => true,
+			CURLOPT_SSL_VERIFYPEER => false, //required for https urls
+			CURLOPT_CONNECTTIMEOUT => 5,
+			CURLOPT_TIMEOUT => 5,
+			CURLOPT_MAXREDIRS => 5
+		));
+		$sContent = curl_exec($oCurl);
+		//$aInfo = curl_getinfo($oCurl);
+		curl_close($oCurl);
+
+		preg_match('/<title>(.*?)<\/title>/s', $sContent, $aTitle);
+		return isset($aTitle['1']) ? trim($aTitle['1']) : '';
+	}
+	
+	/**
+	 * Returns file contents.
+	 * 
+	 * @ignore
+	 * @param int $UserId User identifier.
+	 * @param string $Type Type of storage.
+	 * @param string $Path Path to folder files are obtained from.
+	 * @param string $Name Name of file.
+	 * @param bool $IsThumb Inticates if thumb is required.
+	 * @param string|resource|bool $Result Is passed by reference.
+	 * 
+	 * @throws \System\Exceptions\AuroraApiException
+	 */
+	public function onGetFile($UserId, $Type, $Path, $Name, $IsThumb, &$Result)
+	{
+		if ($this->checkStorageType($Type))
+		{
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			{
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+			}
+			
+			$Result = $this->oApiFilesManager->getFile($UserId, $Type, $Path, $Name);
+		}
+	}	
+	
+	/**
+	 * Create file.
+	 * 
+	 * @ignore
+	 * @param int $UserId User identifier.
+	 * @param string $Type Type of storage.
+	 * @param string $Path Path to folder files are obtained from.
+	 * @param string $Name Name of file.
+	 * @param string|resource $Data Data to be stored in the file.
+	 * @param string|resource|bool $Result Is passed by reference.
+	 * 
+	 * @throws \System\Exceptions\AuroraApiException
+	 */
+	public function onCreateFile($UserId, $Type, $Path, $Name, $Data, &$Result)
+	{
+		if ($this->checkStorageType($Type))
+		{
+			$Result = $this->oApiFilesManager->createFile($UserId, $Type, $Path, $Name, $Data, false);
+		}
+	}
+	
+	/**
+	 * @ignore
+	 * @param string $Link
+	 * @param string $Result
+	 */
+	public function onGetLinkType($Link, &$Result)
+	{
+		$Result = '';
+	}	
+	
+	/**
+	 * @ignore
+	 * @param string $sUrl
+	 * @param mixed $mResult
+	 */
+	public function onCheckUrl($sUrl, &$mResult)
+	{
+		$iUserId = \CApi::getAuthenticatedUserId();
+
+		if ($iUserId)
+		{
+			if (!empty($sUrl))
+			{
+				$sUrl = \api_Utils::GetRemoteFileRealUrl($sUrl);
+				if ($sUrl)
+				{
+					$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
+					$sFileName = basename($sUrl);
+					$sFileExtension = \api_Utils::GetFileExtension($sFileName);
+
+					if (empty($sFileExtension))
+					{
+						$sFileExtension = \api_Utils::GetFileExtensionFromMimeContentType($aRemoteFileInfo['content-type']);
+						$sFileName .= '.'.$sFileExtension;
+					}
+
+					if ($sFileExtension === 'htm' || $sFileExtension === 'html')
+					{
+						$sTitle = $this->getHtmlTitle($sUrl);
+					}
+
+					$mResult['Name'] = isset($sTitle) && strlen($sTitle)> 0 ? $sTitle : urldecode($sFileName);
+					$mResult['Size'] = $aRemoteFileInfo['size'];
+				}
+			}
+		}		
+	}
+	
+	/**
+	 * @ignore
+	 * @param \CFileStorageItem $oItem
+	 * @return boolean
+	 */
+	public function onPopulateFileItem(&$oItem)
+	{
+		if ($oItem->IsLink)
+		{
+			$sFileName = basename($oItem->LinkUrl);
+			$sFileExtension = \api_Utils::GetFileExtension($sFileName);
+			if ($sFileExtension === 'htm' || $sFileExtension === 'html')
+			{
+				$oItem->Name = $this->getHtmlTitle($oItem->LinkUrl);
+				return true;
+			}
+		}
+	}	
+	
+	/**
+	 * @ignore
+	 * @param int $iUserId
+	 */
+	public function onAfterDeleteUser($iUserId)
+	{
+		$this->oApiFilesManager->ClearFiles($iUserId);
+	}
+	/***** private functions *****/
+	
+	/***** public functions *****/
+	/**
+	 * @ignore
+	 */
+	public function EntryPub()
+	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		
+		$aPaths = \System\Service::GetPaths();
+		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
+		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
+		$bList = (!empty($aPaths[3]) && $aPaths[3] === 'list');
+		
+		if ($bList)
+		{
+			$sResult = '';
+
+			$oMinDecorator =  $this->getMinModuleDecorator();
+			if ($oMinDecorator)
+			{
+				$mData = $oMinDecorator->GetMinByHash($sHash);
+
+				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
+				{
+					$oApiIntegrator = \CApi::GetSystemManager('integrator');
+
+					if ($oApiIntegrator)
+					{
+						$oCoreClientModule = \CApi::GetModule('CoreWebclient');
+						if ($oCoreClientModule instanceof \AApiModule) {
+							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
+							if (is_string($sResult)) {
+								$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
+								if (0 < \strlen($sFrameOptions)) {
+									@\header('X-Frame-Options: '.$sFrameOptions);
+								}
+
+								$sAuthToken = isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]) ? $_COOKIE[\System\Service::AUTH_TOKEN_KEY] : '';
+								$sResult = strtr($sResult, array(
+									'{{AppVersion}}' => PSEVEN_APP_VERSION,
+									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
+									'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
+									'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
+								));
+							}
+						}
+					}
+				}
+				else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
+				{
+					$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
+
+					$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
+					if (!empty($sUrlRewriteBase))
+					{
+						$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
+					}
+
+					$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
+					if (is_string($sResult))
+					{
+						$sResult = strtr($sResult, array(
+							'{{Url}}' => $sUrl.$mData['__hash__'], 
+							'{{FileName}}' => $mData['Name'],
+							'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
+							'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
+							'{{BaseUrl}}' => $sUrlRewriteBase 
+						));
+					}
+					else
+					{
+						\CApi::Log('Empty template.', \ELogLevel::Error);
+					}
+				}
+			}
+
+			return $sResult;
+		}
+		else
+		{
+			$oModuleDecorator = $this->getMinModuleDecorator();
+			if ($oModuleDecorator)
+			{
+				$aHash = $oModuleDecorator->GetMinByHash($sHash);
+				if (isset($aHash['__hash__']))
+				{
+					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']) )
+					{
+						echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
+					}
+					else 
+					{
+						header('File not found', true, 404);
+					}
+				}
+			}
+		}
+	}
+	/***** public functions *****/
+	
+	/***** public functions might be called with web API *****/
 	/**
 	 * Obtaines list of module settings for authenticated user.
 	 * 
@@ -159,99 +515,6 @@ class FilesModule extends AApiModule
 		$this->setConfig('UserSpaceLimitMb', $UserSpaceLimitMb);
 		$this->saveModuleConfig();
 		return true;
-	}
-	
-	/**
-	* Returns Min module decorator.
-	* 
-	* @return \CApiModuleDecorator
-	*/
-	private function getMinModuleDecorator()
-	{
-		return $this->oApiFilesManager->getMinModuleDecorator();
-	}
-	
-
-	protected function checkStorageType($Type)
-	{
-		return in_array($Type, array('personal', 'corporate'));
-	}	
-	
-	/**
-	 * Downloads file, views file or makes thumbnail for file.
-	 * 
-	 * @param string $sType Storage type - personal, corporate.
-	 * @param string $sPath Path to folder contained file.
-	 * @param string $sFileName File name.
-	 * @param string $sAuthToken Authorization token.
-	 * @param boolean $bDownload Indicates if file should be downloaded or viewed.
-	 * @param boolean $bThumbnail Indicates if thumbnail should be created for file.
-	 * 
-	 * @return boolean
-	 */
-	private function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $bDownload = true, $bThumbnail = false)
-	{
-		$sPath = urldecode($sPath);
-		$sFileName = urldecode($sFileName);
-		
-		$oModuleDecorator = $this->getMinModuleDecorator();
-		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
-		
-		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
-
-		if ($iUserId && $SharedHash !== null)
-		{
-			\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
-		}
-		else 
-		{
-			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		}
-		
-		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
-			isset($sType, $sPath, $sFileName)) 
-		{
-			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
-			
-			$mResult = false;
-			$this->broadcastEvent(
-				'GetFile', 
-				array(
-					'UserId' => $iUserId,
-					'Type' => $sType,
-					'Path' => $sPath,
-					'Name' => &$sFileName,
-					'IsThumb' => $bThumbnail,
-					'@Result' => &$mResult
-				)
-			);			
-			
-			if (false !== $mResult) 
-			{
-				if (is_resource($mResult)) 
-				{
-//					$sFileName = $this->clearFileName($oFileInfo->Name, $sContentType); // todo
-					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
-					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
-			
-					if ($bThumbnail) 
-					{
-//						$this->cacheByKey($sRawKey);	// todo
-						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName, false);
-					} 
-					else if ($sContentType === 'text/html') 
-					{
-						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult)));
-					} 
-					else 
-					{
-						\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
-					}
-					
-					@fclose($mResult);
-				}
-			}
-		}
 	}
 	
 	/**
@@ -409,7 +672,6 @@ class FilesModule extends AApiModule
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
-	 * @param string $AuthToken Authorization token.
 	 * @param string $SharedHash Shared hash.
 	 * 
 	 * @return boolean
@@ -447,10 +709,10 @@ class FilesModule extends AApiModule
 	/**
 	 * Views file.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
-	 * @param string $AuthToken Authorization token.
 	 * @param string $SharedHash Shared hash.
 	 * 
 	 * @return boolean
@@ -494,6 +756,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Makes thumbnail for file.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
@@ -530,6 +793,8 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns storages avaliable for logged in user.
 	 * 
+	 * @param int $UserId User identifier.
+	 * 
 	 * @return array {
 	 *		*string* **Type** Storage type - personal, corporate.
 	 *		*string* **DisplayName** Storage display name.
@@ -558,17 +823,6 @@ class FilesModule extends AApiModule
 		return $aStorages;
 	}	
 	
-	/**
-	 * @ignore
-	 * @return array
-	 */
-	public function GetExternalStorages()
-	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
-		
-		return array();
-	}
-
 	/**
 	 * @api {post} ?/Api/ GetQuota
 	 * @apiDescription Returns used space and space limit for specified user.
@@ -611,58 +865,6 @@ class FilesModule extends AApiModule
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
 		);
 	}
-	
-	/**
-	 * Returns file contents.
-	 * 
-	 * @param int $UserId User identifier.
-	 * @param string $Type Type of storage.
-	 * @param string $Path Path to folder files are obtained from.
-	 * @param string $FileName Name of file.
-	 * 
-	 * @return string/resource/bool
-	 * 
-	 * @throws \System\Exceptions\AuroraApiException
-	 */
-	public function onGetFile($UserId, $Type, $Path, $Name, $IsThumb, &$Result)
-	{
-		if ($this->checkStorageType($Type))
-		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
-			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
-			}
-			
-			$Result = $this->oApiFilesManager->getFile($UserId, $Type, $Path, $Name);
-		}
-	}	
-	
-	
-	/**
-	 * Create file.
-	 * 
-	 * @param int $UserId User identifier.
-	 * @param string $Type Type of storage.
-	 * @param string $Path Path to folder files are obtained from.
-	 * @param string $Name Name of file.
-	 * @param string|resource $Data Name of file.
-	 * 
-	 * @return string/resource/bool
-	 * 
-	 * @throws \System\Exceptions\AuroraApiException
-	 */
-	public function onCreateFile($UserId, $Type, $Path, $Name, $Data, &$Result)
-	{
-		if ($this->checkStorageType($Type))
-		{
-			$Result = $this->oApiFilesManager->createFile($UserId, $Type, $Path, $Name, $Data, false);
-		}
-	}
-	
-	public function onGetLinkType($Link, &$Result)
-	{
-		$Result = '';
-	}	
 
 	/**
 	 * @api {post} ?/Api/ GetFiles
@@ -1252,9 +1454,9 @@ class FilesModule extends AApiModule
 	}
 
 	/**
-	 * @ignore
+	 * Checks URL and returns information about it.
 	 * 
-	 * @param string $Url
+	 * @param string $Url URL to check.
 	 * 
 	 * @return array|bool {
 	 *		Name
@@ -1278,173 +1480,5 @@ class FilesModule extends AApiModule
 		
 		return $mResult;
 	}	
-	
-	public function EntryPub()
-	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
-		
-		$aPaths = \System\Service::GetPaths();
-		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
-		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
-		$bList = (!empty($aPaths[3]) && $aPaths[3] === 'list');
-		
-		if ($bList)
-		{
-			$sResult = '';
-
-			$oMinDecorator =  $this->getMinModuleDecorator();
-			if ($oMinDecorator)
-			{
-				$mData = $oMinDecorator->GetMinByHash($sHash);
-
-				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
-				{
-					$oApiIntegrator = \CApi::GetSystemManager('integrator');
-
-					if ($oApiIntegrator)
-					{
-						$oCoreClientModule = \CApi::GetModule('CoreWebclient');
-						if ($oCoreClientModule instanceof \AApiModule) {
-							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
-							if (is_string($sResult)) {
-								$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
-								if (0 < \strlen($sFrameOptions)) {
-									@\header('X-Frame-Options: '.$sFrameOptions);
-								}
-
-								$sAuthToken = isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]) ? $_COOKIE[\System\Service::AUTH_TOKEN_KEY] : '';
-								$sResult = strtr($sResult, array(
-									'{{AppVersion}}' => PSEVEN_APP_VERSION,
-									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
-									'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
-									'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
-								));
-							}
-						}
-					}
-				}
-				else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
-				{
-					$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
-
-					$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
-					if (!empty($sUrlRewriteBase))
-					{
-						$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
-					}
-
-					$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
-					if (is_string($sResult))
-					{
-						$sResult = strtr($sResult, array(
-							'{{Url}}' => $sUrl.$mData['__hash__'], 
-							'{{FileName}}' => $mData['Name'],
-							'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
-							'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
-							'{{BaseUrl}}' => $sUrlRewriteBase 
-						));
-					}
-					else
-					{
-						\CApi::Log('Empty template.', \ELogLevel::Error);
-					}
-				}
-			}
-
-			return $sResult;
-		}
-		else
-		{
-			$oModuleDecorator = $this->getMinModuleDecorator();
-			if ($oModuleDecorator)
-			{
-				$aHash = $oModuleDecorator->GetMinByHash($sHash);
-				if (isset($aHash['__hash__']))
-				{
-					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']) )
-					{
-						echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
-					}
-					else 
-					{
-						header('File not found', true, 404);
-					}
-				}
-			}
-		}
-	}
-	
-	public function onCheckUrl($sUrl, &$mResult)
-	{
-		$iUserId = \CApi::getAuthenticatedUserId();
-
-		if ($iUserId)
-		{
-			if (!empty($sUrl))
-			{
-				$sUrl = \api_Utils::GetRemoteFileRealUrl($sUrl);
-				if ($sUrl)
-				{
-					$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
-					$sFileName = basename($sUrl);
-					$sFileExtension = \api_Utils::GetFileExtension($sFileName);
-
-					if (empty($sFileExtension))
-					{
-						$sFileExtension = \api_Utils::GetFileExtensionFromMimeContentType($aRemoteFileInfo['content-type']);
-						$sFileName .= '.'.$sFileExtension;
-					}
-
-					if ($sFileExtension === 'htm' || $sFileExtension === 'html')
-					{
-						$sTitle = $this->getHtmlTitle($sUrl);
-					}
-
-					$mResult['Name'] = isset($sTitle) && strlen($sTitle)> 0 ? $sTitle : urldecode($sFileName);
-					$mResult['Size'] = $aRemoteFileInfo['size'];
-				}
-			}
-		}		
-	}
-	
-	protected function getHtmlTitle($sUrl)
-	{
-		$oCurl = curl_init();
-		\curl_setopt_array($oCurl, array(
-			CURLOPT_URL => $sUrl,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_ENCODING => '',
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_AUTOREFERER => true,
-			CURLOPT_SSL_VERIFYPEER => false, //required for https urls
-			CURLOPT_CONNECTTIMEOUT => 5,
-			CURLOPT_TIMEOUT => 5,
-			CURLOPT_MAXREDIRS => 5
-		));
-		$sContent = curl_exec($oCurl);
-		//$aInfo = curl_getinfo($oCurl);
-		curl_close($oCurl);
-
-		preg_match('/<title>(.*?)<\/title>/s', $sContent, $aTitle);
-		return isset($aTitle['1']) ? trim($aTitle['1']) : '';
-	}
-	
-	public function onPopulateFileItem(&$oItem)
-	{
-		if ($oItem->IsLink)
-		{
-			$sFileName = basename($oItem->LinkUrl);
-			$sFileExtension = \api_Utils::GetFileExtension($sFileName);
-			if ($sFileExtension === 'htm' || $sFileExtension === 'html')
-			{
-				$oItem->Name = $this->getHtmlTitle($oItem->LinkUrl);
-				return true;
-			}
-		}
-	}	
-	
-	public function onAfterDeleteUser($iUserId)
-	{
-		$this->oApiFilesManager->ClearFiles($iUserId);
-	}
+	/***** public functions might be called with web API *****/
 }
