@@ -416,6 +416,51 @@ class FilesModule extends AApiModule
 	
 	/***** public functions might be called with web API *****/
 	/**
+	 * @api {post} ?/Api/ GetAppData
+	 * @apiName GetAppData
+	 * @apiGroup Files
+	 * @apiDescription Obtaines list of module settings for authenticated user.
+	 * 
+	 * @apiParam {string=Files} Module Module=Files name
+	 * @apiParam {string=GetAppData} Method=GetAppData Method name
+	 * @apiParam {string} AuthToken Auth token
+	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetAppData',
+	 *	AuthToken: 'token_value'
+	 * }
+	 * 
+	 * @apiSuccess {string} Module Module name.
+	 * @apiSuccess {string} Method Method name.
+	 * @apiSuccess {array} Result List of Files module settings.
+	 * @apiSuccess {bool} Result.EnableModule=false Indicates if Files module is enabled.
+	 * @apiSuccess {bool} Result.EnableUploadSizeLimit=false Indicates if upload size limit is enabled.
+	 * @apiSuccess {int} Result.UploadSizeLimitMb=0 Value of upload size limit in Mb.
+	 * @apiSuccess {bool} Result.EnableCorporate=false Indicates if corporate storage is enabled.
+	 * @apiSuccess {int} Result.UserSpaceLimitMb=0 Value of user space limit in Mb.
+	 * @apiSuccess {string} Result.CustomTabTitle=&quot;&quot; Custom tab title.
+	 * @apiSuccess {string} Result.PublicHash=&quot;&quot; Public hash.
+	 * @apiSuccess {string} Result.PublicFolderName=&quot;&quot; Public folder name.
+	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetAppData',
+	 *	Result: {EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: '', PublicHash: '', PublicFolderName: ''}
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetAppData',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
+	 */
+	/**
 	 * Obtaines list of module settings for authenticated user.
 	 * 
 	 * @return array
@@ -477,15 +522,13 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result Indicates if request execution was successfull
-	 * @apiSuccess {int} ErrorCode *optional* Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
-	 *	Result: true,
-	 *	'@Time': 0.31426095962524
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -493,8 +536,7 @@ class FilesModule extends AApiModule
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
 	 *	Result: false,
-	 *	ErrorCode: 102,
-	 *	'@Time': 0.31426095962524
+	 *	ErrorCode: 102
 	 * }
 	 */
 	/**
@@ -541,8 +583,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Result.MimeType Mime type of file.
 	 * @apiSuccess {int} Result.Size File size.
 	 * @apiSuccess {string} Result.Hash Hash used for file download, file view or getting file thumbnail.
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	/**
 	 * Uploads file from client side.
@@ -661,8 +702,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -702,8 +742,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -749,8 +788,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -786,8 +824,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Result.Type Storage type - personal, corporate.
 	 * @apiSuccess {string} Result.DisplayName Storage display name.
 	 * @apiSuccess {bool} Result.IsExternal Indicates if storage external or not.
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -842,8 +879,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {array[]} Result 
 	 * @apiSuccess {int} Result.Used Amount of space used by user.
 	 * @apiSuccess {int} Result.Limit Limit of space for user.
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -887,8 +923,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {array[]} Result 
 	 * @apiSuccess {array} Result.Items Array of files objects.
 	 * @apiSuccess {array} Result.Quota Array of items with fields Used, Limit.
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -956,8 +991,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {array[]} Result 
 	 * @apiSuccess {array} Result.Items Array of files objects.
 	 * @apiSuccess {array} Result.Quota Array of items with fields Used, Limit.
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 
 	/**
@@ -1023,8 +1057,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -1074,8 +1107,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -1125,8 +1157,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -1183,8 +1214,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -1240,8 +1270,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -1308,8 +1337,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 	
 	/**
@@ -1375,8 +1403,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {mixed} Result Public link to the item.
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 
 	/**
@@ -1425,8 +1452,7 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
 	 * @apiSuccess {bool} Result 
-	 * @apiSuccess {int} ErrorCode Error code
-	 * @apiSuccess {float} Time Request execution time on the server
+	 * @apiSuccess {int} [ErrorCode] Error code
 	 */
 
 	/**
