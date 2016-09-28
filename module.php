@@ -26,12 +26,6 @@ class FilesModule extends AApiModule
 	 */
 	public $oApiFilesManager = null;
 	
-	/**
-	 *
-	 * @var \CApiModuleDecorator
-	 */
-	protected $oMinModuleDecorator = null;
-	
 	protected $aSettingsMap = array(
 		'EnableUploadSizeLimit' => array(true, 'bool'),
 		'UploadSizeLimitMb' => array(5, 'int'),
@@ -41,6 +35,12 @@ class FilesModule extends AApiModule
 		'CustomTabTitle' => array('', 'string'),
 		'MaxFileSizeForMakingThumbnail' => array(5242880, 'int'), // 5MB
 	);
+
+	/**
+	 *
+	 * @var \CApiModuleDecorator
+	 */
+	protected $oMinModuleDecorator = null;
 
 	public function init() 
 	{
@@ -405,6 +405,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Downloads file.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
@@ -413,11 +414,10 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 */
-	public function DownloadFile($Type, $Path, $Name, $AuthToken, $SharedHash)
+	public function DownloadFile($UserId, $Type, $Path, $Name, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
-		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, true);
+		$this->getRawFile($UserId, $Type, $Path, $Name, $SharedHash, true);
 	}
 
 	/**
@@ -455,11 +455,10 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return boolean
 	 */
-	public function ViewFile($Type, $Path, $Name, $AuthToken, $SharedHash)
+	public function ViewFile($UserId, $Type, $Path, $Name, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
-		$this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false);
+		$this->getRawFile($UserId, $Type, $Path, $Name, $SharedHash, false);
 	}
 
 	/**
@@ -498,20 +497,14 @@ class FilesModule extends AApiModule
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
-	 * @param string $AuthToken Authorization token.
 	 * @param string $SharedHash Shared hash.
 	 * 
 	 * @return boolean
 	 */
-	public function GetFileThumbnail($Type, $Path, $Name, $AuthToken, $SharedHash)
+	public function GetFileThumbnail($UserId, $Type, $Path, $Name, $SharedHash)
 	{
-		if (empty($AuthToken) && isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]))
-		{
-			$AuthToken = $_COOKIE[\System\Service::AUTH_TOKEN_KEY];
-		}
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
-		return base64_encode($this->getRawFile($iUserId, $Type, $Path, $Name, $SharedHash, false, true));
+		return base64_encode($this->getRawFile($UserId, $Type, $Path, $Name, $SharedHash, false, true));
 	}
 
 	/**
@@ -543,15 +536,14 @@ class FilesModule extends AApiModule
 	 *		*bool* **IsExternal** Indicates if storage external or not.
 	 * }
 	 */
-	public function GetStorages()
+	public function GetStorages($UserId)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$iUserId = \CApi::getAuthenticatedUserId();
 		$aStorages = [
 			[
 				'Type' => 'personal', 
-				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE', $iUserId), 
+				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE', $UserId), 
 				'IsExternal' => false
 			]
 		];
@@ -559,7 +551,7 @@ class FilesModule extends AApiModule
 		{
 			$aStorages[] = [
 				'Type' => 'corporate', 
-				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE', $iUserId), 
+				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE', $UserId), 
 				'IsExternal' => false
 			];
 		}
@@ -603,19 +595,19 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns used space and space limit for specified user.
 	 * 
-	 * @param int $iUserId User identifier.
+	 * @param int $UserId User identifier.
 	 * 
 	 * @return array {
 	 *		*int* **Used** Amount of space used by user.
 	 *		*int* **Limit** Limit of space for user.
 	 * }
 	 */
-	public function GetQuota($iUserId)
+	public function GetQuota($UserId)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		return array(
-			'Used' => $this->oApiFilesManager->getUserSpaceUsed($iUserId, [\EFileStorageTypeStr::Personal]),
+			'Used' => $this->oApiFilesManager->getUserSpaceUsed($UserId, [\EFileStorageTypeStr::Personal]),
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
 		);
 	}
@@ -623,6 +615,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns file contents.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage.
 	 * @param string $Path Path to folder files are obtained from.
 	 * @param string $FileName Name of file.
@@ -645,6 +638,19 @@ class FilesModule extends AApiModule
 	}	
 	
 	
+	/**
+	 * Create file.
+	 * 
+	 * @param int $UserId User identifier.
+	 * @param string $Type Type of storage.
+	 * @param string $Path Path to folder files are obtained from.
+	 * @param string $Name Name of file.
+	 * @param string|resource $Data Name of file.
+	 * 
+	 * @return string/resource/bool
+	 * 
+	 * @throws \System\Exceptions\AuroraApiException
+	 */
 	public function onCreateFile($UserId, $Type, $Path, $Name, $Data, &$Result)
 	{
 		if ($this->checkStorageType($Type))
@@ -686,6 +692,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns file list and user quota information.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage.
 	 * @param string $Path Path to folder files are obtained from.
 	 * @param string $Pattern String for search files and folders with such string in name.
@@ -697,20 +704,19 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function GetFiles($Type, $Path, $Pattern)
+	public function GetFiles($UserId, $Type, $Path, $Pattern)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$aUsers = array();
-			$aFiles = $this->oApiFilesManager->getFiles($iUserId, $Type, $Path, $Pattern);
+			$aFiles = $this->oApiFilesManager->getFiles($UserId, $Type, $Path, $Pattern);
 			foreach ($aFiles as $oFile)
 			{
 				if (!isset($aUsers[$oFile->Owner]))
@@ -723,7 +729,7 @@ class FilesModule extends AApiModule
 
 			return array(
 				'Items' => $aFiles,
-				'Quota' => $this->GetQuota($iUserId)
+				'Quota' => $this->GetQuota($UserId)
 			);
 		}
 	}
@@ -822,6 +828,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Creates folder.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to new folder.
 	 * @param string $FolderName New folder name.
@@ -830,19 +837,18 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function CreateFolder($Type, $Path, $FolderName)
+	public function CreateFolder($UserId, $Type, $Path, $FolderName)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId)) {
-
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId)) 
+			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
-			return $this->oApiFilesManager->createFolder($iUserId, $Type, $Path, $FolderName);
+			return $this->oApiFilesManager->createFolder($UserId, $Type, $Path, $FolderName);
 		}
 	}
 
@@ -873,6 +879,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Creates link.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to new link.
 	 * @param string $Link Link value.
@@ -882,20 +889,19 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function CreateLink($Type, $Path, $Link, $Name)
+	public function CreateLink($UserId, $Type, $Path, $Link, $Name)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$Name = \trim(\MailSo\Base\Utils::ClearFileName($Name));
-			return $this->oApiFilesManager->createLink($iUserId, $Type, $Path, $Link, $Name);
+			return $this->oApiFilesManager->createLink($UserId, $Type, $Path, $Link, $Name);
 		}
 	}
 
@@ -924,6 +930,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Deletes files and folder specified with list.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param array $Items Array of items to delete.
 	 * 
@@ -931,14 +938,13 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function Delete($Type, $Items)
+	public function Delete($UserId, $Type, $Items)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
@@ -947,7 +953,7 @@ class FilesModule extends AApiModule
 
 			foreach ($Items as $oItem)
 			{
-				$oResult = $this->oApiFilesManager->delete($iUserId, $Type, $oItem['Path'], $oItem['Name']);
+				$oResult = $this->oApiFilesManager->delete($UserId, $Type, $oItem['Path'], $oItem['Name']);
 			}
 
 			return $oResult;
@@ -982,6 +988,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Renames folder, file or link.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to item to rename.
 	 * @param string $Name Current name of the item.
@@ -992,22 +999,21 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function Rename($Type, $Path, $Name, $NewName, $IsLink)
+	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		if ($this->checkStorageType($Type))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$NewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
 
-			$NewName = $this->oApiFilesManager->getNonExistentFileName($iUserId, $Type, $Path, $NewName);
-			return $this->oApiFilesManager->rename($iUserId, $Type, $Path, $Name, $NewName, $IsLink);
+			$NewName = $this->oApiFilesManager->getNonExistentFileName($UserId, $Type, $Path, $NewName);
+			return $this->oApiFilesManager->rename($UserId, $Type, $Path, $Name, $NewName, $IsLink);
 		}
 	}	
 
@@ -1039,6 +1045,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Copies files and/or folders from one folder to another.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $FromType storage type of folder items will be copied from.
 	 * @param string $ToType storage type of folder items will be copied to.
 	 * @param string $FromPath folder items will be copied from.
@@ -1052,14 +1059,13 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function Copy($FromType, $ToType, $FromPath, $ToPath, $Files)
+	public function Copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
@@ -1071,8 +1077,8 @@ class FilesModule extends AApiModule
 				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
-					$NewName = $this->oApiFilesManager->getNonExistentFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
-					$oResult = $this->oApiFilesManager->copy($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+					$NewName = $this->oApiFilesManager->getNonExistentFileName($UserId, $ToType, $ToPath, $aItem['Name']);
+					$oResult = $this->oApiFilesManager->copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
 				}
 			}
 			return $oResult;
@@ -1107,6 +1113,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Moves files and/or folders from one folder to another.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $FromType storage type of folder items will be moved from.
 	 * @param string $ToType storage type of folder items will be moved to.
 	 * @param string $FromPath folder items will be moved from.
@@ -1120,14 +1127,13 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function Move($FromType, $ToType, $FromPath, $ToPath, $Files)
+	public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			$iUserId = \CApi::getAuthenticatedUserId();
-			if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
@@ -1138,8 +1144,8 @@ class FilesModule extends AApiModule
 				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
-					$NewName = $this->oApiFilesManager->getNonExistentFileName($iUserId, $ToType, $ToPath, $aItem['Name']);
-					$oResult = $this->oApiFilesManager->move($iUserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+					$NewName = $this->oApiFilesManager->getNonExistentFileName($UserId, $ToType, $ToPath, $aItem['Name']);
+					$oResult = $this->oApiFilesManager->move($UserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
 				}
 			}
 			return $oResult;
@@ -1174,6 +1180,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Creates public link for file or folder.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage contains the item.
 	 * @param string $Path Path to the item.
 	 * @param string $Name Name of the item.
@@ -1184,18 +1191,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function CreatePublicLink($Type, $Path, $Name, $Size, $IsFolder)
+	public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$iUserId = \CApi::getAuthenticatedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 		{
 			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
 		$bFolder = $IsFolder === '1' ? true : false;
-		return $this->oApiFilesManager->createPublicLink($iUserId, $Type, $Path, $Name, $Size, $bFolder);
+		return $this->oApiFilesManager->createPublicLink($UserId, $Type, $Path, $Name, $Size, $bFolder);
 	}	
 	
 	/**
@@ -1224,6 +1230,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Deletes public link from file or folder.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage contains the item.
 	 * @param string $Path Path to the item.
 	 * @param string $Name Name of the item.
@@ -1232,17 +1239,16 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function DeletePublicLink($Type, $Path, $Name)
+	public function DeletePublicLink($UserId, $Type, $Path, $Name)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$iUserId = \CApi::getAuthenticatedUserId();
-		if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
+		if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
 		{
 			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
-		return $this->oApiFilesManager->deletePublicLink($iUserId, $Type, $Path, $Name);
+		return $this->oApiFilesManager->deletePublicLink($UserId, $Type, $Path, $Name);
 	}
 
 	/**
