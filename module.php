@@ -1289,7 +1289,7 @@ class FilesModule extends AApiModule
 			$oMinDecorator =  $this->getMinModuleDecorator();
 			if ($oMinDecorator)
 			{
-				$mData = $oMinDecorator->GetMinByHash($Hash);
+				$mData = $oMinDecorator->GetMinByHash($sHash);
 
 				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
 				{
