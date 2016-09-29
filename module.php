@@ -588,10 +588,10 @@ class FilesModule extends AApiModule
 	/**
 	 * Uploads file from client side.
 	 * 
+	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to folder than should contain uploaded file.
-	 * @param array $FileData Uploaded file information. Contains fields size, name, tmp_name.
-	 * @param string $AuthToken Authentication token.
+	 * @param array $UploadData Uploaded file information. Contains fields size, name, tmp_name.
 	 * 
 	 * @return array {
 	 *		*string* **Name** Original file name.
@@ -603,9 +603,8 @@ class FilesModule extends AApiModule
 	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function UploadFile($Type, $Path, $FileData, $AuthToken)
+	public function UploadFile($UserId, $Type, $Path, $UploadData)
 	{
-		$iUserId = \CApi::getAuthenticatedUserId($AuthToken);
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
@@ -613,39 +612,39 @@ class FilesModule extends AApiModule
 		$sError = '';
 		$aResponse = array();
 
-		if ($iUserId)
+		if ($UserId)
 		{
-			if (is_array($FileData))
+			if (is_array($UploadData))
 			{
-				$iSize = (int) $FileData['size'];
+				$iSize = (int) $UploadData['size'];
 				if ($Type === \EFileStorageTypeStr::Personal)
 				{
-					$aQuota = $this->GetQuota($iUserId);
+					$aQuota = $this->GetQuota($UserId);
 					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
 					{
 						throw new \System\Exceptions\AuroraApiException(\System\Notifications::CanNotUploadFileQuota);
 					}
 				}
 				
-				$sUploadName = $FileData['name'];
+				$sUploadName = $UploadData['name'];
 				$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
-				$sSavedName = 'upload-post-'.md5($FileData['name'].$FileData['tmp_name']);
+				$sSavedName = 'upload-post-'.md5($UploadData['name'].$UploadData['tmp_name']);
 				$rData = false;
-				if (is_resource($FileData['tmp_name']))
+				if (is_resource($UploadData['tmp_name']))
 				{
-					$rData = $FileData['tmp_name'];
+					$rData = $UploadData['tmp_name'];
 				}
-				else if ($oApiFileCacheManager->moveUploadedFile($iUserId, $sSavedName, $FileData['tmp_name']))
+				else if ($oApiFileCacheManager->moveUploadedFile($UserId, $sSavedName, $UploadData['tmp_name']))
 				{
-					$rData = $oApiFileCacheManager->getFile($iUserId, $sSavedName);
+					$rData = $oApiFileCacheManager->getFile($UserId, $sSavedName);
 				}
 				if ($rData)
 				{
 					$this->broadcastEvent(
 						'CreateFile', 
 						array(
-							'UserId' => $iUserId,
+							'UserId' => $UserId,
 							'Type' => $Type,
 							'Path' => $Path,
 							'Name' => $sUploadName,
@@ -658,13 +657,7 @@ class FilesModule extends AApiModule
 						'Name' => $sUploadName,
 						'TempName' => $sSavedName,
 						'MimeType' => $sMimeType,
-						'Size' =>  (int) $iSize,
-						'Hash' => \CApi::EncodeKeyValues(array(
-							'TempFile' => true,
-							'UserID' => $iUserId,
-							'Name' => $sUploadName,
-							'TempName' => $sSavedName
-						))
+						'Size' =>  (int) $iSize
 					);
 				}
 			}

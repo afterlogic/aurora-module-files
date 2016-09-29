@@ -22,7 +22,6 @@
  * @property bool $Iframed
  * @property string $ThumbnailLink
  * @property string $OembedHtml
- * @property string $Hash
  * @property bool $Shared
  * @property string $Owner
  * @property string $Content
@@ -55,7 +54,6 @@ class CFileStorageItem  extends api_AContainer
 			'Iframed' => false,
 			'ThumbnailLink' => '',
 			'OembedHtml' => '',
-			'Hash' => '',
 			'Shared' => false,
 			'Owner' => '',
 			'Content' => '',
@@ -94,7 +92,6 @@ class CFileStorageItem  extends api_AContainer
 			'Iframed' => array('bool'),
 			'ThumbnailLink' => array('string'),
 			'OembedHtml' => array('string'),
-			'Hash' => array('string'),
 			'Shared' => array('bool'),
 			'Owner' => array('string'),		
 			'Content' => array('string'),
@@ -121,7 +118,6 @@ class CFileStorageItem  extends api_AContainer
 			'Thumb' => $this->Thumb,
 			'ThumbnailLink' => $this->ThumbnailLink,
 			'OembedHtml' => $this->OembedHtml,
-			'Hash' => $this->Hash,
 			'Shared' => $this->Shared,
 			'Owner' => $this->Owner,
 			'Content' => $this->Content,

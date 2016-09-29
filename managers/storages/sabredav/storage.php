@@ -470,16 +470,6 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 						$oItem->Iframed = !$oItem->IsFolder && !$oItem->IsLink &&
 							\CApi::isIframedMimeTypeSupported($oItem->ContentType, $oItem->Name);
-
-						$oItem->Hash = \CApi::EncodeKeyValues(array(
-							'Type' => $sType,
-							'Path' => $sFilePath,
-							'Name' => $oValue->getName(),
-							'FileName' => $oValue->getName(),
-							'MimeType' => $oItem->ContentType,
-							'Size' => $oValue->getSize(),
-							'Iframed' => $oItem->Iframed,
-						));
 					}
 					
 					$mMin = $oMin->getMinByID($sID);
