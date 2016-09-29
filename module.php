@@ -343,15 +343,17 @@ class FilesModule extends AApiModule
 					if ($oApiIntegrator)
 					{
 						$oCoreClientModule = \CApi::GetModule('CoreWebclient');
-						if ($oCoreClientModule instanceof \AApiModule) {
+						if ($oCoreClientModule instanceof \AApiModule) 
+						{
 							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
-							if (is_string($sResult)) {
+							if (is_string($sResult)) 
+							{
 								$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
-								if (0 < \strlen($sFrameOptions)) {
+								if (0 < \strlen($sFrameOptions)) 
+								{
 									@\header('X-Frame-Options: '.$sFrameOptions);
 								}
 
-								$sAuthToken = isset($_COOKIE[\System\Service::AUTH_TOKEN_KEY]) ? $_COOKIE[\System\Service::AUTH_TOKEN_KEY] : '';
 								$sResult = strtr($sResult, array(
 									'{{AppVersion}}' => PSEVEN_APP_VERSION,
 									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
@@ -400,9 +402,16 @@ class FilesModule extends AApiModule
 				$aHash = $oModuleDecorator->GetMinByHash($sHash);
 				if (isset($aHash['__hash__']))
 				{
-					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']) )
+					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']))
 					{
-						echo $this->getRawFile($aHash['UserId'], $aHash['Type'], $aHash['Path'], $aHash['Name'], $sHash, $bDownload);
+						echo $this->getRawFile(
+							$aHash['UserId'], 
+							$aHash['Type'], 
+							$aHash['Path'], 
+							$aHash['Name'], 
+							$sHash, 
+							$bDownload
+						);
 					}
 					else 
 					{
