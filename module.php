@@ -371,7 +371,7 @@ class FilesModule extends AApiModule
 								}
 
 								$sResult = strtr($sResult, array(
-									'{{AppVersion}}' => PSEVEN_APP_VERSION,
+									'{{AppVersion}}' => AURORA_APP_VERSION,
 									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
 									'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
 									'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
