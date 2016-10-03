@@ -93,10 +93,10 @@ class FilesModule extends AApiModule
 	 * @param string $sType Storage type - personal, corporate.
 	 * @param string $sPath Path to folder contained file.
 	 * @param string $sFileName File name.
-	 * @param boolean $bDownload Indicates if file should be downloaded or viewed.
-	 * @param boolean $bThumbnail Indicates if thumbnail should be created for file.
+	 * @param bool $bDownload Indicates if file should be downloaded or viewed.
+	 * @param bool $bThumbnail Indicates if thumbnail should be created for file.
 	 * 
-	 * @return boolean
+	 * @return bool
 	 */
 	private function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $bDownload = true, $bThumbnail = false)
 	{
@@ -214,7 +214,6 @@ class FilesModule extends AApiModule
 	 * @param string $Name Name of file.
 	 * @param bool $IsThumb Inticates if thumb is required.
 	 * @param string|resource|bool $Result Is passed by reference.
-	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function onGetFile($UserId, $Type, $Path, $Name, $IsThumb, &$Result)
@@ -241,7 +240,6 @@ class FilesModule extends AApiModule
 	 * @param string $Name Name of file.
 	 * @param string|resource $Data Data to be stored in the file.
 	 * @param string|resource|bool $Result Is passed by reference.
-	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function onCreateFile($UserId, $Type, $Path, $Name, $Data, &$Result)
@@ -304,7 +302,7 @@ class FilesModule extends AApiModule
 	/**
 	 * @ignore
 	 * @param \CFileStorageItem $oItem
-	 * @return boolean
+	 * @return bool
 	 */
 	public function onPopulateFileItem(&$oItem)
 	{
@@ -460,7 +458,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccess {string} Module Module name.
 	 * @apiSuccess {string} Method Method name.
-	 * @apiSuccess {array} Result List of Files module settings.
+	 * @apiSuccess {mixed} Result List of module settings in case of success, otherwise **false**.
 	 * @apiSuccess {bool} Result.EnableModule=false Indicates if Files module is enabled.
 	 * @apiSuccess {bool} Result.EnableUploadSizeLimit=false Indicates if upload size limit is enabled.
 	 * @apiSuccess {int} Result.UploadSizeLimitMb=0 Value of upload size limit in Mb.
@@ -475,7 +473,7 @@ class FilesModule extends AApiModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetAppData',
-	 *	Result: {EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: '', PublicHash: '', PublicFolderName: ''}
+	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -528,13 +526,12 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module=Files name
 	 * @apiParam {string=UpdateSettings} Method=UpdateSettings Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
-	 * &emsp; **EnableUploadSizeLimit** *boolean* Enable file upload size limit setting.<br>
+	 * &emsp; **EnableUploadSizeLimit** *bool* Enable file upload size limit setting.<br>
 	 * &emsp; **UploadSizeLimitMb** *int* Upload file size limit setting in Mb.<br>
 	 * &emsp; **UserSpaceLimitMb** *int* User space limit setting in Mb.<br>
-	 * &emsp; **EnableCorporate** *boolean* Enable corporate storage in Files.<br>
+	 * &emsp; **EnableCorporate** *bool* Enable corporate storage in Files.<br>
 	 * }
 	 * 
 	 * @apiParamExample {json} Request-Example:
@@ -542,12 +539,12 @@ class FilesModule extends AApiModule
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
 	 *	AuthToken: 'token_value',
-	 *	Parameters: '{EnableUploadSizeLimit: true,UploadSizeLimitMb: 5,EnableCorporate: true,UserSpaceLimitMb: 10}'
+	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 10 }'
 	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result Indicates if request execution was successfull
+	 * @apiSuccess {bool} Result Indicates if settings were updated successfully.
 	 * @apiSuccess {int} [ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
@@ -568,10 +565,11 @@ class FilesModule extends AApiModule
 	/**
 	 * Updates module's settings - saves them to config.json file.
 	 * 
-	 * @param boolean $EnableUploadSizeLimit Enable file upload size limit setting.
+	 * @param bool $EnableUploadSizeLimit Enable file upload size limit setting.
 	 * @param int $UploadSizeLimitMb Upload file size limit setting in Mb.
-	 * @param boolean $EnableCorporate Enable corporate storage in Files.
+	 * @param bool $EnableCorporate Enable corporate storage in Files.
 	 * @param int $UserSpaceLimitMb User space limit setting in Mb.
+	 * @return bool
 	 */
 	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate, $UserSpaceLimitMb)
 	{
@@ -603,13 +601,28 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {mixed} Result File object in case of success, otherwise **false**.
 	 * @apiSuccess {string} Result.Name Original file name.
 	 * @apiSuccess {string} Result.TempName Temporary file name.
 	 * @apiSuccess {string} Result.MimeType Mime type of file.
 	 * @apiSuccess {int} Result.Size File size.
 	 * @apiSuccess {string} Result.Hash Hash used for file download, file view or getting file thumbnail.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'UploadFile',
+	 *	Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378', MimeType: 'image/png', Size: 1813 } }
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'UploadFile',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	/**
 	 * Uploads file from client side.
@@ -618,7 +631,6 @@ class FilesModule extends AApiModule
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to folder than should contain uploaded file.
 	 * @param array $UploadData Uploaded file information. Contains fields size, name, tmp_name.
-	 * 
 	 * @return array {
 	 *		*string* **Name** Original file name.
 	 *		*string* **TempName** Temporary file name.
@@ -626,7 +638,6 @@ class FilesModule extends AApiModule
 	 *		*int* **Size** File size.
 	 *		*string* **Hash** Hash used for file download, file view or getting file thumbnail.
 	 * }
-	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function UploadFile($UserId, $Type, $Path, $UploadData)
@@ -710,19 +721,23 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=DownloadFile} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
 	 * &emsp; **Path** *string* Path to folder contained file.<br>
 	 * &emsp; **Name** *string* File name.<br>
-	 * &emsp; **SharedHash** *string* Shared hash.<br>
+	 * &emsp; **SharedHash** *string* Shared hash. *optional*<br>
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'DownloadFile',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
+	 * }
+	 * 
+	 * @apiSuccess {string} Result Content of the file with headers for download.
 	 */
 	
 	/**
@@ -733,8 +748,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
 	 * @param string $SharedHash Shared hash.
-	 * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public function DownloadFile($UserId, $Type, $Path, $Name, $SharedHash)
 	{
@@ -751,7 +765,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=ViewFile} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -760,10 +773,15 @@ class FilesModule extends AApiModule
 	 * &emsp; **SharedHash** *string* Shared hash.<br>
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'ViewFile',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
+	 * }
+	 * 
+	 * @apiSuccess {string} Result Content of the file with headers for view.
 	 */
 	
 	/**
@@ -774,8 +792,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
 	 * @param string $SharedHash Shared hash.
-	 * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public function ViewFile($UserId, $Type, $Path, $Name, $SharedHash)
 	{
@@ -792,7 +809,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetFileThumbnail} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -801,16 +817,15 @@ class FilesModule extends AApiModule
 	 * &emsp; **SharedHash** *string* Shared hash.<br>
 	 * }
 	 * 
-	 * @apiParam {string} Parameters JSON.stringified object <br>
-	 * @apiParam {string} Parameters.Type Storage type - personal, corporate.<br>
-	 * @apiParam {string} Parameters..Path Path to folder contained file.<br>
-	 * @apiParam {string} Parameters.Name File name.<br>
-	 * @apiParam {string} Parameters.SharedHash Shared hash.<br>
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetFileThumbnail',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
+	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {string} Result Content of the file thumbnail with headers for view.
 	 */
 	
 	/**
@@ -821,8 +836,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
 	 * @param string $SharedHash Shared hash.
-	 * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public function GetFileThumbnail($UserId, $Type, $Path, $Name, $SharedHash)
 	{
@@ -840,21 +854,41 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=GetStorages} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetStorages',
+	 *	AuthToken: 'token_value'
+	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {mixed} Result List of storages in case of success, otherwise **false**.
 	 * @apiSuccess {string} Result.Type Storage type - personal, corporate.
 	 * @apiSuccess {string} Result.DisplayName Storage display name.
 	 * @apiSuccess {bool} Result.IsExternal Indicates if storage external or not.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetStorages',
+	 *	Result: [{ Type: "personal", DisplayName: "Personal", IsExternal: false }, { Type: "corporate", DisplayName: "Corporate", IsExternal: false }, { Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetStorages',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
 	 * Returns storages avaliable for logged in user.
 	 * 
 	 * @param int $UserId User identifier.
-	 * 
 	 * @return array {
 	 *		*string* **Type** Storage type - personal, corporate.
 	 *		*string* **DisplayName** Storage display name.
@@ -892,25 +926,45 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetQuota} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
-	 * &emsp; **iUserId** *int* User identifier.<br>
+	 * &emsp; **UserId** *int* User identifier.<br>
+	 * }
+	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'UpdateAccount',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ UserId: 123 }'
 	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {mixed} Result Object in case of success, otherwise **false**.
 	 * @apiSuccess {int} Result.Used Amount of space used by user.
 	 * @apiSuccess {int} Result.Limit Limit of space for user.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetQuota',
+	 *	Result: { Used: 21921, Limit: 62914560 }
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetQuota',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
-	
 	/**
 	 * Returns used space and space limit for specified user.
 	 * 
 	 * @param int $UserId User identifier.
-	 * 
 	 * @return array {
 	 *		*int* **Used** Amount of space used by user.
 	 *		*int* **Limit** Limit of space for user.
@@ -935,7 +989,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetFiles} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage.<br>
@@ -943,12 +996,35 @@ class FilesModule extends AApiModule
 	 * &emsp; **Pattern** *string* String for search files and folders with such string in name.<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetFiles',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personale", Path: "", Pattern: "" }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {mixed} Result Object in case of success, otherwise **false**.
 	 * @apiSuccess {array} Result.Items Array of files objects.
 	 * @apiSuccess {array} Result.Quota Array of items with fields Used, Limit.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetFiles',
+	 *	Result: { Items: [{Id: "image.png", Type: "personal", Path: "", FullPath: "/image.png", Name: "image.png", Size: 1813, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475498855, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetFiles',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
@@ -958,12 +1034,10 @@ class FilesModule extends AApiModule
 	 * @param string $Type Type of storage.
 	 * @param string $Path Path to folder files are obtained from.
 	 * @param string $Pattern String for search files and folders with such string in name.
-	 * 
 	 * @return array {
 	 *		*array* **Items** Array of files objects.
 	 *		*array* **Quota** Array of items with fields Used, Limit.
 	 * }
-	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function GetFiles($UserId, $Type, $Path, $Pattern)
@@ -1005,19 +1079,40 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetPublicFiles} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Hash** *string* Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.<br>
 	 * &emsp; **Path** *string* Path to folder contained files to return.<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetPublicFiles',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Hash: "hash_value", Path: "" }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {array[]} Result 
+	 * @apiSuccess {mixed} Result Object in case of success, otherwise **false**.
 	 * @apiSuccess {array} Result.Items Array of files objects.
-	 * @apiSuccess {array} Result.Quota Array of items with fields Used, Limit.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetPublicFiles',
+	 *	Result: { Items: [{ Id: "image.png", Type: "personal", Path: "/shared_folder", FullPath: "/shared_folder/image.png", Name: "image.png", Size: 43549, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475500277, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39", Content: "", IsExternal: false }] }
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'GetPublicFiles',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 
 	/**
@@ -1025,12 +1120,10 @@ class FilesModule extends AApiModule
 	 * 
 	 * @param string $Hash Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.
 	 * @param string $Path Path to folder contained files to return.
-	 * 
 	 * @return array {
 	 *		*array* **Items** Array of files objects.
 	 *		*array* **Quota** Array of items with fields Used, Limit.
 	 * }
-	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function GetPublicFiles($Hash, $Path)
@@ -1073,7 +1166,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreateFolder} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
@@ -1081,10 +1173,33 @@ class FilesModule extends AApiModule
 	 * &emsp; **FolderName** *string* New folder name.<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreateFolder',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Path: "", FolderName: "new_folder" }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {bool} Result Indicates if folder was created successfully.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreateFolder',
+	 *	Result: true
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreateFolder',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
@@ -1094,9 +1209,7 @@ class FilesModule extends AApiModule
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to new folder.
 	 * @param string $FolderName New folder name.
-	 * 
-	 * @return boolean
-	 * 
+	 * @return bool
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function CreateFolder($UserId, $Type, $Path, $FolderName)
@@ -1123,7 +1236,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreateLink} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
@@ -1132,10 +1244,37 @@ class FilesModule extends AApiModule
 	 * &emsp; **Name** *string* Link name.<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreateLink',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Path: "", Link: "link_value", Name: "name_value" }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {mixed} Result Link object in case of success, otherwise **false**.
+	 * @apiSuccess {string} Result.Type Type of storage.
+	 * @apiSuccess {string} Result.Path Path to link.
+	 * @apiSuccess {string} Result.Link Link URL.
+	 * @apiSuccess {string} Result.Name Link name.
+	 * @apiSuccess {int} [ErrorCode] Error code.
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreateLink',
+	 *	Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s", Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreateLink',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
@@ -1146,9 +1285,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to new link.
 	 * @param string $Link Link value.
 	 * @param string $Name Link name.
-	 * 
-	 * @return boolean
-	 * 
+	 * @return bool
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function CreateLink($UserId, $Type, $Path, $Link, $Name)
@@ -1176,17 +1313,39 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Delete} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
 	 * &emsp; **Items** *array* Array of items to delete.<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Delete',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Items: [{ "Path": "", "Name": "2.png" }, { "Path": "", "Name": "logo.png" }] }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {bool} Result Indicates if files and (or) folders were deleted successfully.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Delete',
+	 *	Result: true
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Delete',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
@@ -1195,9 +1354,7 @@ class FilesModule extends AApiModule
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param array $Items Array of items to delete.
-	 * 
-	 * @return boolean
-	 * 
+	 * @return bool
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Delete($UserId, $Type, $Items)
@@ -1231,20 +1388,42 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Rename} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
 	 * &emsp; **Path** *string* Path to item to rename.<br>
 	 * &emsp; **Name** *string* Current name of the item.<br>
 	 * &emsp; **NewName** *string* New name of the item.<br>
-	 * &emsp; **IsLink** *boolean* Indicates if the item is link or not.<br>
+	 * &emsp; **IsLink** *bool* Indicates if the item is link or not.<br>
+	 * }
+	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Rename',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Path: "", Name: "old_name.png", NewName: "new_name.png", IsLink: false }'
 	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {bool} Result Indicates if file or folder was renamed successfully.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Rename',
+	 *	Result: true
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Rename',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
@@ -1255,10 +1434,8 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to item to rename.
 	 * @param string $Name Current name of the item.
 	 * @param string $NewName New name of the item.
-	 * @param boolean $IsLink Indicates if the item is link or not.
-	 * 
-	 * @return boolean
-	 * 
+	 * @param bool $IsLink Indicates if the item is link or not.
+	 * @return bool
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
@@ -1288,7 +1465,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Copy} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **FromType** *string* Storage type of folder items will be copied from.<br>
@@ -1298,10 +1474,33 @@ class FilesModule extends AApiModule
 	 * &emsp; **Files** *array* List of items to copy<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Copy',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ Name: "logo.png", IsFolder: false }, { Name: "details.png", IsFolder: false }] }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {bool} Result Indicates if files and (or) folders were copied successfully.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Copy',
+	 *	Result: true
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Copy',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
@@ -1314,11 +1513,9 @@ class FilesModule extends AApiModule
 	 * @param string $ToPath folder items will be copied to.
 	 * @param array $Files list of items to copy {
 	 *		*string* **Name** Name of item to copy.
-	 *		*boolean* **IsFolder** Indicates if the item to copy is folder or not.
+	 *		*bool* **IsFolder** Indicates if the item to copy is folder or not.
 	 * }
-	 * 
-	 * @return boolean
-	 * 
+	 * @return bool
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
@@ -1356,7 +1553,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Move} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **FromType** *string* Storage type of folder items will be moved from.<br>
@@ -1366,10 +1562,33 @@ class FilesModule extends AApiModule
 	 * &emsp; **Files** *array* List of items to move<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Move',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ "Name": "logo.png", "IsFolder": false },{ "Name": "details.png", "IsFolder": false }] }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {boolean} Result 
+	 * @apiSuccess {bool} Result Indicates if files and (or) folders were moved successfully.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Move',
+	 *	Result: true
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'Move',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 	
 	/**
@@ -1382,11 +1601,9 @@ class FilesModule extends AApiModule
 	 * @param string $ToPath folder items will be moved to.
 	 * @param array $Files list of items to move {
 	 *		*string* **Name** Name of item to copy.
-	 *		*boolean* **IsFolder** Indicates if the item to copy is folder or not.
+	 *		*bool* **IsFolder** Indicates if the item to copy is folder or not.
 	 * }
-	 * 
-	 * @return boolean
-	 * 
+	 * @return bool
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
@@ -1423,20 +1640,42 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreatePublicLink} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage contains the item.<br>
 	 * &emsp; **Path** *string* Path to the item.<br>
 	 * &emsp; **Name** *string* Name of the item.<br>
 	 * &emsp; **Size** *int* Size of the file.<br>
-	 * &emsp; **IsFolder** *boolean* Indicates if the item is folder or not.<br>
+	 * &emsp; **IsFolder** *bool* Indicates if the item is folder or not.<br>
+	 * }
+	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreatePublicLink',
+	 *	AuthToken: 'token_value',
+	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png", Size: 100, "IsFolder": false }'
 	 * }
 	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result Public link to the item.
+	 * @apiSuccess {mixed} Result Public link to the item in case of success, otherwise **false**.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreatePublicLink',
+	 *	Result: 'AppUrl/?/pub/files/shared_item_hash/list'
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'CreatePublicLink',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 
 	/**
@@ -1447,10 +1686,8 @@ class FilesModule extends AApiModule
 	 * @param string $Path Path to the item.
 	 * @param string $Name Name of the item.
 	 * @param int $Size Size of the file.
-	 * @param boolean $IsFolder Indicates if the item is folder or not.
-	 * 
+	 * @param bool $IsFolder Indicates if the item is folder or not.
 	 * @return string|false Public link to the item.
-	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
@@ -1475,7 +1712,6 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=DeletePublicLink} Method Method name
 	 * @apiParam {string} AuthToken Auth token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage contains the item.<br>
@@ -1483,10 +1719,33 @@ class FilesModule extends AApiModule
 	 * &emsp; **Name** *string* Name of the item.<br>
 	 * }
 	 * 
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'UpdateAccount',
+	 *	AuthToken: 'DeletePublicLink',
+	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
+	 * }
+	 * 
 	 * @apiSuccess {string} Module Module name
 	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result 
+	 * @apiSuccess {bool} Result Indicated if public link was deleted successfully.
 	 * @apiSuccess {int} [ErrorCode] Error code
+	 * 
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'DeletePublicLink',
+	 *	Result: true
+	 * }
+	 * 
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'DeletePublicLink',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
 	 */
 
 	/**
@@ -1496,9 +1755,7 @@ class FilesModule extends AApiModule
 	 * @param string $Type Type of storage contains the item.
 	 * @param string $Path Path to the item.
 	 * @param string $Name Name of the item.
-	 * 
 	 * @return bool
-	 * 
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function DeletePublicLink($UserId, $Type, $Path, $Name)
@@ -1518,7 +1775,6 @@ class FilesModule extends AApiModule
 	 * Checks URL and returns information about it.
 	 * 
 	 * @param string $Url URL to check.
-	 * 
 	 * @return array|bool {
 	 *		Name
 	 *		Thumb
