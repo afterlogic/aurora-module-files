@@ -220,13 +220,13 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$UserId = $this->getUUIDById($UserId);
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			$sUUID = $this->getUUIDById($UserId);
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 			
-			$Result = $this->oApiFilesManager->getFile($UserId, $Type, $Path, $Name);
+			$Result = $this->oApiFilesManager->getFile($sUUID, $Type, $Path, $Name);
 		}
 	}	
 	
@@ -246,8 +246,14 @@ class FilesModule extends AApiModule
 	{
 		if ($this->checkStorageType($Type))
 		{
-			$UserId = $this->getUUIDById($UserId);
-			$Result = $this->oApiFilesManager->createFile($UserId, $Type, $Path, $Name, $Data, false);
+			$Result = $this->oApiFilesManager->createFile(
+				$this->getUUIDById($UserId), 
+				$Type, 
+				$Path, 
+				$Name, 
+				$Data, 
+				false
+			);
 		}
 	}
 	
@@ -418,9 +424,8 @@ class FilesModule extends AApiModule
 				{
 					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']))
 					{
-						$UserId = $this->getUUIDById($aHash['UserId']);
 						echo $this->getRawFile(
-							$UserId, 
+							$this->getUUIDById($aHash['UserId']), 
 							$aHash['Type'], 
 							$aHash['Path'], 
 							$aHash['Name'], 
@@ -644,20 +649,20 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
 
 		$sError = '';
 		$aResponse = array();
 
-		if ($UserId)
+		if ($sUUID)
 		{
 			if (is_array($UploadData))
 			{
 				$iSize = (int) $UploadData['size'];
 				if ($Type === \EFileStorageTypeStr::Personal)
 				{
-					$aQuota = $this->GetQuota($UserId);
+					$aQuota = $this->GetQuota($sUUID);
 					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
 					{
 						throw new \System\Exceptions\AuroraApiException(\System\Notifications::CanNotUploadFileQuota);
@@ -673,16 +678,16 @@ class FilesModule extends AApiModule
 				{
 					$rData = $UploadData['tmp_name'];
 				}
-				else if ($oApiFileCacheManager->moveUploadedFile($UserId, $sSavedName, $UploadData['tmp_name']))
+				else if ($oApiFileCacheManager->moveUploadedFile($sUUID, $sSavedName, $UploadData['tmp_name']))
 				{
-					$rData = $oApiFileCacheManager->getFile($UserId, $sSavedName);
+					$rData = $oApiFileCacheManager->getFile($sUUID, $sSavedName);
 				}
 				if ($rData)
 				{
 					$this->broadcastEvent(
 						'CreateFile', 
 						array(
-							'UserId' => $UserId,
+							'UserId' => $sUUID,
 							'Type' => $Type,
 							'Path' => $Path,
 							'Name' => $sUploadName,
@@ -753,8 +758,15 @@ class FilesModule extends AApiModule
 	public function DownloadFile($UserId, $Type, $Path, $Name, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$UserId = $this->getUUIDById($UserId);
-		$this->getRawFile($UserId, $Type, $Path, $Name, $SharedHash, true);
+		$this->getRawFile(
+			$this->getUUIDById($UserId),
+			$UserId, 
+			$Type, 
+			$Path, 
+			$Name, 
+			$SharedHash, 
+			true
+		);
 	}
 
 	/**
@@ -797,8 +809,14 @@ class FilesModule extends AApiModule
 	public function ViewFile($UserId, $Type, $Path, $Name, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$UserId = $this->getUUIDById($UserId);
-		$this->getRawFile($UserId, $Type, $Path, $Name, $SharedHash, false);
+		$this->getRawFile(
+			$this->getUUIDById($UserId), 
+			$Type, 
+			$Path, 
+			$Name, 
+			$SharedHash, 
+			false
+		);
 	}
 
 	/**
@@ -841,8 +859,17 @@ class FilesModule extends AApiModule
 	public function GetFileThumbnail($UserId, $Type, $Path, $Name, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$UserId = $this->getUUIDById($UserId);
-		return base64_encode($this->getRawFile($UserId, $Type, $Path, $Name, $SharedHash, false, true));
+		return base64_encode(
+			$this->getRawFile(
+				$this->getUUIDById($UserId), 
+				$Type, 
+				$Path, 
+				$Name, 
+				$SharedHash, 
+				false, 
+				true
+			)
+		);
 	}
 
 	/**
@@ -899,11 +926,11 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		$aStorages = [
 			[
 				'Type' => 'personal', 
-				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE', $UserId), 
+				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE', $sUUID), 
 				'IsExternal' => false
 			]
 		];
@@ -911,7 +938,7 @@ class FilesModule extends AApiModule
 		{
 			$aStorages[] = [
 				'Type' => 'corporate', 
-				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE', $UserId), 
+				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE', $sUUID), 
 				'IsExternal' => false
 			];
 		}
@@ -974,9 +1001,9 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		return array(
-			'Used' => $this->oApiFilesManager->getUserSpaceUsed($UserId, [\EFileStorageTypeStr::Personal]),
+			'Used' => $this->oApiFilesManager->getUserSpaceUsed($sUUID, [\EFileStorageTypeStr::Personal]),
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
 		);
 	}
@@ -1044,16 +1071,16 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$aUsers = array();
-			$aFiles = $this->oApiFilesManager->getFiles($UserId, $Type, $Path, $Pattern);
+			$aFiles = $this->oApiFilesManager->getFiles($sUUID, $Type, $Path, $Pattern);
 			foreach ($aFiles as $oFile)
 			{
 				if (!isset($aUsers[$oFile->Owner]))
@@ -1142,14 +1169,14 @@ class FilesModule extends AApiModule
 				$iUserId = $mMin['UserId'];
 				if ($iUserId)
 				{
-					$UserId = $this->getUUIDById($UserId);
+					$sUUID = $this->getUUIDById($iUserId);
 					if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 					{
 						throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 					}
 					$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
-					$oResult['Items'] = $this->oApiFilesManager->getFiles($iUserId, $mMin['Type'], $Path);
+					$oResult['Items'] = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path);
 					$oResult['Quota'] = $this->GetQuota($iUserId);
 				}
 			}
@@ -1216,15 +1243,15 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId)) 
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID)) 
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
-			return $this->oApiFilesManager->createFolder($UserId, $Type, $Path, $FolderName);
+			return $this->oApiFilesManager->createFolder($sUUID, $Type, $Path, $FolderName);
 		}
 	}
 
@@ -1292,16 +1319,16 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$Name = \trim(\MailSo\Base\Utils::ClearFileName($Name));
-			return $this->oApiFilesManager->createLink($UserId, $Type, $Path, $Link, $Name);
+			return $this->oApiFilesManager->createLink($sUUID, $Type, $Path, $Link, $Name);
 		}
 	}
 
@@ -1361,10 +1388,10 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
@@ -1373,7 +1400,7 @@ class FilesModule extends AApiModule
 
 			foreach ($Items as $oItem)
 			{
-				$oResult = $this->oApiFilesManager->delete($UserId, $Type, $oItem['Path'], $oItem['Name']);
+				$oResult = $this->oApiFilesManager->delete($sUUID, $Type, $oItem['Path'], $oItem['Name']);
 			}
 
 			return $oResult;
@@ -1442,18 +1469,18 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$NewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
 
-			$NewName = $this->oApiFilesManager->getNonExistentFileName($UserId, $Type, $Path, $NewName);
-			return $this->oApiFilesManager->rename($UserId, $Type, $Path, $Name, $NewName, $IsLink);
+			$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $Type, $Path, $NewName);
+			return $this->oApiFilesManager->rename($sUUID, $Type, $Path, $Name, $NewName, $IsLink);
 		}
 	}	
 
@@ -1522,10 +1549,10 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
@@ -1537,8 +1564,8 @@ class FilesModule extends AApiModule
 				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
-					$NewName = $this->oApiFilesManager->getNonExistentFileName($UserId, $ToType, $ToPath, $aItem['Name']);
-					$oResult = $this->oApiFilesManager->copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+					$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
+					$oResult = $this->oApiFilesManager->copy($sUUID, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
 				}
 			}
 			return $oResult;
@@ -1610,10 +1637,10 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
+		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
@@ -1624,8 +1651,8 @@ class FilesModule extends AApiModule
 				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
-					$NewName = $this->oApiFilesManager->getNonExistentFileName($UserId, $ToType, $ToPath, $aItem['Name']);
-					$oResult = $this->oApiFilesManager->move($UserId, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+					$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
+					$oResult = $this->oApiFilesManager->move($sUUID, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
 				}
 			}
 			return $oResult;
@@ -1694,14 +1721,14 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
-		if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+		$sUUID = $this->getUUIDById($UserId);
+		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 		{
 			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
 		$bFolder = $IsFolder === '1' ? true : false;
-		return $this->oApiFilesManager->createPublicLink($UserId, $Type, $Path, $Name, $Size, $bFolder);
+		return $this->oApiFilesManager->createPublicLink($sUUID, $Type, $Path, $Name, $Size, $bFolder);
 	}	
 	
 	/**
@@ -1762,13 +1789,13 @@ class FilesModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$UserId = $this->getUUIDById($UserId);
-		if (!$this->oApiCapabilityManager->isFilesSupported($UserId))
+		$sUUID = $this->getUUIDById($UserId);
+		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 		{
 			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
-		return $this->oApiFilesManager->deletePublicLink($UserId, $Type, $Path, $Name);
+		return $this->oApiFilesManager->deletePublicLink($sUUID, $Type, $Path, $Name);
 	}
 
 	/**
