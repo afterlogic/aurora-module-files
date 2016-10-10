@@ -122,7 +122,7 @@ class FilesModule extends AApiModule
 		{
 			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 			
-			$mResult = false;
+//			$mResult = false;
 			$this->broadcastEvent(
 				'GetFile', 
 				array(
@@ -130,9 +130,9 @@ class FilesModule extends AApiModule
 					'Type' => $sType,
 					'Path' => $sPath,
 					'Name' => &$sFileName,
-					'IsThumb' => $bThumbnail,
-					'@Result' => &$mResult
-				)
+					'IsThumb' => $bThumbnail
+				),
+				$mResult
 			);			
 			
 			if (false !== $mResult) 
@@ -706,9 +706,9 @@ class FilesModule extends AApiModule
 							'Type' => $Type,
 							'Path' => $Path,
 							'Name' => $sUploadName,
-							'Data' => $rData,
-							'@Result' => &$mResult
-						)
+							'Data' => $rData
+						),
+						$mResult
 					);			
 					
 					$aResponse['File'] = array(
@@ -1892,9 +1892,9 @@ class FilesModule extends AApiModule
 		$this->broadcastEvent(
 			'CheckUrl', 
 			array(
-				'Url' => $Url,
-				'@Result' => &$mResult
-			)
+				'Url' => $Url
+			),
+			$mResult
 		);
 		
 		return $mResult;
