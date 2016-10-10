@@ -461,32 +461,37 @@ class FilesModule extends AApiModule
 	 *	AuthToken: 'token_value'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name.
-	 * @apiSuccess {string} Method Method name.
-	 * @apiSuccess {mixed} Result List of module settings in case of success, otherwise **false**.
-	 * @apiSuccess {bool} Result.EnableModule=false Indicates if Files module is enabled.
-	 * @apiSuccess {bool} Result.EnableUploadSizeLimit=false Indicates if upload size limit is enabled.
-	 * @apiSuccess {int} Result.UploadSizeLimitMb=0 Value of upload size limit in Mb.
-	 * @apiSuccess {bool} Result.EnableCorporate=false Indicates if corporate storage is enabled.
-	 * @apiSuccess {int} Result.UserSpaceLimitMb=0 Value of user space limit in Mb.
-	 * @apiSuccess {string} Result.CustomTabTitle=&quot;&quot; Custom tab title.
-	 * @apiSuccess {string} Result.PublicHash=&quot;&quot; Public hash.
-	 * @apiSuccess {string} Result.PublicFolderName=&quot;&quot; Public folder name.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name.
+	 * @apiSuccess {string} Result.Method Method name.
+	 * @apiSuccess {mixed} Result.Result List of module settings in case of success, otherwise **false**.
+	 * @apiSuccess {bool} Result.Result.EnableModule=false Indicates if Files module is enabled.
+	 * @apiSuccess {bool} Result.Result.EnableUploadSizeLimit=false Indicates if upload size limit is enabled.
+	 * @apiSuccess {int} Result.Result.UploadSizeLimitMb=0 Value of upload size limit in Mb.
+	 * @apiSuccess {bool} Result.Result.EnableCorporate=false Indicates if corporate storage is enabled.
+	 * @apiSuccess {int} Result.Result.UserSpaceLimitMb=0 Value of user space limit in Mb.
+	 * @apiSuccess {string} Result.Result.CustomTabTitle=&quot;&quot; Custom tab title.
+	 * @apiSuccess {string} Result.Result.PublicHash=&quot;&quot; Public hash.
+	 * @apiSuccess {string} Result.Result.PublicFolderName=&quot;&quot; Public folder name.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetAppData',
-	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetAppData',
+	 *		Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetAppData',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetAppData',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	/**
@@ -547,24 +552,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 10 }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicates if settings were updated successfully.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicates if settings were updated successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'UpdateSettings',
-	 *	Result: true
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'UpdateSettings',
+	 *		Result: true
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'UpdateSettings',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'UpdateSettings',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	/**
@@ -604,29 +614,34 @@ class FilesModule extends AApiModule
 	 * &emsp; **FileData** *string* Uploaded file information. Contains fields size, name, tmp_name.<br>
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result File object in case of success, otherwise **false**.
-	 * @apiSuccess {string} Result.Name Original file name.
-	 * @apiSuccess {string} Result.TempName Temporary file name.
-	 * @apiSuccess {string} Result.MimeType Mime type of file.
-	 * @apiSuccess {int} Result.Size File size.
-	 * @apiSuccess {string} Result.Hash Hash used for file download, file view or getting file thumbnail.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {mixed} Result.Result File object in case of success, otherwise **false**.
+	 * @apiSuccess {string} Result.Result.Name Original file name.
+	 * @apiSuccess {string} Result.Result.TempName Temporary file name.
+	 * @apiSuccess {string} Result.Result.MimeType Mime type of file.
+	 * @apiSuccess {int} Result.Result.Size File size.
+	 * @apiSuccess {string} Result.Result.Hash Hash used for file download, file view or getting file thumbnail.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'UploadFile',
-	 *	Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378', MimeType: 'image/png', Size: 1813 } }
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'UploadFile',
+	 *		Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378', MimeType: 'image/png', Size: 1813 } }
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'UploadFile',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'UploadFile',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	/**
@@ -888,27 +903,32 @@ class FilesModule extends AApiModule
 	 *	AuthToken: 'token_value'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result List of storages in case of success, otherwise **false**.
-	 * @apiSuccess {string} Result.Type Storage type - personal, corporate.
-	 * @apiSuccess {string} Result.DisplayName Storage display name.
-	 * @apiSuccess {bool} Result.IsExternal Indicates if storage external or not.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {mixed} Result.Result List of storages in case of success, otherwise **false**.
+	 * @apiSuccess {string} Result.Result.Type Storage type - personal, corporate.
+	 * @apiSuccess {string} Result.Result.DisplayName Storage display name.
+	 * @apiSuccess {bool} Result.Result.IsExternal Indicates if storage external or not.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetStorages',
-	 *	Result: [{ Type: "personal", DisplayName: "Personal", IsExternal: false }, { Type: "corporate", DisplayName: "Corporate", IsExternal: false }, { Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetStorages',
+	 *		Result: [{ Type: "personal", DisplayName: "Personal", IsExternal: false }, { Type: "corporate", DisplayName: "Corporate", IsExternal: false }, { Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetStorages',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetStorages',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -966,26 +986,31 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ UserId: 123 }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result Object in case of success, otherwise **false**.
-	 * @apiSuccess {int} Result.Used Amount of space used by user.
-	 * @apiSuccess {int} Result.Limit Limit of space for user.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {mixed} Result.Result Object in case of success, otherwise **false**.
+	 * @apiSuccess {int} Result.Result.Used Amount of space used by user.
+	 * @apiSuccess {int} Result.Result.Limit Limit of space for user.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetQuota',
-	 *	Result: { Used: 21921, Limit: 62914560 }
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetQuota',
+	 *		Result: { Used: 21921, Limit: 62914560 }
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetQuota',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetQuota',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	/**
@@ -1031,26 +1056,31 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Type: "personale", Path: "", Pattern: "" }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result Object in case of success, otherwise **false**.
-	 * @apiSuccess {array} Result.Items Array of files objects.
-	 * @apiSuccess {array} Result.Quota Array of items with fields Used, Limit.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {mixed} Result.Result Object in case of success, otherwise **false**.
+	 * @apiSuccess {array} Result.Result.Items Array of files objects.
+	 * @apiSuccess {array} Result.Result.Quota Array of items with fields Used, Limit.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetFiles',
-	 *	Result: { Items: [{Id: "image.png", Type: "personal", Path: "", FullPath: "/image.png", Name: "image.png", Size: 1813, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475498855, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetFiles',
+	 *		Result: { Items: [{Id: "image.png", Type: "personal", Path: "", FullPath: "/image.png", Name: "image.png", Size: 1813, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475498855, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetFiles',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetFiles',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -1120,25 +1150,30 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Hash: "hash_value", Path: "" }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result Object in case of success, otherwise **false**.
-	 * @apiSuccess {array} Result.Items Array of files objects.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {mixed} Result.Result Object in case of success, otherwise **false**.
+	 * @apiSuccess {array} Result.Result.Items Array of files objects.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetPublicFiles',
-	 *	Result: { Items: [{ Id: "image.png", Type: "personal", Path: "/shared_folder", FullPath: "/shared_folder/image.png", Name: "image.png", Size: 43549, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475500277, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39", Content: "", IsExternal: false }] }
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetPublicFiles',
+	 *		Result: { Items: [{ Id: "image.png", Type: "personal", Path: "/shared_folder", FullPath: "/shared_folder/image.png", Name: "image.png", Size: 43549, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475500277, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39", Content: "", IsExternal: false }] }
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'GetPublicFiles',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'GetPublicFiles',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 
@@ -1208,24 +1243,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Type: "personal", Path: "", FolderName: "new_folder" }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicates if folder was created successfully.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicates if folder was created successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'CreateFolder',
-	 *	Result: true
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'CreateFolder',
+	 *		Result: true
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'CreateFolder',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'CreateFolder',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -1279,28 +1319,33 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Type: "personal", Path: "", Link: "link_value", Name: "name_value" }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result Link object in case of success, otherwise **false**.
-	 * @apiSuccess {string} Result.Type Type of storage.
-	 * @apiSuccess {string} Result.Path Path to link.
-	 * @apiSuccess {string} Result.Link Link URL.
-	 * @apiSuccess {string} Result.Name Link name.
-	 * @apiSuccess {int} [ErrorCode] Error code.
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {mixed} Result.Result Link object in case of success, otherwise **false**.
+	 * @apiSuccess {string} Result.Result.Type Type of storage.
+	 * @apiSuccess {string} Result.Result.Path Path to link.
+	 * @apiSuccess {string} Result.Result.Link Link URL.
+	 * @apiSuccess {string} Result.Result.Name Link name.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code.
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'CreateLink',
-	 *	Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s", Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'CreateLink',
+	 *		Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s", Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'CreateLink',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'CreateLink',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -1354,24 +1399,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Type: "personal", Items: [{ "Path": "", "Name": "2.png" }, { "Path": "", "Name": "logo.png" }] }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicates if files and (or) folders were deleted successfully.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicates if files and (or) folders were deleted successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Delete',
-	 *	Result: true
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Delete',
+	 *		Result: true
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Delete',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Delete',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -1432,24 +1482,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "old_name.png", NewName: "new_name.png", IsLink: false }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicates if file or folder was renamed successfully.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicates if file or folder was renamed successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Rename',
-	 *	Result: true
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Rename',
+	 *		Result: true
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Rename',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Rename',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -1509,24 +1564,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ Name: "logo.png", IsFolder: false }, { Name: "details.png", IsFolder: false }] }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicates if files and (or) folders were copied successfully.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicates if files and (or) folders were copied successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Copy',
-	 *	Result: true
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Copy',
+	 *		Result: true
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Copy',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Copy',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -1597,24 +1657,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ "Name": "logo.png", "IsFolder": false },{ "Name": "details.png", "IsFolder": false }] }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicates if files and (or) folders were moved successfully.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicates if files and (or) folders were moved successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Move',
-	 *	Result: true
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Move',
+	 *		Result: true
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'Move',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'Move',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 	
@@ -1684,24 +1749,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png", Size: 100, "IsFolder": false }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {mixed} Result Public link to the item in case of success, otherwise **false**.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {mixed} Result.Result Public link to the item in case of success, otherwise **false**.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'CreatePublicLink',
-	 *	Result: 'AppUrl/?/pub/files/shared_item_hash/list'
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'CreatePublicLink',
+	 *		Result: 'AppUrl/?/pub/files/shared_item_hash/list'
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'CreatePublicLink',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'CreatePublicLink',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 
@@ -1754,24 +1824,29 @@ class FilesModule extends AApiModule
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
 	 * 
-	 * @apiSuccess {string} Module Module name
-	 * @apiSuccess {string} Method Method name
-	 * @apiSuccess {bool} Result Indicated if public link was deleted successfully.
-	 * @apiSuccess {int} [ErrorCode] Error code
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicated if public link was deleted successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'DeletePublicLink',
-	 *	Result: true
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'DeletePublicLink',
+	 *		Result: true
+	 *	}]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Module: 'Files',
-	 *	Method: 'DeletePublicLink',
-	 *	Result: false,
-	 *	ErrorCode: 102
+	 *	Result: [{
+	 *		Module: 'Files',
+	 *		Method: 'DeletePublicLink',
+	 *		Result: false,
+	 *		ErrorCode: 102
+	 *	}]
 	 * }
 	 */
 
