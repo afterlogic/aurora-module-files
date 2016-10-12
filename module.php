@@ -445,19 +445,19 @@ class FilesModule extends AApiModule
 	
 	/***** public functions might be called with web API *****/
 	/**
-	 * @api {post} ?/Api/ GetAppData
-	 * @apiName GetAppData
+	 * @api {post} ?/Api/ GetSettings
+	 * @apiName GetSettings
 	 * @apiGroup Files
 	 * @apiDescription Obtaines list of module settings for authenticated user.
 	 * 
 	 * @apiParam {string=Files} Module Module=Files name
-	 * @apiParam {string=GetAppData} Method=GetAppData Method name
+	 * @apiParam {string=GetSettings} Method=GetSettings Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * 
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
-	 *	Method: 'GetAppData',
+	 *	Method: 'GetSettings',
 	 *	AuthToken: 'token_value'
 	 * }
 	 * 
@@ -479,7 +479,7 @@ class FilesModule extends AApiModule
 	 * {
 	 *	Result: [{
 	 *		Module: 'Files',
-	 *		Method: 'GetAppData',
+	 *		Method: 'GetSettings',
 	 *		Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 *	}]
 	 * }
@@ -488,7 +488,7 @@ class FilesModule extends AApiModule
 	 * {
 	 *	Result: [{
 	 *		Module: 'Files',
-	 *		Method: 'GetAppData',
+	 *		Method: 'GetSettings',
 	 *		Result: false,
 	 *		ErrorCode: 102
 	 *	}]
@@ -499,7 +499,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return array
 	 */
-	public function GetAppData()
+	public function GetSettings()
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
