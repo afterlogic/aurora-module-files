@@ -448,6 +448,8 @@ class FilesModule extends AApiModule
 	 * @api {post} ?/Api/ GetSettings
 	 * @apiName GetSettings
 	 * @apiGroup Files
+	 * @apiDefine Files Module
+	 * Main Files module. It provides PHP and Web APIs for managing files.
 	 * @apiDescription Obtaines list of module settings for authenticated user.
 	 * 
 	 * @apiParam {string=Files} Module Module=Files name
