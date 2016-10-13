@@ -454,7 +454,8 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						
 						$this->oManager->GetModule()->broadcastEvent(
 							'PopulateFileItem', 
-							array(&$oItem)
+							array(),
+							$oItem
 						);
 						
 						$oItem->LastModified = $oValue->getLastModified();
