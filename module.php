@@ -457,7 +457,7 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiParam {string=Files} Module Module=Files name
 	 * @apiParam {string=GetSettings} Method=GetSettings Method name
-	 * @apiParam {string} AuthToken Auth token
+	 * @apiParam {string} [AuthToken] Auth token
 	 * 
 	 * @apiParamExample {json} Request-Example:
 	 * {
@@ -476,8 +476,8 @@ class FilesModule extends AApiModule
 	 * @apiSuccess {bool} Result.Result.EnableCorporate=false Indicates if corporate storage is enabled.
 	 * @apiSuccess {int} Result.Result.UserSpaceLimitMb=0 Value of user space limit in Mb.
 	 * @apiSuccess {string} Result.Result.CustomTabTitle=&quot;&quot; Custom tab title.
-	 * @apiSuccess {string} Result.Result.PublicHash=&quot;&quot; Public hash.
-	 * @apiSuccess {string} Result.Result.PublicFolderName=&quot;&quot; Public folder name.
+	 * @apiSuccess {string} [Result.Result.PublicHash=&quot;&quot;] Public hash.
+	 * @apiSuccess {string} [Result.Result.PublicFolderName=&quot;&quot;] Public folder name.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
 	 * 
 	 * @apiSuccessExample {json} Success response example:
@@ -745,7 +745,7 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=DownloadFile} Method Method name
-	 * @apiParam {string} AuthToken Auth token
+	 * @apiParam {string} [AuthToken] Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -796,7 +796,7 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=ViewFile} Method Method name
-	 * @apiParam {string} AuthToken Auth token
+	 * @apiParam {string} [AuthToken] Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -846,7 +846,7 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetFileThumbnail} Method Method name
-	 * @apiParam {string} AuthToken Auth token
+	 * @apiParam {string} [AuthToken] Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -1140,7 +1140,6 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetPublicFiles} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Hash** *string* Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.<br>
@@ -1151,7 +1150,6 @@ class FilesModule extends AApiModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetPublicFiles',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Hash: "hash_value", Path: "" }'
 	 * }
 	 * 
