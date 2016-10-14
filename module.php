@@ -122,16 +122,17 @@ class FilesModule extends AApiModule
 		{
 			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 			
-//			$mResult = false;
+			$aArgs = array(
+				'UserId' => $iUserId,
+				'Type' => $sType,
+				'Path' => $sPath,
+				'Name' => &$sFileName,
+				'IsThumb' => $bThumbnail
+			);
+			$mResult = false;
 			$this->broadcastEvent(
 				'GetFile', 
-				array(
-					'UserId' => $iUserId,
-					'Type' => $sType,
-					'Path' => $sPath,
-					'Name' => &$sFileName,
-					'IsThumb' => $bThumbnail
-				),
+				$aArgs,
 				$mResult
 			);			
 			
@@ -216,17 +217,17 @@ class FilesModule extends AApiModule
 	 * @param string|resource|bool $Result Is passed by reference.
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function onGetFile($UserId, $Type, $Path, $Name, $IsThumb, &$Result)
+	public function onGetFile($aArgs, &$Result)
 	{
-		if ($this->checkStorageType($Type))
+		if ($this->checkStorageType($aArgs['Type']))
 		{
-			$sUUID = $this->getUUIDById($UserId);
+			$sUUID = $this->getUUIDById($aArgs['UserId']);
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 			
-			$Result = $this->oApiFilesManager->getFile($sUUID, $Type, $Path, $Name);
+			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
 		}
 	}	
 	
@@ -242,16 +243,16 @@ class FilesModule extends AApiModule
 	 * @param string|resource|bool $Result Is passed by reference.
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
-	public function onCreateFile($UserId, $Type, $Path, $Name, $Data, &$Result)
+	public function onCreateFile($aArgs, &$Result)
 	{
-		if ($this->checkStorageType($Type))
+		if ($this->checkStorageType($aArgs['Type']))
 		{
 			$Result = $this->oApiFilesManager->createFile(
-				$this->getUUIDById($UserId), 
-				$Type, 
-				$Path, 
-				$Name, 
-				$Data, 
+				$this->getUUIDById($aArgs['UserId']), 
+				$aArgs['Type'], 
+				$aArgs['Path'], 
+				$aArgs['Name'], 
+				$aArgs['Data'], 
 				false
 			);
 		}
@@ -310,7 +311,7 @@ class FilesModule extends AApiModule
 	 * @param \CFileStorageItem $oItem
 	 * @return bool
 	 */
-	public function onPopulateFileItem(&$oItem)
+	public function onPopulateFileItem($aArgs, &$oItem)
 	{
 		if ($oItem->IsLink)
 		{
@@ -328,9 +329,9 @@ class FilesModule extends AApiModule
 	 * @ignore
 	 * @param int $iUserId
 	 */
-	public function onAfterDeleteUser($iUserId)
+	public function onAfterDeleteUser($aArgs)
 	{
-		$this->oApiFilesManager->ClearFiles($iUserId);
+		$this->oApiFilesManager->ClearFiles($aArgs['UserId']);
 	}
 	/***** private functions *****/
 	
@@ -704,15 +705,16 @@ class FilesModule extends AApiModule
 				}
 				if ($rData)
 				{
+					$aArgs = array(
+						'UserId' => $sUUID,
+						'Type' => $Type,
+						'Path' => $Path,
+						'Name' => $sUploadName,
+						'Data' => $rData
+					);
 					$this->broadcastEvent(
 						'CreateFile', 
-						array(
-							'UserId' => $sUUID,
-							'Type' => $Type,
-							'Path' => $Path,
-							'Name' => $sUploadName,
-							'Data' => $rData
-						),
+						$aArgs,
 						$mResult
 					);			
 					
@@ -1892,11 +1894,12 @@ class FilesModule extends AApiModule
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		$mResult = false;
 		
+		$aArgs = array(
+			'Url' => $Url
+		);
 		$this->broadcastEvent(
 			'CheckUrl', 
-			array(
-				'Url' => $Url
-			),
+			$aArgs,
 			$mResult
 		);
 		

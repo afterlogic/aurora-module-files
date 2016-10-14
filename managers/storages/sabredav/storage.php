@@ -452,9 +452,10 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 							$oItem->ContentType = $oValue->getContentType();
 						}
 						
+						$aArgs = array();
 						$this->oManager->GetModule()->broadcastEvent(
 							'PopulateFileItem', 
-							array(),
+							$aArgs,
 							$oItem
 						);
 						
