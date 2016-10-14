@@ -273,15 +273,15 @@ class FilesModule extends AApiModule
 	 * @param string $sUrl
 	 * @param mixed $mResult
 	 */
-	public function onCheckUrl($sUrl, &$mResult)
+	public function onCheckUrl($aArgs, &$mResult)
 	{
 		$iUserId = \CApi::getAuthenticatedUserId();
 
 		if ($iUserId)
 		{
-			if (!empty($sUrl))
+			if (!empty($aArgs['Url']))
 			{
-				$sUrl = \api_Utils::GetRemoteFileRealUrl($sUrl);
+				$sUrl = \api_Utils::GetRemoteFileRealUrl($aArgs['Url']);
 				if ($sUrl)
 				{
 					$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
@@ -329,9 +329,9 @@ class FilesModule extends AApiModule
 	 * @ignore
 	 * @param int $iUserId
 	 */
-	public function onAfterDeleteUser($aArgs)
+	public function onAfterDeleteUser($aArgs, $iUserId)
 	{
-		$this->oApiFilesManager->ClearFiles($aArgs['UserId']);
+		$this->oApiFilesManager->ClearFiles($iUserId);
 	}
 	/***** private functions *****/
 	
