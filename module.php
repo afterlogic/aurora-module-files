@@ -782,7 +782,6 @@ class FilesModule extends AApiModule
 		// checkUserRoleIsAtLeast is called in getRawFile
 		$this->getRawFile(
 			$this->getUUIDById($UserId),
-			$UserId, 
 			$Type, 
 			$Path, 
 			$Name, 
