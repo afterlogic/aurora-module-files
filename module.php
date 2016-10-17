@@ -92,16 +92,16 @@ class FilesModule extends AApiModule
 	 * @param int $iUserId User identificator.
 	 * @param string $sType Storage type - personal, corporate.
 	 * @param string $sPath Path to folder contained file.
-	 * @param string $sFileName File name.
+	 * @param string $sFileId File identificator.
 	 * @param bool $bDownload Indicates if file should be downloaded or viewed.
 	 * @param bool $bThumbnail Indicates if thumbnail should be created for file.
 	 * 
 	 * @return bool
 	 */
-	private function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $bDownload = true, $bThumbnail = false)
+	private function getRawFile($iUserId, $sType, $sPath, $sFileId, $SharedHash = null, $bDownload = true, $bThumbnail = false)
 	{
 		$sPath = urldecode($sPath);
-		$sFileName = urldecode($sFileName);
+		$sFileId = urldecode($sFileId);
 		
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
@@ -118,15 +118,15 @@ class FilesModule extends AApiModule
 		}
 		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
-			isset($sType, $sPath, $sFileName)) 
+			isset($sType, $sPath, $sFileId)) 
 		{
-			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
+			$sContentType = (empty($sFileId)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileId);
 			
 			$aArgs = array(
 				'UserId' => $iUserId,
 				'Type' => $sType,
 				'Path' => $sPath,
-				'Name' => &$sFileName,
+				'Name' => &$sFileId,
 				'IsThumb' => $bThumbnail
 			);
 			$mResult = false;
@@ -141,13 +141,13 @@ class FilesModule extends AApiModule
 				if (is_resource($mResult)) 
 				{
 //					$sFileName = $this->clearFileName($oFileInfo->Name, $sContentType); // todo
-					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
-					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
+					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileId);
+					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileId);
 			
 					if ($bThumbnail) 
 					{
 //						$this->cacheByKey($sRawKey);	// todo
-						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName, false);
+						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileId, false);
 					} 
 					else if ($sContentType === 'text/html') 
 					{
@@ -773,18 +773,18 @@ class FilesModule extends AApiModule
 	 * @param int $UserId User identifier.
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
-	 * @param string $Name File name.
+	 * @param string $Id File identificator.
 	 * @param string $SharedHash Shared hash.
 	 * @return bool
 	 */
-	public function DownloadFile($UserId, $Type, $Path, $Name, $SharedHash)
+	public function DownloadFile($UserId, $Type, $Path, $Id, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		$this->getRawFile(
 			$this->getUUIDById($UserId),
 			$Type, 
 			$Path, 
-			$Name, 
+			$Id, 
 			$SharedHash, 
 			true
 		);
