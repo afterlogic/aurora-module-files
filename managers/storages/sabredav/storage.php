@@ -233,6 +233,8 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					{
 						$oResult->Owner = $aProps['Owner'];
 					}
+					
+					$oResult->IsFolder = $oItem->isDirectory();
 					$oResult->Path = $sPath;
 					$oResult->Type = $sType;
 					$oResult->Name = $sName;
