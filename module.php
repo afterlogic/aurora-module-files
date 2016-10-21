@@ -1143,7 +1143,8 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFileInfo($UserId, $Type, $Path, $Name)
 	{
-		return $this->oApiFilesManager->getFileInfo($UserId, $Type, $Path, $Name);
+		$sUUID = $this->getUUIDById($UserId);
+		return $this->oApiFilesManager->getFileInfo($sUUID, $Type, $Path, $Name);
 	}
 
 	/**
