@@ -1133,6 +1133,18 @@ class FilesModule extends AApiModule
 			);
 		}
 	}
+	
+	/**
+	 * 
+	 * @param int $UserId
+	 * @param string $Type
+	 * @param string $Path
+	 * @param string $Name
+	 */
+	public function GetFileInfo($UserId, $Type, $Path, $Name)
+	{
+		return $this->oApiFilesManager->getFileInfo($UserId, $Type, $Path, $Name);
+	}
 
 	/**
 	 * @api {post} ?/Api/ GetPublicFiles
