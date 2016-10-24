@@ -54,6 +54,7 @@ class FilesModule extends AApiModule
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
 		$this->AddEntry('pub', 'EntryPub');
+		$this->AddEntry('upload', 'UploadFileData');
 		
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
 		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
@@ -603,6 +604,57 @@ class FilesModule extends AApiModule
 		$this->saveModuleConfig();
 		return true;
 	}
+	
+	/**
+	 * Uploads file from client side.
+	 * 
+	 * @param int $UserId User identifier.
+	 * @param string $Type Type of storage - personal, corporate.
+	 * @param string $Path Path to folder than should contain uploaded file.
+	 * @param array $Data file content.
+	 * @return array {
+	 *		*string* **Name** Original file name.
+	 *		*string* **TempName** Temporary file name.
+	 *		*string* **MimeType** Mime type of file.
+	 *		*int* **Size** File size.
+	 *		*string* **Hash** Hash used for file download, file view or getting file thumbnail.
+	 * }
+	 * @throws \System\Exceptions\AuroraApiException
+	 */
+	public function UploadFileData()
+	{
+		$aPaths = \System\Service::GetPaths();
+		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
+		{
+			$sType = isset($aPaths[2]) ? strtolower($aPaths[2]) : 'personal';
+			$rData = fopen("php://input", "r");
+			$aFilePath = array_slice($aPaths, 3);
+			$sFilePath = urldecode(implode('/', $aFilePath));
+			$sAuthToken = $this->oHttp->GetHeader('Auth-Token');
+			$iUserId = \CApi::getAuthenticatedUserId($sAuthToken);
+			$oUser = \CApi::getAuthenticatedUser($iUserId);
+			
+			if ($rData && $oUser && !empty($aFilePath))
+			{
+				$aArgs = array(
+					'UserId' => $oUser->sUUID,
+					'Type' => $sType,
+					'Path' => dirname($sFilePath),
+					'Name' => basename($sFilePath),
+					'Data' => $rData
+				);
+				$this->broadcastEvent(
+					'CreateFile', 
+					$aArgs,
+					$mResult
+				);			
+
+				return;
+			}			
+			
+		}
+		
+	}	
 	
 	/**
 	 * @api {post} ?/Upload/ UploadFile
