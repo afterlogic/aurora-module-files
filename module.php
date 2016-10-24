@@ -608,21 +608,12 @@ class FilesModule extends AApiModule
 	/**
 	 * Uploads file from client side.
 	 * 
-	 * @param int $UserId User identifier.
-	 * @param string $Type Type of storage - personal, corporate.
-	 * @param string $Path Path to folder than should contain uploaded file.
-	 * @param array $Data file content.
-	 * @return array {
-	 *		*string* **Name** Original file name.
-	 *		*string* **TempName** Temporary file name.
-	 *		*string* **MimeType** Mime type of file.
-	 *		*int* **Size** File size.
-	 *		*string* **Hash** Hash used for file download, file view or getting file thumbnail.
-	 * }
+	 * @return string "true" or "false"
 	 * @throws \System\Exceptions\AuroraApiException
 	 */
 	public function UploadFileData()
 	{
+		$mResult = false;
 		$aPaths = \System\Service::GetPaths();
 		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
 		{
@@ -630,8 +621,9 @@ class FilesModule extends AApiModule
 			$rData = fopen("php://input", "r");
 			$aFilePath = array_slice($aPaths, 3);
 			$sFilePath = urldecode(implode('/', $aFilePath));
-			$sAuthToken = $this->oHttp->GetHeader('Auth-Token');
-			$iUserId = \CApi::getAuthenticatedUserId($sAuthToken);
+			$iUserId = \CApi::getAuthenticatedUserId(
+				$this->oHttp->GetHeader('Auth-Token')
+			);
 			$oUser = \CApi::getAuthenticatedUser($iUserId);
 			if ($oUser)
 			{
@@ -649,27 +641,25 @@ class FilesModule extends AApiModule
 						$aArgs,
 						$mResult
 					);			
-
-					if ($mResult)
-					{
-						echo 'true';
-					}
-					else 
-					{
-						echo 'false';
-					}
 				}
 				else 
 				{
-					echo 'false';
+					$mResult = false;
 				}
 			}
 			else
 			{
-				echo 'false';
+				$mResult = false;
 			}
 		}
-		
+		if ($mResult)
+		{
+			echo 'true';
+		}
+		else 
+		{
+			echo 'false';
+		}
 	}	
 	
 	/**
