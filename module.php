@@ -633,25 +633,34 @@ class FilesModule extends AApiModule
 			$sAuthToken = $this->oHttp->GetHeader('Auth-Token');
 			$iUserId = \CApi::getAuthenticatedUserId($sAuthToken);
 			$oUser = \CApi::getAuthenticatedUser($iUserId);
-			
-			if ($rData && $oUser && !empty($aFilePath))
+			if ($oUser)
 			{
-				$aArgs = array(
-					'UserId' => $oUser->sUUID,
-					'Type' => $sType,
-					'Path' => dirname($sFilePath),
-					'Name' => basename($sFilePath),
-					'Data' => $rData
-				);
-				$this->broadcastEvent(
-					'CreateFile', 
-					$aArgs,
-					$mResult
-				);			
+				if ($rData)
+				{
+					$aArgs = array(
+						'UserId' => $oUser->sUUID,
+						'Type' => $sType,
+						'Path' => dirname($sFilePath),
+						'Name' => basename($sFilePath),
+						'Data' => $rData
+					);
+					$this->broadcastEvent(
+						'CreateFile', 
+						$aArgs,
+						$mResult
+					);			
 
-				return;
-			}			
-			
+					var_dump($mResult);
+				}
+				else 
+				{
+					echo 'io-error';
+				}
+			}
+			else
+			{
+				echo 'auth-error';
+			}
 		}
 		
 	}	
