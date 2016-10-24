@@ -650,16 +650,16 @@ class FilesModule extends AApiModule
 						$mResult
 					);			
 
-					var_dump($mResult);
+					echo !!$mResult;
 				}
 				else 
 				{
-					echo 'io-error';
+					echo 'false';
 				}
 			}
 			else
 			{
-				echo 'auth-error';
+				echo 'false';
 			}
 		}
 		
