@@ -650,7 +650,14 @@ class FilesModule extends AApiModule
 						$mResult
 					);			
 
-					echo (bool) !!$mResult;
+					if ($mResult)
+					{
+						echo 'true';
+					}
+					else 
+					{
+						echo 'false';
+					}
 				}
 				else 
 				{
