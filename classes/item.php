@@ -57,7 +57,8 @@ class CFileStorageItem  extends api_AContainer
 			'Shared' => false,
 			'Owner' => '',
 			'Content' => '',
-			'IsExternal' => false
+			'IsExternal' => false,
+			'RealPath' => ''
 		));
 	}
 
@@ -95,7 +96,8 @@ class CFileStorageItem  extends api_AContainer
 			'Shared' => array('bool'),
 			'Owner' => array('string'),		
 			'Content' => array('string'),
-			'IsExternal' => array('bool')
+			'IsExternal' => array('bool'),
+			'RealPath' => array('string')
 		);
 	}
 	

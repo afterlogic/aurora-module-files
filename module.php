@@ -56,6 +56,7 @@ class FilesModule extends AApiModule
 		$this->AddEntry('pub', 'EntryPub');
 		$this->AddEntry('upload', 'UploadFileData');
 		
+		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'));
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
 		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
 		$this->subscribeEvent('Files::GetLinkType', array($this, 'onGetLinkType'));
@@ -1201,8 +1202,12 @@ class FilesModule extends AApiModule
 	 */
 	public function GetFileInfo($UserId, $Type, $Path, $Name)
 	{
-		$sUUID = $this->getUUIDById($UserId);
-		return $this->oApiFilesManager->getFileInfo($sUUID, $Type, $Path, $Name);
+	}
+
+	public function onAfterGetFileInfo($aArgs, &$mResult)
+	{
+		$sUUID = $this->getUUIDById($aArgs['UserId']);
+		$mResult = $this->oApiFilesManager->getFileInfo($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
 	}
 
 	/**

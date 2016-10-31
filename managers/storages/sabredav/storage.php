@@ -234,6 +234,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						$oResult->Owner = $aProps['Owner'];
 					}
 					
+					$oResult->RealPath = $oItem->getPath();
 					$oResult->Path = $sPath;
 					$oResult->Type = $sType;
 					$oResult->Name = $sName;
@@ -381,7 +382,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 			$sRootPath = $this->getRootPath($iUserId, $sType, true);
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
-			if ($oDirectory !== null)
+			if ($oDirectory !== null && $oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				if (!empty($sPattern) || is_numeric($sPattern))
 				{
