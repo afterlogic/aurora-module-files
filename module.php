@@ -62,6 +62,9 @@ class FilesModule extends AApiModule
 		$this->subscribeEvent('Files::GetLinkType', array($this, 'onGetLinkType'));
 		$this->subscribeEvent('Files::CheckUrl', array($this, 'onCheckUrl'));
 
+		$this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'));
+		$this->subscribeEvent('Files::Delete::after', array($this, 'onAfterDelete'));
+
 		$this->subscribeEvent('Files::PopulateFileItem', array($this, 'onPopulateFileItem'));
 
 		$this->subscribeEvent('Core::AfterDeleteUser', array($this, 'onAfterDeleteUser'));
@@ -1517,9 +1520,12 @@ class FilesModule extends AApiModule
 	public function Delete($UserId, $Type, $Items)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
-		$sUUID = $this->getUUIDById($UserId);
-		if ($this->checkStorageType($Type))
+	}	
+	
+	public function onAfterDelete(&$aArgs, &$mResult)
+	{
+		$sUUID = $this->getUUIDById($aArgs['UserId']);
+		if ($this->checkStorageType($aArgs['Type']))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
@@ -1528,14 +1534,18 @@ class FilesModule extends AApiModule
 
 			$oResult = false;
 
-			foreach ($Items as $oItem)
+			foreach ($aArgs['Items'] as $oItem)
 			{
-				$oResult = $this->oApiFilesManager->delete($sUUID, $Type, $oItem['Path'], $oItem['Name']);
+				$oResult = $this->oApiFilesManager->delete($sUUID, $aArgs['Type'], $oItem['Path'], $oItem['Name']);
+				if (!$oResult)
+				{
+					break;
+				}
 			}
-
+			$mResult = $oResult;
 			return $oResult;
 		}
-	}	
+	}
 
 	/**
 	 * @api {post} ?/Api/ Rename
@@ -1603,21 +1613,24 @@ class FilesModule extends AApiModule
 	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
-		$sUUID = $this->getUUIDById($UserId);
-		if ($this->checkStorageType($Type))
+	}	
+	
+	public function onAfterRename(&$aArgs, &$mResult)
+	{
+		$sUUID = $this->getUUIDById($aArgs['UserId']);
+		if ($this->checkStorageType($aArgs['Type']))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
 			}
 
-			$NewName = \trim(\MailSo\Base\Utils::ClearFileName($NewName));
+			$sNewName = \trim(\MailSo\Base\Utils::ClearFileName($aArgs['NewName']));
 
-			$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $Type, $Path, $NewName);
-			return $this->oApiFilesManager->rename($sUUID, $Type, $Path, $Name, $NewName, $IsLink);
+			$sNewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $aArgs['Type'], $aArgs['Path'], $sNewName);
+			$mResult = $this->oApiFilesManager->rename($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $sNewName, $aArgs['IsLink']);
 		}
-	}	
+	}
 
 	/**
 	 * @api {post} ?/Api/ Copy

@@ -168,7 +168,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		if ($this->init($iUserId))
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
-			if ($oDirectory !== null)
+			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				if($oDirectory->childExists($sName))
 				{
@@ -680,14 +680,17 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		if ($this->init($iUserId))
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
-			$oItem = $oDirectory->getChild($sName);
-			if ($oItem !== null)
+			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
-				if (strlen($sNewName) < 200)
+				$oItem = $oDirectory->getChild($sName);
+				if ($oItem !== null)
 				{
-					$this->updateMin($iUserId, $sType, $sPath, $sName, $sNewName, $oItem);
-					$oItem->setName($sNewName);
-					return true;
+					if (strlen($sNewName) < 200)
+					{
+						$this->updateMin($iUserId, $sType, $sPath, $sName, $sNewName, $oItem);
+						$oItem->setName($sNewName);
+						return true;
+					}
 				}
 			}
 		}
