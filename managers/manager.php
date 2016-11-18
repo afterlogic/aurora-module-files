@@ -67,15 +67,28 @@ class CApiFilesManager extends AApiManagerWithStorage
 	 * Retrieves array of metadata on the specific file. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param string $sType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder.
 	 * @param string $sName Filename. 
 	 * 
 	 * @return CFileStorageItem
 	 */
-	public function getFileInfo($iUserId, $iType, $sPath, $sName)
+	public function getFileInfo($iUserId, $sType, $sPath, $sName)
 	{
-		return $this->oStorage->getFileInfo($iUserId, $iType, $sPath, $sName);
+		$oResult = null;
+		if ($this->oStorage->init($iUserId))
+		{
+			$oDirectory = $this->oStorage->getDirectory($iUserId, $sType, $sPath);
+			if ($oDirectory !== null)
+			{
+				$oItem = $oDirectory->getChild($sName);
+				if ($oItem !== null)
+				{
+					$oResult = $this->oStorage->getFileInfo($iUserId, $sType, $oItem);
+				}
+			}
+		}
+		return $oResult;
 	}
 
 	/**

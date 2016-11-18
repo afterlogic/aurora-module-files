@@ -119,7 +119,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 *
 	 * @return Afterlogic\DAV\FS\Directory|null
 	 */
-	protected function getDirectory($iUserId, $sType, $sPath = '')
+	public function getDirectory($iUserId, $sType, $sPath = '')
 	{
 		$oDirectory = null;
 		
@@ -211,39 +211,99 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	/**
 	 * @param int $iUserId
 	 * @param string $sType
-	 * @param string $sPath
-	 * @param string $sName
+	 * @param object $oItem
 	 *
 	 * @return CFileStorageItem|null
 	 */
-	public function getFileInfo($iUserId, $sType, $sPath, $sName)
+	public function getFileInfo($iUserId, $sType, $oItem)
 	{
 		$oResult = null;
 		if ($this->init($iUserId))
 		{
-			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
-			if ($oDirectory !== null)
+			if ($oItem !== null)
 			{
-				$oItem = $oDirectory->getChild($sName);
-				if ($oItem !== null)
+				$oMin = $this->getApiMinManager();
+				$sRootPath = $this->getRootPath($iUserId, $sType, true);
+				$sFilePath = str_replace($sRootPath, '', dirname($oItem->getPath()));
+				if ($oItem instanceof Afterlogic\DAV\FS\File)
 				{
-					$aProps = $oItem->getProperties(false);
-					$oResult = new \CFileStorageItem();
-					if (isset($aProps['Owner']))
+					$aProps = $oItem->getProperties(array('Owner', 'Shared', 'Name' ,'Link'));
+				}
+				$oResult /*@var $oResult \CFileStorageItem */ = new  \CFileStorageItem();
+
+				$oResult->Type = $sType;
+				$oResult->TypeStr = $sType;
+				$oResult->Path = $sFilePath;
+				$oResult->Name = $oItem->getName();
+				$oResult->Id = $oItem->getName();
+				$oResult->FullPath = $oResult->Name !== '' ? $oResult->Path . '/' . $oResult->Name : $oResult->Path ;
+
+				$sID = '';
+				if ($oItem instanceof \Afterlogic\DAV\FS\Directory)
+				{
+					$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oItem->getName());
+					$oResult->IsFolder = true;
+				}
+
+				if ($oItem instanceof \Afterlogic\DAV\FS\File)
+				{
+					$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oItem->getName());
+					$oResult->IsFolder = false;
+					$oResult->Size = $oItem->getSize();
+
+					$aPathInfo = pathinfo($oResult->Name);
+					if (isset($aPathInfo['extension']) && strtolower($aPathInfo['extension']) === 'url')
 					{
-						$oResult->Owner = $aProps['Owner'];
+						$aUrlFileInfo = $this->parseIniString(stream_get_contents($oItem->get()));
+						if ($aUrlFileInfo && isset($aUrlFileInfo['URL']))
+						{
+							$oResult->IsLink = true;
+							$oResult->LinkUrl = $aUrlFileInfo['URL'];
+						}
+						if (!$oResult->ContentType && isset($aPathInfo['filename']))
+						{
+							$oResult->ContentType = \api_Utils::MimeContentType($aPathInfo['filename']);
+						}							
 					}
-					
-					$oResult->RealPath = $oItem->getPath();
-					$oResult->Path = $sPath;
-					$oResult->Type = $sType;
-					$oResult->Name = $sName;
-					if (isset($aProps['Link']))
+					else						
 					{
-        				$oResult->Name = isset($aProps['Name']) ? $aProps['Name'] : $oResult->Name;
-						$oResult->IsLink = true;
-						$oResult->LinkUrl = $aProps['Link'];
-						$oResult->LinkType = (int) $aProps['LinkType'];
+						$oResult->ContentType = $oItem->getContentType();
+					}
+
+					$aArgs = array();
+					$this->oManager->GetModule()->broadcastEvent(
+						'PopulateFileItem', 
+						$aArgs,
+						$oResult
+					);
+
+					$oResult->LastModified = $oItem->getLastModified();
+					if (!$oResult->ContentType)
+					{
+						$oResult->ContentType = \api_Utils::MimeContentType($oResult->Name);
+					}
+
+					if (\CApi::GetConf('labs.allow-thumbnail', true) && !$oResult->Thumb)
+					{
+						$oResult->Thumb = $oResult->Size < $iThumbnailLimit && \api_Utils::IsGDImageMimeTypeSuppoted($oResult->ContentType, $oResult->Name);
+					}
+
+					$oResult->Iframed = !$oResult->IsFolder && !$oResult->IsLink &&
+						\CApi::isIframedMimeTypeSupported($oResult->ContentType, $oResult->Name);
+				}
+
+				$mMin = $oMin->getMinByID($sID);
+
+				$oResult->Shared = isset($aProps['Shared']) ? $aProps['Shared'] : empty($mMin['__hash__']) ? false : true;
+				$oResult->Owner = isset($aProps['Owner']) ? $aProps['Owner'] : $iUserId;
+
+				if ($oResult && '.asc' === \strtolower(\substr(\trim($oResult->Name), -4)))
+				{
+					$mResult = $this->getFile($iUserId, $oResult->Type, $oResult->Path, $oResult->Name);
+
+					if (is_resource($mResult))
+					{
+						$oResult->Content = stream_get_contents($mResult);
 					}
 				}
 			}
@@ -368,7 +428,6 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		$oDirectory = null;
 		$aItems = array();
 		$aResult = array();
-		$oMin = $this->getApiMinManager();
 		
 		if ($this->init($iUserId))
 		{
@@ -380,7 +439,6 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$oApiTenants->getDefaultGlobalTenant();
 			}
 
-			$sRootPath = $this->getRootPath($iUserId, $sType, true);
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
 			if ($oDirectory !== null && $oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
@@ -401,97 +459,9 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$aItems = $oDirectory->getChildren();
 				}
 
-				$iThumbnailLimit = $this->oManager->GetModule()->getConfig(
-					'MaxFileSizeForMakingThumbnail', 
-					1024 * 1024 * 5 // 5MB
-				);
-
-				foreach ($aItems as $oValue) 
+				foreach ($aItems as $oItem) 
 				{
-					$sFilePath = str_replace($sRootPath, '', dirname($oValue->getPath()));
-					if ($oValue instanceof Afterlogic\DAV\FS\File)
-					{
-						$aProps = $oValue->getProperties(array('Owner', 'Shared', 'Name' ,'Link'));
-					}
-					$oItem /*@var $oItem \CFileStorageItem */ = new  \CFileStorageItem();
-					
-					$oItem->Type = $sType;
-					$oItem->TypeStr = $sType;
-					$oItem->Path = $sFilePath;
-					$oItem->Name = $oValue->getName();
-					$oItem->Id = $oValue->getName();
-					$oItem->FullPath = $oItem->Name !== '' ? $oItem->Path . '/' . $oItem->Name : $oItem->Path ;
-
-					$sID = '';
-					if ($oValue instanceof \Afterlogic\DAV\FS\Directory)
-					{
-						$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oValue->getName());
-						$oItem->IsFolder = true;
-					}
-
-					if ($oValue instanceof \Afterlogic\DAV\FS\File)
-					{
-						$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oValue->getName());
-						$oItem->IsFolder = false;
-						$oItem->Size = $oValue->getSize();
-
-						$aPathInfo = pathinfo($oItem->Name);
-						if (isset($aPathInfo['extension']) && strtolower($aPathInfo['extension']) === 'url')
-						{
-							$aUrlFileInfo = $this->parseIniString(stream_get_contents($oValue->get()));
-							if ($aUrlFileInfo && isset($aUrlFileInfo['URL']))
-							{
-								$oItem->IsLink = true;
-								$oItem->LinkUrl = $aUrlFileInfo['URL'];
-							}
-							if (!$oItem->ContentType && isset($aPathInfo['filename']))
-							{
-								$oItem->ContentType = \api_Utils::MimeContentType($aPathInfo['filename']);
-							}							
-						}
-						else						
-						{
-							$oItem->ContentType = $oValue->getContentType();
-						}
-						
-						$aArgs = array();
-						$this->oManager->GetModule()->broadcastEvent(
-							'PopulateFileItem', 
-							$aArgs,
-							$oItem
-						);
-						
-						$oItem->LastModified = $oValue->getLastModified();
-						if (!$oItem->ContentType)
-						{
-							$oItem->ContentType = \api_Utils::MimeContentType($oItem->Name);
-						}
-
-						if (\CApi::GetConf('labs.allow-thumbnail', true) && !$oItem->Thumb)
-						{
-							$oItem->Thumb = $oItem->Size < $iThumbnailLimit && \api_Utils::IsGDImageMimeTypeSuppoted($oItem->ContentType, $oItem->Name);
-						}
-
-						$oItem->Iframed = !$oItem->IsFolder && !$oItem->IsLink &&
-							\CApi::isIframedMimeTypeSupported($oItem->ContentType, $oItem->Name);
-					}
-					
-					$mMin = $oMin->getMinByID($sID);
-
-					$oItem->Shared = isset($aProps['Shared']) ? $aProps['Shared'] : empty($mMin['__hash__']) ? false : true;
-					$oItem->Owner = isset($aProps['Owner']) ? $aProps['Owner'] : $iUserId;
-					
-					if ($oItem && '.asc' === \strtolower(\substr(\trim($oItem->Name), -4)))
-					{
-						$mResult = $this->getFile($iUserId, $oItem->Type, $oItem->Path, $oItem->Name);
-
-						if (is_resource($mResult))
-						{
-							$oItem->Content = stream_get_contents($mResult);
-						}
-					}
-					
-					$aResult[] = $oItem;
+					$aResult[] = $this->getFileInfo($iUserId, $sType, $oItem);
 				}
 			}
 		}

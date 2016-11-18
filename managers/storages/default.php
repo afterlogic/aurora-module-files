@@ -31,7 +31,7 @@ class CApiFilesStorage extends AApiManagerStorage
 		return false;
 	}
 	
-	public function getFileInfo($oAccount, $iType, $sPath, $sName)
+	public function getFileInfo($iUserId, $sType, $oItem)
 	{
 	
 	}
