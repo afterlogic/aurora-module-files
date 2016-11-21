@@ -26,6 +26,8 @@
  * @property string $Owner
  * @property string $Content
  * @property bool $IsExternal
+ * @property string $RealPath
+ * @property string $MainAction
  * 
  * @package Classes
  * @subpackage FileStorage
@@ -58,7 +60,8 @@ class CFileStorageItem  extends api_AContainer
 			'Owner' => '',
 			'Content' => '',
 			'IsExternal' => false,
-			'RealPath' => ''
+			'RealPath' => '',
+			'MainAction' => ''
 		));
 	}
 
@@ -97,7 +100,8 @@ class CFileStorageItem  extends api_AContainer
 			'Owner' => array('string'),		
 			'Content' => array('string'),
 			'IsExternal' => array('bool'),
-			'RealPath' => array('string')
+			'RealPath' => array('string'),
+			'MainAction' => array('string')
 		);
 	}
 	
@@ -123,7 +127,8 @@ class CFileStorageItem  extends api_AContainer
 			'Shared' => $this->Shared,
 			'Owner' => $this->Owner,
 			'Content' => $this->Content,
-			'IsExternal' => $this->IsExternal
+			'IsExternal' => $this->IsExternal,
+			'MainAction' => $this->MainAction
 		);		
 	}
 }
