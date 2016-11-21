@@ -233,6 +233,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 				$oResult->Type = $sType;
 				$oResult->TypeStr = $sType;
+				$oResult->RealPath = $oItem->getPath();
 				$oResult->Path = $sFilePath;
 				$oResult->Name = $oItem->getName();
 				$oResult->Id = $oItem->getName();
@@ -285,6 +286,10 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 					if (\CApi::GetConf('labs.allow-thumbnail', true) && !$oResult->Thumb)
 					{
+						$iThumbnailLimit = $this->oManager->GetModule()->getConfig(
+							'MaxFileSizeForMakingThumbnail', 
+							1024 * 1024 * 5 // 5MB
+						);
 						$oResult->Thumb = $oResult->Size < $iThumbnailLimit && \api_Utils::IsGDImageMimeTypeSuppoted($oResult->ContentType, $oResult->Name);
 					}
 
