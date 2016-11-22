@@ -286,7 +286,8 @@ class FilesModule extends AApiModule
 		{
 			if (!empty($aArgs['Url']))
 			{
-				$sUrl = \api_Utils::GetRemoteFileRealUrl($aArgs['Url']);
+//				$sUrl = \api_Utils::GetRemoteFileRealUrl($aArgs['Url']);
+				$sUrl = $aArgs['Url'];
 				if ($sUrl)
 				{
 					$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
