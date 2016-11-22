@@ -448,6 +448,64 @@ class FilesModule extends AApiModule
 			}
 		}
 	}
+	
+	/**
+	 * Uploads file from client side.
+	 * 
+	 * @return string "true" or "false"
+	 * @throws \System\Exceptions\AuroraApiException
+	 */
+	public function UploadFileData()
+	{
+		$mResult = false;
+		$aPaths = \System\Service::GetPaths();
+		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
+		{
+			$sType = isset($aPaths[2]) ? strtolower($aPaths[2]) : 'personal';
+			$rData = fopen("php://input", "r");
+			$aFilePath = array_slice($aPaths, 3);
+			$sFilePath = urldecode(implode('/', $aFilePath));
+			$iUserId = \CApi::getAuthenticatedUserId(
+				$this->oHttp->GetHeader('Auth-Token')
+			);
+			$oUser = \CApi::getAuthenticatedUser($iUserId);
+			if ($oUser)
+			{
+				if ($rData)
+				{
+					$aArgs = array(
+						'UserId' => $oUser->sUUID,
+						'Type' => $sType,
+						'Path' => dirname($sFilePath),
+						'Name' => basename($sFilePath),
+						'Data' => $rData
+					);
+					$this->broadcastEvent(
+						'CreateFile', 
+						$aArgs,
+						$mResult
+					);			
+				}
+				else 
+				{
+					$mResult = false;
+				}
+			}
+			else
+			{
+				$mResult = false;
+			}
+		}
+		if ($mResult)
+		{
+			echo 'true';
+		}
+		else 
+		{
+			echo 'false';
+		}
+	}
+	
 	/***** public functions *****/
 	
 	/***** public functions might be called with web API *****/
@@ -489,21 +547,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetSettings',
-	 *		Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetSettings',
+	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetSettings',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetSettings',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	/**
@@ -572,21 +626,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'UpdateSettings',
-	 *		Result: true
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'UpdateSettings',
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'UpdateSettings',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'UpdateSettings',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	/**
@@ -610,64 +660,7 @@ class FilesModule extends AApiModule
 		return true;
 	}
 	
-	/**
-	 * Uploads file from client side.
-	 * 
-	 * @return string "true" or "false"
-	 * @throws \System\Exceptions\AuroraApiException
-	 */
-	public function UploadFileData()
-	{
-		$mResult = false;
-		$aPaths = \System\Service::GetPaths();
-		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
-		{
-			$sType = isset($aPaths[2]) ? strtolower($aPaths[2]) : 'personal';
-			$rData = fopen("php://input", "r");
-			$aFilePath = array_slice($aPaths, 3);
-			$sFilePath = urldecode(implode('/', $aFilePath));
-			$iUserId = \CApi::getAuthenticatedUserId(
-				$this->oHttp->GetHeader('Auth-Token')
-			);
-			$oUser = \CApi::getAuthenticatedUser($iUserId);
-			if ($oUser)
-			{
-				if ($rData)
-				{
-					$aArgs = array(
-						'UserId' => $oUser->sUUID,
-						'Type' => $sType,
-						'Path' => dirname($sFilePath),
-						'Name' => basename($sFilePath),
-						'Data' => $rData
-					);
-					$this->broadcastEvent(
-						'CreateFile', 
-						$aArgs,
-						$mResult
-					);			
-				}
-				else 
-				{
-					$mResult = false;
-				}
-			}
-			else
-			{
-				$mResult = false;
-			}
-		}
-		if ($mResult)
-		{
-			echo 'true';
-		}
-		else 
-		{
-			echo 'false';
-		}
-	}	
-	
-	/**
+		/**
 	 * @api {post} ?/Upload/ UploadFile
 	 * @apiDescription Uploads file from client side.
 	 * @apiName UploadFile
@@ -696,21 +689,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'UploadFile',
-	 *		Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378', MimeType: 'image/png', Size: 1813 } }
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'UploadFile',
+	 *	Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378', MimeType: 'image/png', Size: 1813 } }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'UploadFile',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'UploadFile',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	/**
@@ -983,21 +972,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetStorages',
-	 *		Result: [{ Type: "personal", DisplayName: "Personal", IsExternal: false }, { Type: "corporate", DisplayName: "Corporate", IsExternal: false }, { Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetStorages',
+	 *	Result: [{ Type: "personal", DisplayName: "Personal", IsExternal: false }, { Type: "corporate", DisplayName: "Corporate", IsExternal: false }, { Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetStorages',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetStorages',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	
@@ -1065,21 +1050,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetQuota',
-	 *		Result: { Used: 21921, Limit: 62914560 }
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetQuota',
+	 *	Result: { Used: 21921, Limit: 62914560 }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetQuota',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetQuota',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	/**
@@ -1122,7 +1103,7 @@ class FilesModule extends AApiModule
 	 *	Module: 'Files',
 	 *	Method: 'GetFiles',
 	 *	AuthToken: 'token_value',
-	 *	Parameters: '{ Type: "personale", Path: "", Pattern: "" }'
+	 *	Parameters: '{ Type: "personal", Path: "", Pattern: "" }'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -1135,21 +1116,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetFiles',
-	 *		Result: { Items: [{Id: "image.png", Type: "personal", Path: "", FullPath: "/image.png", Name: "image.png", Size: 1813, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475498855, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetFiles',
+	 *	Result: { Items: [{Id: "image.png", Type: "personal", Path: "", FullPath: "/image.png", Name: "image.png", Size: 1813, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475498855, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetFiles',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetFiles',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	
@@ -1198,6 +1175,7 @@ class FilesModule extends AApiModule
 	}
 	
 	/**
+	 * Return information about file. Subscribers of "Files::GetFileInfo::after" event are used for collecting information.
 	 * 
 	 * @param int $UserId
 	 * @param string $Type
@@ -1207,7 +1185,7 @@ class FilesModule extends AApiModule
 	public function GetFileInfo($UserId, $Type, $Path, $Name)
 	{
 	}
-
+	
 	public function onAfterGetFileInfo($aArgs, &$mResult)
 	{
 		$sUUID = $this->getUUIDById($aArgs['UserId']);
@@ -1243,21 +1221,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetPublicFiles',
-	 *		Result: { Items: [{ Id: "image.png", Type: "personal", Path: "/shared_folder", FullPath: "/shared_folder/image.png", Name: "image.png", Size: 43549, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475500277, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39", Content: "", IsExternal: false }] }
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetPublicFiles',
+	 *	Result: { Items: [{ Id: "image.png", Type: "personal", Path: "/shared_folder", FullPath: "/shared_folder/image.png", Name: "image.png", Size: 43549, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475500277, ContentType: "image/png", Iframed: false, Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39", Content: "", IsExternal: false }] }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'GetPublicFiles',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'GetPublicFiles',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 
@@ -1335,21 +1309,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'CreateFolder',
-	 *		Result: true
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'CreateFolder',
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'CreateFolder',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'CreateFolder',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	
@@ -1415,21 +1385,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'CreateLink',
-	 *		Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s", Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'CreateLink',
+	 *	Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s", Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'CreateLink',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'CreateLink',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	
@@ -1491,21 +1457,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Delete',
-	 *		Result: true
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'Delete',
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Delete',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'Delete',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	
@@ -1521,7 +1483,7 @@ class FilesModule extends AApiModule
 	public function Delete($UserId, $Type, $Items)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-	}	
+	}
 	
 	public function onAfterDelete(&$aArgs, &$mResult)
 	{
@@ -1581,21 +1543,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Rename',
-	 *		Result: true
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'Rename',
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Rename',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'Rename',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	
@@ -1666,18 +1624,15 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Copy',
-	 *		Result: true
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'Copy',
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Copy',
+	 *	Module: 'Files',
+	 *	Method: 'Copy',
 	 *		Result: false,
 	 *		ErrorCode: 102
 	 *	}]
@@ -1759,21 +1714,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Move',
-	 *		Result: true
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'Move',
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'Move',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'Move',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 	
@@ -1851,21 +1802,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'CreatePublicLink',
-	 *		Result: 'AppUrl/?/pub/files/shared_item_hash/list'
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'CreatePublicLink',
+	 *	Result: 'AppUrl/?/pub/files/shared_item_hash/list'
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'CreatePublicLink',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'CreatePublicLink',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 
@@ -1926,21 +1873,17 @@ class FilesModule extends AApiModule
 	 * 
 	 * @apiSuccessExample {json} Success response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'DeletePublicLink',
-	 *		Result: true
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'DeletePublicLink',
+	 *	Result: true
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
 	 * {
-	 *	Result: [{
-	 *		Module: 'Files',
-	 *		Method: 'DeletePublicLink',
-	 *		Result: false,
-	 *		ErrorCode: 102
-	 *	}]
+	 *	Module: 'Files',
+	 *	Method: 'DeletePublicLink',
+	 *	Result: false,
+	 *	ErrorCode: 102
 	 * }
 	 */
 
