@@ -202,7 +202,7 @@ class FilesModule extends AApiModule
 		if (is_numeric($UserId))
 		{
 			$oManagerApi = \CApi::GetSystemManager('eav', 'db');
-			$oEntity = $oManagerApi->getEntityById((int) \CApi::getAuthenticatedUserId());
+			$oEntity = $oManagerApi->getEntity((int) \CApi::getAuthenticatedUserId());
 			$UserId = $oEntity->sUUID;
 		}
 		
