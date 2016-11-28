@@ -353,7 +353,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		if ($this->init($iUserId))
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
-			if ($oDirectory !== null)
+			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				$oItem = $oDirectory->getChild($sName);
 				if ($oItem !== null)
@@ -488,7 +488,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
 
-			if ($oDirectory !== null)
+			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				$oDirectory->createDirectory($sFolderName);
 				return true;
@@ -513,7 +513,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
 
-			if ($oDirectory !== null)
+			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				$sFileName = $sName . '.url';
 				
@@ -548,7 +548,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
 
-			if ($oDirectory !== null)
+			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				$oDirectory->createFile($sFileName, $sData);
 				return true;

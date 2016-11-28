@@ -1182,9 +1182,7 @@ class FilesModule extends AApiModule
 	 * @param string $Path
 	 * @param string $Name
 	 */
-	public function GetFileInfo($UserId, $Type, $Path, $Name)
-	{
-	}
+	public function GetFileInfo($UserId, $Type, $Path, $Name) {}
 	
 	public function onAfterGetFileInfo($aArgs, &$mResult)
 	{

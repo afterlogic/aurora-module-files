@@ -265,20 +265,6 @@ class CApiFilesManager extends AApiManagerWithStorage
 				'Name' => $sNewName,
 				'Size' => $iSize
 			);
-
-			if (empty($aData['AccountType']) && $iUserId instanceof CHelpdeskUser)
-			{
-				$aData['AccountType'] = 'hd';
-			}
-
-			if ('wm' === $aData['AccountType'])
-			{
-				$aData['Account'] = $iUserId->IdAccount;
-			}
-			else if ('hd' === $aData['AccountType'])
-			{
-				$aData['Account'] = $iUserId->IdHelpdeskUser;
-			}
 		}
 
 		return $aData;
