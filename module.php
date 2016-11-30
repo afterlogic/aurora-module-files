@@ -203,7 +203,10 @@ class FilesModule extends AApiModule
 		{
 			$oManagerApi = \CApi::GetSystemManager('eav', 'db');
 			$oEntity = $oManagerApi->getEntity((int) \CApi::getAuthenticatedUserId());
-			$UserId = $oEntity->sUUID;
+			if ($oEntity instanceof \AEntity)
+			{
+				$UserId = $oEntity->sUUID;
+			}
 		}
 		
 		return $UserId;
