@@ -196,7 +196,6 @@ class FilesModule extends AApiModule
 		return isset($aTitle['1']) ? trim($aTitle['1']) : '';
 	}
 	
-
 	private function getUUIDById($UserId)
 	{
 		if (is_numeric($UserId))
@@ -211,7 +210,6 @@ class FilesModule extends AApiModule
 		
 		return $UserId;
 	}
-	
 	
 	/**
 	 * Returns file contents.
