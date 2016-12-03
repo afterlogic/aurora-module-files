@@ -356,7 +356,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				$oItem = $oDirectory->getChild($sName);
-				if ($oItem !== null)
+				if ($oItem instanceof \Afterlogic\DAV\FS\File)
 				{
 					$sResult = $oItem->get();
 				}
