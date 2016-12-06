@@ -255,7 +255,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$aPathInfo = pathinfo($oResult->Name);
 					if (isset($aPathInfo['extension']) && strtolower($aPathInfo['extension']) === 'url')
 					{
-						$aUrlFileInfo = $this->parseIniString(stream_get_contents($oItem->get()));
+						$aUrlFileInfo = \api_Utils::parseIniString(stream_get_contents($oItem->get()));
 						if ($aUrlFileInfo && isset($aUrlFileInfo['URL']))
 						{
 							$oResult->IsLink = true;
@@ -876,20 +876,5 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	{
 		// TODO
 	}
-	
-	public function parseIniString($sIniString) 
-	{
-		$aResult = array(); 
-		foreach (explode("\n", $sIniString) as $sLine) 
-		{
-			$aValues = explode("=", $sLine, 2);
-			if (isset($aValues[0], $aValues[1]))
-			{
-				$aResult[$aValues[0]] = trim(rtrim($aValues[1], "\r"), "\"");
-			}
-		}
-		return $aResult;
-	}	
-	
 }
 
