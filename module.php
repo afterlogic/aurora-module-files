@@ -94,7 +94,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Downloads file, views file or makes thumbnail for file.
 	 * 
-	 * @param int $iUserId User identificator.
+	 * @param int $iUserId User identifier.
 	 * @param string $sType Storage type - personal, corporate.
 	 * @param string $sPath Path to folder contained file.
 	 * @param string $sFileName File name.
@@ -519,7 +519,7 @@ class FilesModule extends AApiModule
 	 * @api {post} ?/Api/ GetSettings
 	 * @apiName GetSettings
 	 * @apiGroup Files
-	 * @apiDescription Obtaines list of module settings for authenticated user.
+	 * @apiDescription Obtains list of module settings for authenticated user.
 	 * 
 	 * @apiParam {string=Files} Module Module=Files name
 	 * @apiParam {string=GetSettings} Method=GetSettings Method name
@@ -562,7 +562,7 @@ class FilesModule extends AApiModule
 	 * }
 	 */
 	/**
-	 * Obtaines list of module settings for authenticated user.
+	 * Obtains list of module settings for authenticated user.
 	 * 
 	 * @return array
 	 */
@@ -1200,7 +1200,7 @@ class FilesModule extends AApiModule
 	 * @apiParam {string=GetPublicFiles} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
-	 * &emsp; **Hash** *string* Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.<br>
+	 * &emsp; **Hash** *string* Hash to identify the list of files to return. Containes information about user identifier, type of storage, path to public folder, name of public folder.<br>
 	 * &emsp; **Path** *string* Path to folder contained files to return.<br>
 	 * }
 	 * 
@@ -1237,7 +1237,7 @@ class FilesModule extends AApiModule
 	/**
 	 * Returns list of public files.
 	 * 
-	 * @param string $Hash Hash to identify the list of files to return. Containes information about user identificator, type of storage, path to public folder, name of public folder.
+	 * @param string $Hash Hash to identify the list of files to return. Containes information about user identifier, type of storage, path to public folder, name of public folder.
 	 * @param string $Path Path to folder contained files to return.
 	 * @return array {
 	 *		*array* **Items** Array of files objects.

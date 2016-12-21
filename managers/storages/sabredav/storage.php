@@ -818,7 +818,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	/**
 	 * Returns user used space in bytes for specified storages.
 	 * 
-	 * @param int $iUserId User identificator.
+	 * @param int $iUserId User identifier.
 	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
 	 * 
 	 * @return int;

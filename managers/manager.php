@@ -377,7 +377,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 	/**
 	 * Returns space used by the user in specified storages, in bytes.
 	 * 
-	 * @param int $iUserId User identificator.
+	 * @param int $iUserId User identifier.
 	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
 	 * 
 	 * @return int;
