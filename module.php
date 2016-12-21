@@ -44,7 +44,7 @@ class FilesModule extends AApiModule
 
 	/***** private functions *****/
 	/**
-	 * Initializes Core Module.
+	 * Initializes Files Module.
 	 * 
 	 * @ignore
 	 */
