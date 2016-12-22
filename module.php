@@ -521,8 +521,8 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiDescription Obtains list of module settings for authenticated user.
 	 * 
-	 * @apiParam {string=Files} Module Module=Files name
-	 * @apiParam {string=GetSettings} Method=GetSettings Method name
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=GetSettings} Method Method name
 	 * @apiParam {string} [AuthToken] Auth token
 	 * 
 	 * @apiParamExample {json} Request-Example:
@@ -600,8 +600,8 @@ class FilesModule extends AApiModule
 	 * @apiGroup Files
 	 * @apiDescription Updates module's settings - saves them to config.json file.
 	 * 
-	 * @apiParam {string=Files} Module Module=Files name
-	 * @apiParam {string=UpdateSettings} Method=UpdateSettings Method name
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=UpdateSettings} Method Method name
 	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
