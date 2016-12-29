@@ -1757,6 +1757,16 @@ class FilesModule extends AApiModule
 
 			foreach ($Files as $aItem)
 			{
+				if ($ToType === \EFileStorageTypeStr::Personal)
+				{
+					$oFileItem = $this->oApiFilesManager->getFileInfo($UserId, $FromType, $FromPath, $aItem['Name']);
+					$aQuota = $this->GetQuota($sUUID);
+					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $oFileItem->Size > $aQuota['Limit'])
+					{
+						throw new \System\Exceptions\AuroraApiException(\System\Notifications::CanNotUploadFileQuota);
+					}
+				}
+				
 				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
