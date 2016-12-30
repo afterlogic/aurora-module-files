@@ -1163,7 +1163,7 @@ class FilesModule extends AApiModule
 				if (!isset($aUsers[$oFile->Owner]))
 				{
 					$oUser = \CApi::GetModuleDecorator('Core')->GetUser($oFile->Owner);
-					$aUsers[$oFile->Owner] = $oUser ? $oUser->Name : '';
+					$aUsers[$oFile->Owner] = $oUser ? $oUser->PublicId : '';
 				}
 				$oFile->Owner = $aUsers[$oFile->Owner];
 			}
