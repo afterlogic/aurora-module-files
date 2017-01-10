@@ -1759,7 +1759,7 @@ class FilesModule extends AApiModule
 			{
 				if ($ToType === \EFileStorageTypeStr::Personal)
 				{
-					$oFileItem = $this->oApiFilesManager->getFileInfo($UserId, $FromType, $FromPath, $aItem['Name']);
+					$oFileItem = $this->oApiFilesManager->getFileInfo($sUUID, $FromType, $FromPath, $aItem['Name']);
 					$aQuota = $this->GetQuota($sUUID);
 					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $oFileItem->Size > $aQuota['Limit'])
 					{
