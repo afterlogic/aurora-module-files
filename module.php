@@ -145,7 +145,6 @@ class FilesModule extends AApiModule
 			{
 				if (is_resource($mResult)) 
 				{
-//					$sFileName = $this->clearFileName($oFileInfo->Name, $sContentType); // todo
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
 					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
 			
@@ -157,6 +156,10 @@ class FilesModule extends AApiModule
 					else if ($sContentType === 'text/html') 
 					{
 						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult)));
+					} 
+					else if ($sContentType === 'text/plain') 
+					{
+						echo(stream_get_contents($mResult));
 					} 
 					else 
 					{
