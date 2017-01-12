@@ -421,6 +421,14 @@ class FilesModule extends AApiModule
 						\CApi::Log('Empty template.', \ELogLevel::Error);
 					}
 				}
+				else 
+				{
+					$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
+					$sResult = strtr($sResult, array(
+						'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
+					));
+					
+				}
 			}
 
 			return $sResult;
@@ -446,7 +454,10 @@ class FilesModule extends AApiModule
 					}
 					else 
 					{
-						header('File not found', true, 404);
+						$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
+						$sResult = strtr($sResult, array(
+							'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
+						));
 					}
 				}
 			}
