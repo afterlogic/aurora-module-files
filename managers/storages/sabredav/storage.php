@@ -416,7 +416,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 			);
 		}
 		
-		return \api_Utils::GetAppUrl() . '?/pub/files/' . $mResult . '/list';
+		return \api_Utils::GetAppUrl() . '?/files-pub/' . $mResult . '/list';
 	}
 
 	/**
