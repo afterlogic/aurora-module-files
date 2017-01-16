@@ -53,7 +53,7 @@ class FilesModule extends AApiModule
 		$this->incClass('item');
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
-		$this->AddEntry('pub', 'EntryPub');
+//		$this->AddEntry('pub', 'EntryPub');
 		$this->AddEntry('upload', 'UploadFileData');
 		
 		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'));
@@ -349,120 +349,120 @@ class FilesModule extends AApiModule
 	/**
 	 * @ignore
 	 */
-	public function EntryPub()
-	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
-		
-		$aPaths = \System\Service::GetPaths();
-		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
-		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
-		$bList = (!empty($aPaths[3]) && $aPaths[3] === 'list');
-		
-		if ($bList)
-		{
-			$sResult = '';
-
-			$oMinDecorator =  $this->getMinModuleDecorator();
-			if ($oMinDecorator)
-			{
-				$mData = $oMinDecorator->GetMinByHash($sHash);
-
-				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
-				{
-					$oApiIntegrator = \CApi::GetSystemManager('integrator');
-
-					if ($oApiIntegrator)
-					{
-						$oCoreClientModule = \CApi::GetModule('CoreWebclient');
-						if ($oCoreClientModule instanceof \AApiModule) 
-						{
-							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
-							if (is_string($sResult)) 
-							{
-								$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
-								if (0 < \strlen($sFrameOptions)) 
-								{
-									@\header('X-Frame-Options: '.$sFrameOptions);
-								}
-
-								$sResult = strtr($sResult, array(
-									'{{AppVersion}}' => AURORA_APP_VERSION,
-									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
-									'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
-									'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
-								));
-							}
-						}
-					}
-				}
-				else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
-				{
-					$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
-
-					$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
-					if (!empty($sUrlRewriteBase))
-					{
-						$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
-					}
-
-					$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
-					if (is_string($sResult))
-					{
-						$sResult = strtr($sResult, array(
-							'{{Url}}' => $sUrl.$mData['__hash__'], 
-							'{{FileName}}' => $mData['Name'],
-							'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
-							'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
-							'{{BaseUrl}}' => $sUrlRewriteBase 
-						));
-					}
-					else
-					{
-						\CApi::Log('Empty template.', \ELogLevel::Error);
-					}
-				}
-				else 
-				{
-					$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
-					$sResult = strtr($sResult, array(
-						'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
-					));
-					
-				}
-			}
-
-			return $sResult;
-		}
-		else
-		{
-			$oModuleDecorator = $this->getMinModuleDecorator();
-			if ($oModuleDecorator)
-			{
-				$aHash = $oModuleDecorator->GetMinByHash($sHash);
-				if (isset($aHash['__hash__']))
-				{
-					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']))
-					{
-						echo $this->getRawFile(
-							$this->getUUIDById($aHash['UserId']), 
-							$aHash['Type'], 
-							$aHash['Path'], 
-							$aHash['Name'], 
-							$sHash, 
-							$bDownload
-						);
-					}
-					else 
-					{
-						$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
-						$sResult = strtr($sResult, array(
-							'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
-						));
-					}
-				}
-			}
-		}
-	}
+//	public function EntryPub()
+//	{
+//		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+//		
+//		$aPaths = \System\Service::GetPaths();
+//		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
+//		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
+//		$bList = (!empty($aPaths[3]) && $aPaths[3] === 'list');
+//		
+//		if ($bList)
+//		{
+//			$sResult = '';
+//
+//			$oMinDecorator =  $this->getMinModuleDecorator();
+//			if ($oMinDecorator)
+//			{
+//				$mData = $oMinDecorator->GetMinByHash($sHash);
+//
+//				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
+//				{
+//					$oApiIntegrator = \CApi::GetSystemManager('integrator');
+//
+//					if ($oApiIntegrator)
+//					{
+//						$oCoreClientModule = \CApi::GetModule('CoreWebclient');
+//						if ($oCoreClientModule instanceof \AApiModule) 
+//						{
+//							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
+//							if (is_string($sResult)) 
+//							{
+//								$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
+//								if (0 < \strlen($sFrameOptions)) 
+//								{
+//									@\header('X-Frame-Options: '.$sFrameOptions);
+//								}
+//
+//								$sResult = strtr($sResult, array(
+//									'{{AppVersion}}' => AURORA_APP_VERSION,
+//									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
+//									'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
+//									'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
+//								));
+//							}
+//						}
+//					}
+//				}
+//				else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
+//				{
+//					$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
+//
+//					$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
+//					if (!empty($sUrlRewriteBase))
+//					{
+//						$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
+//					}
+//
+//					$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
+//					if (is_string($sResult))
+//					{
+//						$sResult = strtr($sResult, array(
+//							'{{Url}}' => $sUrl.$mData['__hash__'], 
+//							'{{FileName}}' => $mData['Name'],
+//							'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
+//							'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
+//							'{{BaseUrl}}' => $sUrlRewriteBase 
+//						));
+//					}
+//					else
+//					{
+//						\CApi::Log('Empty template.', \ELogLevel::Error);
+//					}
+//				}
+//				else 
+//				{
+//					$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
+//					$sResult = strtr($sResult, array(
+//						'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
+//					));
+//					
+//				}
+//			}
+//
+//			return $sResult;
+//		}
+//		else
+//		{
+//			$oModuleDecorator = $this->getMinModuleDecorator();
+//			if ($oModuleDecorator)
+//			{
+//				$aHash = $oModuleDecorator->GetMinByHash($sHash);
+//				if (isset($aHash['__hash__']))
+//				{
+//					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']))
+//					{
+//						echo $this->getRawFile(
+//							$this->getUUIDById($aHash['UserId']), 
+//							$aHash['Type'], 
+//							$aHash['Path'], 
+//							$aHash['Name'], 
+//							$sHash, 
+//							$bDownload
+//						);
+//					}
+//					else 
+//					{
+//						$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
+//						$sResult = strtr($sResult, array(
+//							'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
+//						));
+//					}
+//				}
+//			}
+//		}
+//	}
 	
 	/**
 	 * Uploads file from client side.
@@ -594,9 +594,9 @@ class FilesModule extends AApiModule
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
 			'CustomTabTitle' => $this->getConfig('CustomTabTitle', '')
 		);
-		if (isset($aPath[2]))
+		if (isset($aPath[1]))
 		{
-			$sPublicHash = $aPath[2];
+			$sPublicHash = $aPath[1];
 			$aAppData['PublicHash'] = $sPublicHash;
 			$oModuleDecorator = $this->getMinModuleDecorator();
 			$mMin = ($oModuleDecorator && $sPublicHash !== null) ? $oModuleDecorator->GetMinByHash($sPublicHash) : array();
@@ -1827,7 +1827,7 @@ class FilesModule extends AApiModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreatePublicLink',
-	 *	Result: 'AppUrl/?/pub/files/shared_item_hash/list'
+	 *	Result: 'AppUrl/?/files-pub/shared_item_hash/list'
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
