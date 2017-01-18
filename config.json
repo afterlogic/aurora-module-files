@@ -1,0 +1,22 @@
+{
+    "EnableUploadSizeLimit": [
+        true,
+        "bool"
+    ],
+    "UploadSizeLimitMb": [
+        100,
+        "int"
+    ],
+    "Disabled": [
+        false,
+        "bool"
+    ],
+    "EnableCorporate": [
+        true,
+        "bool"
+    ],
+    "UserSpaceLimitMb": [
+        100,
+        "int"
+    ]
+}

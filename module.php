@@ -25,16 +25,6 @@ class FilesModule extends AApiModule
 	 * @var \CApiFilesManager
 	 */
 	public $oApiFilesManager = null;
-	
-	protected $aSettingsMap = array(
-		'EnableUploadSizeLimit' => array(true, 'bool'),
-		'UploadSizeLimitMb' => array(5, 'int'),
-		'Disabled' => array(false, 'bool'),
-		'EnableCorporate' => array(true, 'bool'),
-		'UserSpaceLimitMb' => array(100, 'int'),
-		'CustomTabTitle' => array('', 'string'),
-		'MaxFileSizeForMakingThumbnail' => array(5242880, 'int'), // 5MB
-	);
 
 	/**
 	 *
