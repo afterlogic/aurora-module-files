@@ -260,10 +260,12 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				{
 					$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oItem->getName());
 					$oResult->IsFolder = true;
+					$oResult->AddActions(array('list'));
 				}
 
 				if ($oItem instanceof \Afterlogic\DAV\FS\File)
 				{
+					$oResult->AddActions(array('view'));
 					$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oItem->getName());
 					$oResult->IsFolder = false;
 					$oResult->Size = $oItem->getSize();
@@ -276,6 +278,11 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						{
 							$oResult->IsLink = true;
 							$oResult->LinkUrl = $aUrlFileInfo['URL'];
+							$oResult->AddActions(array('open'));
+						}
+						else
+						{
+							$oResult->AddActions(array('download'));
 						}
 						if (!$oResult->ContentType && isset($aPathInfo['filename']))
 						{

@@ -44,6 +44,7 @@
  * @property bool $IsExternal
  * @property string $RealPath
  * @property string $MainAction
+ * @property array $Actions
  * 
  * @package Classes
  * @subpackage FileStorage
@@ -77,7 +78,8 @@ class CFileStorageItem  extends api_AContainer
 			'Content' => '',
 			'IsExternal' => false,
 			'RealPath' => '',
-			'MainAction' => ''
+			'MainAction' => '',
+			'Actions' => array()
 		));
 	}
 
@@ -117,7 +119,8 @@ class CFileStorageItem  extends api_AContainer
 			'Content' => array('string'),
 			'IsExternal' => array('bool'),
 			'RealPath' => array('string'),
-			'MainAction' => array('string')
+			'MainAction' => array('string'),
+			'Actions' => array('array')
 		);
 	}
 	
@@ -144,7 +147,26 @@ class CFileStorageItem  extends api_AContainer
 			'Owner' => $this->Owner,
 			'Content' => $this->Content,
 			'IsExternal' => $this->IsExternal,
-			'MainAction' => $this->MainAction
+			'MainAction' => $this->MainAction,
+			'Actions' => $this->Actions
 		);		
+	}
+	
+	public function UnshiftAction($sAction)
+	{
+		$this->Actions = array_diff($this->Actions, array($sAction));
+		array_unshift($this->Actions, $sAction);
+	}
+	
+	public function AddActions($aActions)
+	{
+		$this->Actions = array_diff($this->Actions, $aActions);
+		$this->Actions = array_merge(
+			array_diff(
+				$this->Actions, 
+				$aActions
+			), 
+			$aActions
+		);
 	}
 }
