@@ -154,8 +154,9 @@ class CFileStorageItem  extends api_AContainer
 	
 	public function UnshiftAction($sAction)
 	{
-		$this->Actions = array_diff($this->Actions, array($sAction));
-		array_unshift($this->Actions, $sAction);
+		$aActions = array_diff($this->Actions, array($sAction));
+		array_unshift($aActions, $sAction);
+		$this->Actions = $aActions;
 	}
 	
 	public function AddActions($aActions)
