@@ -161,12 +161,9 @@ class CFileStorageItem  extends api_AContainer
 	
 	public function AddActions($aActions)
 	{
-		$this->Actions = array_diff($this->Actions, $aActions);
+		$aDiffActions = array_diff($this->Actions, $aActions);
 		$this->Actions = array_merge(
-			array_diff(
-				$this->Actions, 
-				$aActions
-			), 
+			$aDiffActions, 
 			$aActions
 		);
 	}
