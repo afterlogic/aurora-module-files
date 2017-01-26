@@ -291,6 +291,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					}
 					else						
 					{
+						$oResult->AddActions(array('download'));
 						$oResult->ContentType = $oItem->getContentType();
 					}
 
