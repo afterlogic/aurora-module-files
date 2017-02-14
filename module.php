@@ -197,7 +197,7 @@ class FilesModule extends AApiModule
 			$oEntity = $oManagerApi->getEntity((int) \CApi::getAuthenticatedUserId());
 			if ($oEntity instanceof \AEntity)
 			{
-				$UserId = $oEntity->sUUID;
+				$UserId = $oEntity->UUID;
 			}
 		}
 		
@@ -479,7 +479,7 @@ class FilesModule extends AApiModule
 				if ($rData)
 				{
 					$aArgs = array(
-						'UserId' => $oUser->sUUID,
+						'UserId' => $oUser->UUID,
 						'Type' => $sType,
 						'Path' => dirname($sFilePath),
 						'Name' => basename($sFilePath),
