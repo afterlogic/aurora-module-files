@@ -126,9 +126,6 @@ class CFileStorageItem  extends api_AContainer
 	
 	public function toResponseArray($aParameters = array())
 	{
-//		$UserId, $Type, $Path, $Name		
-		
-		
 		$sHash = \CApi::EncodeKeyValues(array(
 			'UserId' => \CApi::getAuthenticatedUserId(), 
 			'Type' => $this->TypeStr,
@@ -136,7 +133,7 @@ class CFileStorageItem  extends api_AContainer
 			'Name' => $this->Name
 		));		
 		
-		return array(
+		$aResult = array(
 			'Id' => $this->Id,
 			'Type' => $this->TypeStr,
 			'Path' => $this->Path,
@@ -162,6 +159,13 @@ class CFileStorageItem  extends api_AContainer
 			'DownloadUrl' => '?download-file/' . $sHash,
 			'ViewUrl' => '?download-file/' . $sHash .'/view'
 		);		
+		
+		if ($this->Thumb)
+		{
+			$aResult['ThumbnailUrl'] = '?download-file/' . $sHash .'/thumb';
+		}
+		
+		return $aResult;
 	}
 	
 	public function UnshiftAction($sAction)

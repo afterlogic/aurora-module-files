@@ -133,17 +133,24 @@ class FilesModule extends AApiModule
 		
 		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
 
-		if ($iUserId && $SharedHash !== null)
+		try
 		{
-			\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
-		}
-		else 
-		{
-			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-			if ($iUserId !== \CApi::getAuthenticatedUserId())
+			if ($iUserId && $SharedHash !== null)
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::AccessDenied);
+				\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 			}
+			else 
+			{
+				\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+				if ($iUserId !== \CApi::getAuthenticatedUserId())
+				{
+					throw new \System\Exceptions\AuroraApiException(\System\Notifications::AccessDenied);
+				}
+			}
+		}
+		catch (\System\Exceptions\AuroraApiException $oEx)
+		{
+			header('Location: ./');
 		}
 		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
@@ -175,7 +182,7 @@ class FilesModule extends AApiModule
 					if ($bThumbnail) 
 					{
 //						$this->cacheByKey($sRawKey);	// todo
-						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName, false);
+						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName);
 					} 
 					else if ($sContentType === 'text/html') 
 					{
