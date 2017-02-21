@@ -98,11 +98,6 @@ class CApiFilesStorage extends AApiManagerStorage
 		
 	}
 
-	public function getQuota($oAccount, $iType)
-	{
-
-	}
-	
 	public function getNonExistentFileName($oAccount, $iType, $sPath, $sFileName)
 	{
 	

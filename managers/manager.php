@@ -388,29 +388,6 @@ class CApiFilesManager extends AApiManagerWithStorage
 	}
 	
 	/**
-	 * Returns general quota information for the account, used and available space. 
-	 * 
-	 * @param int $iUserId Account object
-	 * 
-	 * @return array array( $iUsageSize, $iFreeSize ); 
-	 */
-	public function getQuota($iUserId)
-	{
-		$iUsageSize = 0;
-		$iFreeSize = 0;
-		
-		$oApiTenants = \CApi::GetSystemManager('tenants');
-		$oTenant = $oApiTenants ? $oApiTenants->getTenantById($iUserId->IdTenant) : null;
-		if ($oTenant)
-		{
-			$iUsageSize = $oTenant->FilesUsageInMB * 1024 * 1024;
-			$iFreeSize = ($oTenant->FilesUsageDynamicQuotaInMB * 1024 * 1024) - $iUsageSize;
-		}
-		
-		return array($iUsageSize, $iFreeSize);
-	}
-	
-	/**
 	 * Allows for obtaining filename which doesn't exist in current directory. For example, if you need to store **data.txt** file but it already exists, this method will return **data_1.txt**, or **data_2.txt** if that one already exists, and so on. 
 	 * 
 	 * @param int $iUserId Account object 
