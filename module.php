@@ -44,7 +44,12 @@ class FilesModule extends AApiModule
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		
 //		$this->AddEntry('pub', 'EntryPub');
-		$this->AddEntry('upload', 'UploadFileData');
+		$this->AddEntries(
+			array(
+				'upload' => 'UploadFileData',
+				'download-file' => 'EntryDownloadFile'
+			)
+		);
 		
 		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'));
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
@@ -93,10 +98,35 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return bool
 	 */
-	private function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $bDownload = true, $bThumbnail = false)
+	private function getRawFile($sHash, $sAction = '')
 	{
-		$sPath = urldecode($sPath);
-		$sFileName = urldecode($sFileName);
+		$aValues = \CApi::DecodeKeyValues($sHash);
+		
+		$iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
+		
+		$sPath = isset($aValues['Path']) ? urldecode($aValues['Path']) : '';
+		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
+		$sType = isset($aValues['Type']) ? $aValues['Type'] : '';
+		$SharedHash = isset($aValues['SharedHash']) ? $aValues['SharedHash'] : null;
+		
+		$bDownload = true;
+		$bThumbnail = false;
+		
+		switch ($sAction)
+		{
+			case 'view':
+				$bDownload = false;
+				$bThumbnail = false;
+			break;
+			case 'thumb':
+				$bDownload = false;
+				$bThumbnail = true;
+			break;
+			default:
+				$bDownload = true;
+				$bThumbnail = false;
+			break;
+		}
 		
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
@@ -110,6 +140,10 @@ class FilesModule extends AApiModule
 		else 
 		{
 			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+			if ($iUserId !== \CApi::getAuthenticatedUserId())
+			{
+				throw new \System\Exceptions\AuroraApiException(\System\Notifications::AccessDenied);
+			}
 		}
 		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
@@ -831,20 +865,17 @@ class FilesModule extends AApiModule
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
-	 * @param string $SharedHash Shared hash.
 	 * @return bool
 	 */
-	public function DownloadFile($UserId, $Type, $Path, $Name, $SharedHash)
+	public function EntryDownloadFile()
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		$this->getRawFile(
-			$this->getUUIDById($UserId),
-			$Type, 
-			$Path, 
-			$Name, 
-			$SharedHash, 
-			true
-		);
+		
+		$aPath = \System\Service::GetPaths();
+		$sHash = (string) isset($aPath[1]) ? $aPath[1] : '';
+		$sAction = (string) isset($aPath[2]) ? $aPath[2] : '';	
+
+		$this->getRawFile($sHash, $sAction);		
 	}
 
 	/**

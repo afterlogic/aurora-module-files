@@ -126,6 +126,16 @@ class CFileStorageItem  extends api_AContainer
 	
 	public function toResponseArray($aParameters = array())
 	{
+//		$UserId, $Type, $Path, $Name		
+		
+		
+		$sHash = \CApi::EncodeKeyValues(array(
+			'UserId' => \CApi::getAuthenticatedUserId(), 
+			'Type' => $this->TypeStr,
+			'Path' => $this->Path,
+			'Name' => $this->Name
+		));		
+		
 		return array(
 			'Id' => $this->Id,
 			'Type' => $this->TypeStr,
@@ -148,7 +158,9 @@ class CFileStorageItem  extends api_AContainer
 			'Content' => $this->Content,
 			'IsExternal' => $this->IsExternal,
 			'MainAction' => $this->MainAction,
-			'Actions' => $this->Actions
+			'Actions' => $this->Actions,
+			'DownloadUrl' => '?download-file/' . $sHash,
+			'ViewUrl' => '?download-file/' . $sHash .'/view'
 		);		
 	}
 	
