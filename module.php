@@ -98,17 +98,8 @@ class FilesModule extends AApiModule
 	 * 
 	 * @return bool
 	 */
-	private function getRawFile($sHash, $sAction = '')
+	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '')
 	{
-		$aValues = \CApi::DecodeKeyValues($sHash);
-		
-		$iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
-		
-		$sPath = isset($aValues['Path']) ? urldecode($aValues['Path']) : '';
-		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
-		$sType = isset($aValues['Type']) ? $aValues['Type'] : '';
-		$SharedHash = isset($aValues['SharedHash']) ? $aValues['SharedHash'] : null;
-		
 		$bDownload = true;
 		$bThumbnail = false;
 		
@@ -230,7 +221,7 @@ class FilesModule extends AApiModule
 		return isset($aTitle['1']) ? trim($aTitle['1']) : '';
 	}
 	
-	private function getUUIDById($UserId)
+	public function getUUIDById($UserId)
 	{
 		if (is_numeric($UserId))
 		{
@@ -880,9 +871,17 @@ class FilesModule extends AApiModule
 		
 		$aPath = \System\Service::GetPaths();
 		$sHash = (string) isset($aPath[1]) ? $aPath[1] : '';
+		$aValues = \CApi::DecodeKeyValues($sHash);
+		
+		$iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
+		$sType = isset($aValues['Type']) ? $aValues['Type'] : '';
+		$sPath = isset($aValues['Path']) ? urldecode($aValues['Path']) : '';
+		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
+		$SharedHash = isset($aValues['SharedHash']) ? $aValues['SharedHash'] : null;
+		
 		$sAction = (string) isset($aPath[2]) ? $aPath[2] : '';	
 
-		$this->getRawFile($sHash, $sAction);		
+		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash, $sAction);		
 	}
 
 	/**
