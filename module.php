@@ -18,7 +18,9 @@
  * @package Modules
  */
 
-class FilesModule extends AApiModule
+namespace Aurora\Modules;
+
+class FilesModule extends \AApiModule
 {
 	/**
 	 *
@@ -784,7 +786,7 @@ class FilesModule extends AApiModule
 
 				$sSavedName = 'upload-post-'.md5($UploadData['name'].$UploadData['tmp_name']);
 				$rData = false;
-				if (is_resource($UploadData['tmp_name']))
+				if (\is_resource($UploadData['tmp_name']))
 				{
 					$rData = $UploadData['tmp_name'];
 				}
@@ -974,7 +976,7 @@ class FilesModule extends AApiModule
 	public function GetFileThumbnail($UserId, $Type, $Path, $Name, $SharedHash)
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return base64_encode(
+		return \base64_encode(
 			$this->getRawFile(
 				$this->getUUIDById($UserId), 
 				$Type, 
