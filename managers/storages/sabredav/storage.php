@@ -37,9 +37,9 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	protected $oApiMinManager = null;
 
 	/**
-	 * @param CApiGlobalManager &$oManager
+	 * @param \Aurora\System\GlobalManager &$oManager
 	 */
-	public function __construct(AApiManager &$oManager)
+	public function __construct(\Aurora\System\AbstractManager &$oManager)
 	{
 		parent::__construct('sabredav', $oManager);
 		
@@ -63,7 +63,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	{
 		if ($this->oApiMinManager === null)
 		{
-			$oMinModule = \CApi::GetModule('Min');
+			$oMinModule = \Aurora\System\Api::GetModule('Min');
 			if ($oMinModule)
 			{
 				$this->oApiMinManager = $oMinModule->oApiMinManager;
@@ -107,7 +107,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		if ($iUserId)
 		{
 			$sUser = $bUser ? '/' . $iUserId : '';
-			$sRootPath = \CApi::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+			$sRootPath = \Aurora\System\Api::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\Afterlogic\DAV\Constants::FILESTORAGE_PATH_PERSONAL . $sUser;
 
 			if ($sType === \EFileStorageTypeStr::Corporate)
@@ -115,12 +115,12 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				$iTenantId = /*$oAccount ? $oAccount->IdTenant :*/ 0;
 
 				$sTenant = $bUser ? $sTenant = '/' . $iTenantId : '';
-				$sRootPath = \CApi::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+				$sRootPath = \Aurora\System\Api::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\Afterlogic\DAV\Constants::FILESTORAGE_PATH_CORPORATE . $sTenant;
 			}
 			else if ($sType === \EFileStorageTypeStr::Shared)
 			{
-				$sRootPath = \CApi::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
+				$sRootPath = \Aurora\System\Api::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\Afterlogic\DAV\Constants::FILESTORAGE_PATH_SHARED . $sUser;
 			}
 		}
@@ -273,7 +273,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$aPathInfo = pathinfo($oResult->Name);
 					if (isset($aPathInfo['extension']) && strtolower($aPathInfo['extension']) === 'url')
 					{
-						$aUrlFileInfo = \api_Utils::parseIniString(stream_get_contents($oItem->get()));
+						$aUrlFileInfo = \Aurora\System\Utils::parseIniString(stream_get_contents($oItem->get()));
 						if ($aUrlFileInfo && isset($aUrlFileInfo['URL']))
 						{
 							$oResult->IsLink = true;
@@ -286,7 +286,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						}
 						if (!$oResult->ContentType && isset($aPathInfo['filename']))
 						{
-							$oResult->ContentType = \api_Utils::MimeContentType($aPathInfo['filename']);
+							$oResult->ContentType = \Aurora\System\Utils::MimeContentType($aPathInfo['filename']);
 						}							
 					}
 					else						
@@ -305,20 +305,20 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$oResult->LastModified = $oItem->getLastModified();
 					if (!$oResult->ContentType)
 					{
-						$oResult->ContentType = \api_Utils::MimeContentType($oResult->Name);
+						$oResult->ContentType = \Aurora\System\Utils::MimeContentType($oResult->Name);
 					}
 
-					if (\CApi::GetConf('labs.allow-thumbnail', true) && !$oResult->Thumb)
+					if (\Aurora\System\Api::GetConf('labs.allow-thumbnail', true) && !$oResult->Thumb)
 					{
 						$iThumbnailLimit = $this->oManager->GetModule()->getConfig(
 							'MaxFileSizeForMakingThumbnail', 
 							1024 * 1024 * 5 // 5MB
 						);
-						$oResult->Thumb = $oResult->Size < $iThumbnailLimit && \api_Utils::IsGDImageMimeTypeSuppoted($oResult->ContentType, $oResult->Name);
+						$oResult->Thumb = $oResult->Size < $iThumbnailLimit && \Aurora\System\Utils::IsGDImageMimeTypeSuppoted($oResult->ContentType, $oResult->Name);
 					}
 
 					$oResult->Iframed = !$oResult->IsFolder && !$oResult->IsLink &&
-						\CApi::isIframedMimeTypeSupported($oResult->ContentType, $oResult->Name);
+						\Aurora\System\Api::isIframedMimeTypeSupported($oResult->ContentType, $oResult->Name);
 				}
 
 				$mMin = $oMin->getMinByID($sID);
@@ -424,7 +424,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 			);
 		}
 		
-		return \api_Utils::GetAppUrl() . '?/files-pub/' . $mResult . '/list';
+		return \Aurora\System\Utils::GetAppUrl() . '?/files-pub/' . $mResult . '/list';
 	}
 
 	/**
@@ -461,7 +461,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		if ($this->init($iUserId))
 		{
 			$oTenant = null;
-			$oApiTenants = false; //\CApi::GetCoreManager('tenants');
+			$oApiTenants = false; //\Aurora\System\Api::GetCoreManager('tenants');
 			if ($oApiTenants)
 			{
 				$oTenant = /*(0 < $oAccount->IdTenant) ? $oApiTenants->getTenantById($oAccount->IdTenant) :*/
@@ -840,7 +840,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 			foreach ($aTypes as $sType)
 			{
 				$sRootPath = $this->getRootPath($iUserId, $sType, true);
-				$aSize = \api_Utils::GetDirectorySize($sRootPath);
+				$aSize = \Aurora\System\Utils::GetDirectorySize($sRootPath);
 				$iUsageSize += (int) $aSize['size'];
 			}
 		}
@@ -889,7 +889,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		if ($iUserId)
 		{
 			$sRootPath = $this->getRootPath($iUserId, \EFileStorageTypeStr::Personal, true);
-			api_Utils::RecRmdir($sRootPath);
+			\Aurora\System\Utils::RecRmdir($sRootPath);
 		}
 	}
 

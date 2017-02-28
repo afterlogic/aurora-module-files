@@ -24,12 +24,12 @@
  * @package Filestorage
  * @subpackage Storages
  */
-class CApiFilesStorage extends AApiManagerStorage
+class CApiFilesStorage extends \Aurora\System\AbstractManagerStorage
 {
 	/**
-	 * @param CApiGlobalManager &$oManager
+	 * @param \Aurora\System\GlobalManager &$oManager
 	 */
-	public function __construct($sStorageName, AApiManager &$oManager)
+	public function __construct($sStorageName, \Aurora\System\AbstractManager &$oManager)
 	{
 		parent::__construct('filestorage', $sStorageName, $oManager);
 	}

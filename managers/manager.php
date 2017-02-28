@@ -23,12 +23,12 @@
  * 
  * @package Filestorage
  */
-class CApiFilesManager extends AApiManagerWithStorage
+class CApiFilesManager extends \Aurora\System\AbstractManagerWithStorage
 {
 	/**
-	 * @param CApiGlobalManager &$oManager
+	 * @param \Aurora\System\GlobalManager &$oManager
 	 */
-	public function __construct(CApiGlobalManager &$oManager, $sForcedStorage = '', AApiModule $oModule = null)
+	public function __construct(\Aurora\System\GlobalManager &$oManager, $sForcedStorage = '', \Aurora\System\AbstractModule $oModule = null)
 	{
 		parent::__construct('', $oManager, $sForcedStorage, $oModule);
 	}
@@ -43,7 +43,7 @@ class CApiFilesManager extends AApiManagerWithStorage
 		static $oMinModuleDecorator = null;
 		if ($oMinModuleDecorator === null)
 		{
-			$oMinModuleDecorator = \CApi::GetModuleDecorator('Min');
+			$oMinModuleDecorator = \Aurora\System\Api::GetModuleDecorator('Min');
 		}
 		
 		return $oMinModuleDecorator;

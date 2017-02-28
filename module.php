@@ -20,7 +20,7 @@
 
 namespace Aurora\Modules;
 
-class FilesModule extends \AApiModule
+class FilesModule extends \Aurora\System\AbstractModule
 {
 	/**
 	 *
@@ -130,12 +130,12 @@ class FilesModule extends \AApiModule
 		{
 			if ($iUserId && $SharedHash !== null)
 			{
-				\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+				\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 			}
 			else 
 			{
-				\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-				if ($iUserId !== \CApi::getAuthenticatedUserId())
+				\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+				if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId())
 				{
 					throw new \System\Exceptions\AuroraApiException(\System\Notifications::AccessDenied);
 				}
@@ -227,8 +227,8 @@ class FilesModule extends \AApiModule
 	{
 		if (is_numeric($UserId))
 		{
-			$oManagerApi = \CApi::GetSystemManager('eav', 'db');
-			$oEntity = $oManagerApi->getEntity((int) \CApi::getAuthenticatedUserId());
+			$oManagerApi = \Aurora\System\Api::GetSystemManager('eav', 'db');
+			$oEntity = $oManagerApi->getEntity((int) \Aurora\System\Api::getAuthenticatedUserId());
 			if ($oEntity instanceof \CEntity)
 			{
 				$UserId = $oEntity->UUID;
@@ -308,23 +308,23 @@ class FilesModule extends \AApiModule
 	 */
 	public function onCheckUrl($aArgs, &$mResult)
 	{
-		$iUserId = \CApi::getAuthenticatedUserId();
+		$iUserId = \Aurora\System\Api::getAuthenticatedUserId();
 
 		if ($iUserId)
 		{
 			if (!empty($aArgs['Url']))
 			{
-//				$sUrl = \api_Utils::GetRemoteFileRealUrl($aArgs['Url']);
+//				$sUrl = \Aurora\System\Utils::GetRemoteFileRealUrl($aArgs['Url']);
 				$sUrl = $aArgs['Url'];
 				if ($sUrl)
 				{
-					$aRemoteFileInfo = \api_Utils::GetRemoteFileInfo($sUrl);
+					$aRemoteFileInfo = \Aurora\System\Utils::GetRemoteFileInfo($sUrl);
 					$sFileName = basename($sUrl);
-					$sFileExtension = \api_Utils::GetFileExtension($sFileName);
+					$sFileExtension = \Aurora\System\Utils::GetFileExtension($sFileName);
 
 					if (empty($sFileExtension))
 					{
-						$sFileExtension = \api_Utils::GetFileExtensionFromMimeContentType($aRemoteFileInfo['content-type']);
+						$sFileExtension = \Aurora\System\Utils::GetFileExtensionFromMimeContentType($aRemoteFileInfo['content-type']);
 						$sFileName .= '.'.$sFileExtension;
 					}
 
@@ -350,7 +350,7 @@ class FilesModule extends \AApiModule
 		if ($oItem->IsLink)
 		{
 			$sFileName = basename($oItem->LinkUrl);
-			$sFileExtension = \api_Utils::GetFileExtension($sFileName);
+			$sFileExtension = \Aurora\System\Utils::GetFileExtension($sFileName);
 			if ($sFileExtension === 'htm' || $sFileExtension === 'html')
 			{
 				$oItem->Name = $this->getHtmlTitle($oItem->LinkUrl);
@@ -375,7 +375,7 @@ class FilesModule extends \AApiModule
 	 */
 //	public function EntryPub()
 //	{
-//		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+//		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 //		
 //		$aPaths = \System\Service::GetPaths();
 //		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
@@ -393,17 +393,17 @@ class FilesModule extends \AApiModule
 //
 //				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
 //				{
-//					$oApiIntegrator = \CApi::GetSystemManager('integrator');
+//					$oApiIntegrator = \Aurora\System\Api::GetSystemManager('integrator');
 //
 //					if ($oApiIntegrator)
 //					{
-//						$oCoreClientModule = \CApi::GetModule('CoreWebclient');
-//						if ($oCoreClientModule instanceof \AApiModule) 
+//						$oCoreClientModule = \Aurora\System\Api::GetModule('CoreWebclient');
+//						if ($oCoreClientModule instanceof \Aurora\System\AbstractModule) 
 //						{
 //							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
 //							if (is_string($sResult)) 
 //							{
-//								$sFrameOptions = \CApi::GetConf('labs.x-frame-options', '');
+//								$sFrameOptions = \Aurora\System\Api::GetConf('labs.x-frame-options', '');
 //								if (0 < \strlen($sFrameOptions)) 
 //								{
 //									@\header('X-Frame-Options: '.$sFrameOptions);
@@ -421,9 +421,9 @@ class FilesModule extends \AApiModule
 //				}
 //				else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
 //				{
-//					$sUrl = (bool) \CApi::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
+//					$sUrl = (bool) \Aurora\System\Api::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
 //
-//					$sUrlRewriteBase = (string) \CApi::GetConf('labs.server-url-rewrite-base', '');
+//					$sUrlRewriteBase = (string) \Aurora\System\Api::GetConf('labs.server-url-rewrite-base', '');
 //					if (!empty($sUrlRewriteBase))
 //					{
 //						$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
@@ -435,14 +435,14 @@ class FilesModule extends \AApiModule
 //						$sResult = strtr($sResult, array(
 //							'{{Url}}' => $sUrl.$mData['__hash__'], 
 //							'{{FileName}}' => $mData['Name'],
-//							'{{FileSize}}' => \api_Utils::GetFriendlySize($mData['Size']),
-//							'{{FileType}}' => \api_Utils::GetFileExtension($mData['Name']),
+//							'{{FileSize}}' => \Aurora\System\Utils::GetFriendlySize($mData['Size']),
+//							'{{FileType}}' => \Aurora\System\Utils::GetFileExtension($mData['Name']),
 //							'{{BaseUrl}}' => $sUrlRewriteBase 
 //						));
 //					}
 //					else
 //					{
-//						\CApi::Log('Empty template.', \ELogLevel::Error);
+//						\Aurora\System\Api::Log('Empty template.', \ELogLevel::Error);
 //					}
 //				}
 //				else 
@@ -504,10 +504,10 @@ class FilesModule extends \AApiModule
 			$rData = fopen("php://input", "r");
 			$aFilePath = array_slice($aPaths, 3);
 			$sFilePath = urldecode(implode('/', $aFilePath));
-			$iUserId = \CApi::getAuthenticatedUserId(
+			$iUserId = \Aurora\System\Api::getAuthenticatedUserId(
 				$this->oHttp->GetHeader('Auth-Token')
 			);
-			$oUser = \CApi::getAuthenticatedUser($iUserId);
+			$oUser = \Aurora\System\Api::getAuthenticatedUser($iUserId);
 			if ($oUser)
 			{
 				if ($rData)
@@ -606,7 +606,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function GetSettings()
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$aPath = \System\Service::GetPaths();
 		
@@ -689,7 +689,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate, $UserSpaceLimitMb)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::TenantAdmin);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::TenantAdmin);
 		
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
@@ -759,10 +759,10 @@ class FilesModule extends \AApiModule
 	 */
 	public function UploadFile($UserId, $Type, $Path, $UploadData)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$sUUID = $this->getUUIDById($UserId);
-		$oApiFileCacheManager = \CApi::GetSystemManager('filecache');
+		$oApiFileCacheManager = \Aurora\System\Api::GetSystemManager('filecache');
 
 		$sError = '';
 		$aResponse = array();
@@ -873,7 +873,7 @@ class FilesModule extends \AApiModule
 		
 		$aPath = \System\Service::GetPaths();
 		$sHash = (string) isset($aPath[1]) ? $aPath[1] : '';
-		$aValues = \CApi::DecodeKeyValues($sHash);
+		$aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
 		
 		$iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
 		$sType = isset($aValues['Type']) ? $aValues['Type'] : '';
@@ -1042,7 +1042,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function GetStorages($UserId)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		$aStorages = [
@@ -1118,7 +1118,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function GetQuota($UserId)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		return array(
@@ -1189,7 +1189,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function GetFiles($UserId, $Type, $Path, $Pattern)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
@@ -1205,7 +1205,7 @@ class FilesModule extends \AApiModule
 			{
 				if (!isset($aUsers[$oFile->Owner]))
 				{
-					$oUser = \CApi::GetModuleDecorator('Core')->GetUser($oFile->Owner);
+					$oUser = \Aurora\System\Api::GetModuleDecorator('Core')->GetUser($oFile->Owner);
 					$aUsers[$oFile->Owner] = $oUser ? $oUser->PublicId : '';
 				}
 				$oFile->Owner = $aUsers[$oFile->Owner];
@@ -1290,7 +1290,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
 		$iUserId = null;
 		$oResult = array();
@@ -1377,7 +1377,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function CreateFolder($UserId, $Type, $Path, $FolderName)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
@@ -1454,7 +1454,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function CreateLink($UserId, $Type, $Path, $Link, $Name)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 
 		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($Type))
@@ -1524,7 +1524,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function Delete($UserId, $Type, $Items)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 	}
 	
 	public function onAfterDelete(&$aArgs, &$mResult)
@@ -1613,7 +1613,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 	}	
 	
 	public function onAfterRename(&$aArgs, &$mResult)
@@ -1698,7 +1698,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function Copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
@@ -1787,7 +1787,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
@@ -1882,7 +1882,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1951,7 +1951,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function DeletePublicLink($UserId, $Type, $Path, $Name)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$sUUID = $this->getUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1975,7 +1975,7 @@ class FilesModule extends \AApiModule
 	 */
 	public function CheckUrl($Url)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		$mResult = false;
 		
 		$aArgs = array(

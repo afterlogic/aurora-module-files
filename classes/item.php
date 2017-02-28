@@ -126,8 +126,8 @@ class CFileStorageItem  extends api_AContainer
 	
 	public function toResponseArray($aParameters = array())
 	{
-		$sHash = \CApi::EncodeKeyValues(array(
-			'UserId' => \CApi::getAuthenticatedUserId(), 
+		$sHash = \Aurora\System\Api::EncodeKeyValues(array(
+			'UserId' => \Aurora\System\Api::getAuthenticatedUserId(), 
 			'Type' => $this->TypeStr,
 			'Path' => $this->Path,
 			'Name' => $this->Name
