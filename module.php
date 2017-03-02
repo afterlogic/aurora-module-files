@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (c) 2016, Afterlogic Corp.
+ * @copyright Copyright (c) 2017, Afterlogic Corp.
  * @license AGPL-3.0
  *
  * This code is free software: you can redistribute it and/or modify
@@ -137,11 +137,11 @@ class FilesModule extends \Aurora\System\AbstractModule
 				\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 				if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId())
 				{
-					throw new \System\Exceptions\AuroraApiException(\System\Notifications::AccessDenied);
+					throw new \System\Exceptions\ApiException(\System\Notifications::AccessDenied);
 				}
 			}
 		}
-		catch (\System\Exceptions\AuroraApiException $oEx)
+		catch (\System\Exceptions\ApiException $oEx)
 		{
 			header('Location: ./');
 		}
@@ -170,12 +170,12 @@ class FilesModule extends \Aurora\System\AbstractModule
 				if (is_resource($mResult)) 
 				{
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
-					\CApiResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
+					\Aurora\System\ResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
 			
 					if ($bThumbnail) 
 					{
 //						$this->cacheByKey($sRawKey);	// todo
-						return \CApiResponseManager::GetThumbResource($iUserId, $mResult, $sFileName);
+						return \Aurora\System\ResponseManager::GetThumbResource($iUserId, $mResult, $sFileName);
 					} 
 					else if ($sContentType === 'text/html') 
 					{
@@ -229,7 +229,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			$oManagerApi = \Aurora\System\Api::GetSystemManager('eav', 'db');
 			$oEntity = $oManagerApi->getEntity((int) \Aurora\System\Api::getAuthenticatedUserId());
-			if ($oEntity instanceof \CEntity)
+			if ($oEntity instanceof \Aurora\System\EAV\Entity)
 			{
 				$UserId = $oEntity->UUID;
 			}
@@ -248,7 +248,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param string $Name Name of file.
 	 * @param bool $IsThumb Inticates if thumb is required.
 	 * @param string|resource|bool $Result Is passed by reference.
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function onGetFile($aArgs, &$Result)
 	{
@@ -257,7 +257,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 			$sUUID = $this->getUUIDById($aArgs['UserId']);
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 			
 			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
@@ -274,7 +274,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param string $Name Name of file.
 	 * @param string|resource $Data Data to be stored in the file.
 	 * @param string|resource|bool $Result Is passed by reference.
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function onCreateFile($aArgs, &$Result)
 	{
@@ -377,7 +377,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 //	{
 //		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 //		
-//		$aPaths = \System\Service::GetPaths();
+//		$aPaths = \Aurora\System\Service::GetPaths();
 //		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
 //		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
 //		$bList = (!empty($aPaths[3]) && $aPaths[3] === 'list');
@@ -492,12 +492,12 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * Uploads file from client side.
 	 * 
 	 * @return string "true" or "false"
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function UploadFileData()
 	{
 		$mResult = false;
-		$aPaths = \System\Service::GetPaths();
+		$aPaths = \Aurora\System\Service::GetPaths();
 		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
 		{
 			$sType = isset($aPaths[2]) ? strtolower($aPaths[2]) : 'personal';
@@ -608,7 +608,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$aPath = \System\Service::GetPaths();
+		$aPath = \Aurora\System\Service::GetPaths();
 		
 		$aAppData = array(
 			'EnableModule' => true,
@@ -755,7 +755,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 *		*int* **Size** File size.
 	 *		*string* **Hash** Hash used for file download, file view or getting file thumbnail.
 	 * }
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function UploadFile($UserId, $Type, $Path, $UploadData)
 	{
@@ -777,7 +777,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 					$aQuota = $this->GetQuota($sUUID);
 					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
 					{
-						throw new \System\Exceptions\AuroraApiException(\System\Notifications::CanNotUploadFileQuota);
+						throw new \System\Exceptions\ApiException(\System\Notifications::CanNotUploadFileQuota);
 					}
 				}
 				
@@ -871,7 +871,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		
-		$aPath = \System\Service::GetPaths();
+		$aPath = \Aurora\System\Service::GetPaths();
 		$sHash = (string) isset($aPath[1]) ? $aPath[1] : '';
 		$aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
 		
@@ -1185,7 +1185,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 *		*array* **Items** Array of files objects.
 	 *		*array* **Quota** Array of items with fields Used, Limit.
 	 * }
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function GetFiles($UserId, $Type, $Path, $Pattern)
 	{
@@ -1196,7 +1196,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$aUsers = array();
@@ -1286,7 +1286,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 *		*array* **Items** Array of files objects.
 	 *		*array* **Quota** Array of items with fields Used, Limit.
 	 * }
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
@@ -1307,7 +1307,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 					$sUUID = $this->getUUIDById($iUserId);
 					if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 					{
-						throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+						throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 					}
 					$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
@@ -1373,7 +1373,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param string $Path Path to new folder.
 	 * @param string $FolderName New folder name.
 	 * @return bool
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function CreateFolder($UserId, $Type, $Path, $FolderName)
 	{
@@ -1384,7 +1384,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID)) 
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			return $this->oApiFilesManager->createFolder($sUUID, $Type, $Path, $FolderName);
@@ -1450,7 +1450,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param string $Link Link value.
 	 * @param string $Name Link name.
 	 * @return bool
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function CreateLink($UserId, $Type, $Path, $Link, $Name)
 	{
@@ -1461,7 +1461,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$Name = \trim(\MailSo\Base\Utils::ClearFileName($Name));
@@ -1520,7 +1520,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param array $Items Array of items to delete.
 	 * @return bool
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function Delete($UserId, $Type, $Items)
 	{
@@ -1534,7 +1534,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$oResult = false;
@@ -1609,7 +1609,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param string $NewName New name of the item.
 	 * @param bool $IsLink Indicates if the item is link or not.
 	 * @return bool
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
 	{
@@ -1623,7 +1623,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$sNewName = \trim(\MailSo\Base\Utils::ClearFileName($aArgs['NewName']));
@@ -1694,7 +1694,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 *		*bool* **IsFolder** Indicates if the item to copy is folder or not.
 	 * }
 	 * @return bool
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function Copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
@@ -1705,7 +1705,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 
 			$oResult = null;
@@ -1783,7 +1783,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 *		*bool* **IsFolder** Indicates if the item to copy is folder or not.
 	 * }
 	 * @return bool
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
@@ -1794,7 +1794,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
-				throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+				throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 			}
 			$oResult = null;
 
@@ -1806,7 +1806,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 					$aQuota = $this->GetQuota($sUUID);
 					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $oFileItem->Size > $aQuota['Limit'])
 					{
-						throw new \System\Exceptions\AuroraApiException(\System\Notifications::CanNotUploadFileQuota);
+						throw new \System\Exceptions\ApiException(\System\Notifications::CanNotUploadFileQuota);
 					}
 				}
 				
@@ -1878,7 +1878,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param int $Size Size of the file.
 	 * @param bool $IsFolder Indicates if the item is folder or not.
 	 * @return string|false Public link to the item.
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
 	{
@@ -1887,7 +1887,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		$sUUID = $this->getUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 		{
-			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+			throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
 		$bFolder = $IsFolder === '1' ? true : false;
@@ -1947,7 +1947,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 	 * @param string $Path Path to the item.
 	 * @param string $Name Name of the item.
 	 * @return bool
-	 * @throws \System\Exceptions\AuroraApiException
+	 * @throws \System\Exceptions\ApiException
 	 */
 	public function DeletePublicLink($UserId, $Type, $Path, $Name)
 	{
@@ -1956,7 +1956,7 @@ class FilesModule extends \Aurora\System\AbstractModule
 		$sUUID = $this->getUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 		{
-			throw new \System\Exceptions\AuroraApiException(\System\Notifications::FilesNotAllowed);
+			throw new \System\Exceptions\ApiException(\System\Notifications::FilesNotAllowed);
 		}
 		
 		return $this->oApiFilesManager->deletePublicLink($sUUID, $Type, $Path, $Name);
