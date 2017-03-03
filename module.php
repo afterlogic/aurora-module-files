@@ -497,7 +497,7 @@ class FilesModule extends \Aurora\System\Module\AbstractModule
 	public function UploadFileData()
 	{
 		$mResult = false;
-		$aPaths = \Aurora\System\Service::GetPaths();
+		$aPaths = \Aurora\System\Application::GetPaths();
 		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
 		{
 			$sType = isset($aPaths[2]) ? strtolower($aPaths[2]) : 'personal';
@@ -608,7 +608,7 @@ class FilesModule extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$aPath = \Aurora\System\Service::GetPaths();
+		$aPath = \Aurora\System\Application::GetPaths();
 		
 		$aAppData = array(
 			'EnableModule' => true,
@@ -871,7 +871,7 @@ class FilesModule extends \Aurora\System\Module\AbstractModule
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		
-		$aPath = \Aurora\System\Service::GetPaths();
+		$aPath = \Aurora\System\Application::GetPaths();
 		$sHash = (string) isset($aPath[1]) ? $aPath[1] : '';
 		$aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
 		
