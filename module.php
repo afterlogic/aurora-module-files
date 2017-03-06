@@ -18,9 +18,9 @@
  * @package Modules
  */
 
-namespace Aurora\Modules;
+namespace Aurora\Modules\Files;
 
-class FilesModule extends \Aurora\System\Module\AbstractModule
+class Module extends \Aurora\System\Module\AbstractModule
 {
 	/**
 	 *
