@@ -762,7 +762,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$sUUID = $this->getUUIDById($UserId);
-		$oApiFileCacheManager = \Aurora\System\Api::GetSystemManager('filecache');
+		$oApiFileCacheManager = \Aurora\System\Api::GetSystemManager('Filecache');
 
 		$sError = '';
 		$aResponse = array();
