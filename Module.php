@@ -170,12 +170,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if (is_resource($mResult)) 
 				{
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
-					\Aurora\System\ResponseManager::OutputHeaders($bDownload, $sContentType, $sFileName);
+					\Aurora\System\Managers\Response::OutputHeaders($bDownload, $sContentType, $sFileName);
 			
 					if ($bThumbnail) 
 					{
 //						$this->cacheByKey($sRawKey);	// todo
-						return \Aurora\System\ResponseManager::GetThumbResource($iUserId, $mResult, $sFileName);
+						return \Aurora\System\Managers\Response::GetThumbResource($iUserId, $mResult, $sFileName);
 					} 
 					else if ($sContentType === 'text/html') 
 					{
