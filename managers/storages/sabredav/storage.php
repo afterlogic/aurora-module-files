@@ -260,12 +260,18 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				{
 					$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oItem->getName());
 					$oResult->IsFolder = true;
-					$oResult->AddActions(array('list'));
+					$oResult->AddAction([
+						'list' => []
+					]);
 				}
 
 				if ($oItem instanceof \Afterlogic\DAV\FS\File)
 				{
-					$oResult->AddActions(array('view'));
+					$oResult->AddAction([
+						'view' => [
+							'url' => '?download-file/' . $oResult->getHash() .'/view'
+						]
+					]);
 					$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oItem->getName());
 					$oResult->IsFolder = false;
 					$oResult->Size = $oItem->getSize();
@@ -278,11 +284,19 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						{
 							$oResult->IsLink = true;
 							$oResult->LinkUrl = $aUrlFileInfo['URL'];
-							$oResult->AddActions(array('open'));
+							$oResult->AddAction([
+								'open' => [
+									'url' => $aUrlFileInfo['URL']
+								]
+							]);
 						}
 						else
 						{
-							$oResult->AddActions(array('download'));
+							$oResult->AddAction([
+								'download' => [
+									'url' => '?download-file/' . $oResult->getHash()
+								]
+							]);						
 						}
 						if (!$oResult->ContentType && isset($aPathInfo['filename']))
 						{
@@ -291,7 +305,11 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					}
 					else						
 					{
-						$oResult->AddActions(array('download'));
+						$oResult->AddAction([
+							'download' => [
+								'url' => '?download-file/' . $oResult->getHash()
+							]
+						]);
 						$oResult->ContentType = $oItem->getContentType();
 					}
 

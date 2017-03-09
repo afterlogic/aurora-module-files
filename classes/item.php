@@ -45,6 +45,7 @@
  * @property string $RealPath
  * @property string $MainAction
  * @property array $Actions
+ * @property string $Hash
  * 
  * @package Classes
  * @subpackage FileStorage
@@ -81,6 +82,16 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'MainAction' => '',
 			'Actions' => array()
 		));
+	}
+	
+	public function getHash()
+	{
+		return \Aurora\System\Api::EncodeKeyValues(array(
+			'UserId' => \Aurora\System\Api::getAuthenticatedUserId(), 
+			'Type' => $this->TypeStr,
+			'Path' => $this->Path,
+			'Name' => $this->Name
+		));		
 	}
 
 	/**
@@ -120,19 +131,13 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'IsExternal' => array('bool'),
 			'RealPath' => array('string'),
 			'MainAction' => array('string'),
-			'Actions' => array('array')
+			'Actions' => array('array'),
+			'Hash' => array('string')
 		);
 	}
 	
 	public function toResponseArray($aParameters = array())
 	{
-		$sHash = \Aurora\System\Api::EncodeKeyValues(array(
-			'UserId' => \Aurora\System\Api::getAuthenticatedUserId(), 
-			'Type' => $this->TypeStr,
-			'Path' => $this->Path,
-			'Name' => $this->Name
-		));		
-		
 		$aResult = array(
 			'Id' => $this->Id,
 			'Type' => $this->TypeStr,
@@ -155,14 +160,12 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'Content' => $this->Content,
 			'IsExternal' => $this->IsExternal,
 			'MainAction' => $this->MainAction,
-			'Actions' => $this->Actions,
-			'DownloadUrl' => '?download-file/' . $sHash,
-			'ViewUrl' => '?download-file/' . $sHash .'/view'
+			'Actions' => $this->Actions
 		);		
 		
 		if ($this->Thumb)
 		{
-			$aResult['ThumbnailUrl'] = '?download-file/' . $sHash .'/thumb';
+			$aResult['ThumbnailUrl'] = '?download-file/' . $this->getHash() .'/thumb';
 		}
 		
 		return $aResult;
@@ -175,12 +178,11 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 		$this->Actions = $aActions;
 	}
 	
-	public function AddActions($aActions)
+	public function AddAction($aAction)
 	{
-		$aDiffActions = array_diff($this->Actions, $aActions);
-		$this->Actions = array_merge(
-			$aDiffActions, 
-			$aActions
-		);
+		$sKey = key($aAction);
+		$aActions = $this->Actions;
+		$aActions[$sKey] = $aAction[$sKey];
+		$this->Actions = $aActions;
 	}
 }
