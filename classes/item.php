@@ -160,7 +160,8 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'Content' => $this->Content,
 			'IsExternal' => $this->IsExternal,
 			'MainAction' => $this->MainAction,
-			'Actions' => $this->Actions
+			'Actions' => $this->Actions,
+			'Hash' => $this->getHash()
 		);		
 		
 		if ($this->Thumb)

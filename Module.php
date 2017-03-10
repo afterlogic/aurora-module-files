@@ -22,6 +22,11 @@ namespace Aurora\Modules\Files;
 
 class Module extends \Aurora\System\Module\AbstractModule
 {
+	/* 
+	 * @var $oApiFileCache \Aurora\System\Managers\Filecache\Manager 
+	 */	
+	public $oApiFileCache = null;
+
 	/**
 	 *
 	 * @var \CApiFilesManager
@@ -44,6 +49,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$this->incClass('item');
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
+		$this->oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
 		
 //		$this->AddEntry('pub', 'EntryPub');
 		$this->AddEntries(
@@ -1989,5 +1995,63 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		return $mResult;
 	}	
+	
+	/**
+	 * @return array
+	 */
+	public function GetFilesForUpload($UserId, $Hashes = array())
+	{
+		$sUUID = $this->getUUIDById($UserId);
+		
+		$mResult = false;
+		if (is_array($Hashes) && 0 < count($Hashes))
+		{
+			$mResult = array();
+			foreach ($Hashes as $sHash)
+			{
+				$aData = \Aurora\System\Api::DecodeKeyValues($sHash);
+				if (\is_array($aData) && 0 < \count($aData))
+				{
+					$oFileInfo = $this->oApiFilesManager->getFileInfo($sUUID, $aData['Type'], $aData['Path'], $aData['Name']);
+					$rFile = $this->oApiFilesManager->getFile($sUUID, $aData['Type'], $aData['Path'], $aData['Name']);
+
+					$sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
+
+					if (is_resource($rFile) && $this->oApiFileCache->putFile($sUUID, $sTempName, $rFile))
+					{
+						$aItem = array(
+							'Name' => $oFileInfo->Name,
+							'TempName' => $sTempName,
+							'Size' => $oFileInfo->Size,
+							'Hash' => $sHash,
+							'MimeType' => ''
+						);
+
+						$aItem['MimeType'] = \MailSo\Base\Utils::MimeContentType($aItem['Name']);
+						$aItem['NewHash'] = \Aurora\System\Api::EncodeKeyValues(array(
+							'TempFile' => true,
+							'UserId' => $UserId,
+							'Name' => $aItem['Name'],
+							'TempName' => $sTempName
+						));
+
+						$mResult[] = $aItem;
+
+						if (is_resource($rFile))
+						{
+							@fclose($rFile);
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			throw new \Aurora\System\Exceptions\ApiException(\ProjectCore\Notifications::InvalidInputParameter);
+		}
+
+		return $mResult;
+	}	
+	
 	/***** public functions might be called with web API *****/
 }
