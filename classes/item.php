@@ -43,7 +43,6 @@
  * @property string $Content
  * @property bool $IsExternal
  * @property string $RealPath
- * @property string $MainAction
  * @property array $Actions
  * @property string $Hash
  * 
@@ -79,7 +78,6 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'Content' => '',
 			'IsExternal' => false,
 			'RealPath' => '',
-			'MainAction' => '',
 			'Actions' => array()
 		));
 	}
@@ -130,7 +128,6 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'Content' => array('string'),
 			'IsExternal' => array('bool'),
 			'RealPath' => array('string'),
-			'MainAction' => array('string'),
 			'Actions' => array('array'),
 			'Hash' => array('string')
 		);
@@ -159,7 +156,6 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'Owner' => $this->Owner,
 			'Content' => $this->Content,
 			'IsExternal' => $this->IsExternal,
-			'MainAction' => $this->MainAction,
 			'Actions' => $this->Actions,
 			'Hash' => $this->getHash()
 		);		
@@ -172,10 +168,16 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 		return $aResult;
 	}
 	
-	public function UnshiftAction($sAction)
+	public function UnshiftAction($aAction)
 	{
-		$aActions = array_diff($this->Actions, array($sAction));
-		array_unshift($aActions, $sAction);
+		$sKey = key($aAction);
+		$aActions = $this->Actions;
+		if (isset($aActions[$sKey]))
+		{
+			unset($aActions[$sKey]);
+		}
+		
+		$aActions = \array_merge($aAction, $aActions);
 		$this->Actions = $aActions;
 	}
 	

@@ -101,8 +101,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $sType Storage type - personal, corporate.
 	 * @param string $sPath Path to folder contained file.
 	 * @param string $sFileName File name.
-	 * @param bool $bDownload Indicates if file should be downloaded or viewed.
-	 * @param bool $bThumbnail Indicates if thumbnail should be created for file.
+	 * @param string $SharedHash Indicates if file should be downloaded or viewed.
+	 * @param string $sAction Indicates if thumbnail should be created for file.
 	 * 
 	 * @return bool
 	 */
