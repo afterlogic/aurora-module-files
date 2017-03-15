@@ -51,7 +51,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		$this->oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
 		
-//		$this->AddEntry('pub', 'EntryPub');
 		$this->AddEntries(
 			array(
 				'upload' => 'UploadFileData',
@@ -377,124 +376,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	/***** public functions *****/
 	/**
-	 * @ignore
-	 */
-//	public function EntryPub()
-//	{
-//		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
-//		
-//		$aPaths = \Aurora\System\Service::GetPaths();
-//		$sHash = empty($aPaths[2]) ? '' : $aPaths[2];
-//		$bDownload = !(!empty($aPaths[3]) && $aPaths[3] === 'view');
-//		$bList = (!empty($aPaths[3]) && $aPaths[3] === 'list');
-//		
-//		if ($bList)
-//		{
-//			$sResult = '';
-//
-//			$oMinDecorator =  $this->getMinModuleDecorator();
-//			if ($oMinDecorator)
-//			{
-//				$mData = $oMinDecorator->GetMinByHash($sHash);
-//
-//				if (is_array($mData) && isset($mData['IsFolder']) && $mData['IsFolder'])
-//				{
-//					$oApiIntegrator = \Aurora\System\Api::GetSystemManager('integrator');
-//
-//					if ($oApiIntegrator)
-//					{
-//						$oCoreClientModule = \Aurora\System\Api::GetModule('CoreWebclient');
-//						if ($oCoreClientModule instanceof \Aurora\System\Module\AbstractModule) 
-//						{
-//							$sResult = file_get_contents($oCoreClientModule->GetPath().'/templates/Index.html');
-//							if (is_string($sResult)) 
-//							{
-//								$sFrameOptions = \Aurora\System\Api::GetConf('labs.x-frame-options', '');
-//								if (0 < \strlen($sFrameOptions)) 
-//								{
-//									@\header('X-Frame-Options: '.$sFrameOptions);
-//								}
-//
-//								$sResult = strtr($sResult, array(
-//									'{{AppVersion}}' => AURORA_APP_VERSION,
-//									'{{IntegratorDir}}' => $oApiIntegrator->isRtl() ? 'rtl' : 'ltr',
-//									'{{IntegratorLinks}}' => $oApiIntegrator->buildHeadersLink(),
-//									'{{IntegratorBody}}' => $oApiIntegrator->buildBody('-files-pub')
-//								));
-//							}
-//						}
-//					}
-//				}
-//				else if ($mData && isset($mData['__hash__'], $mData['Name'], $mData['Size']))
-//				{
-//					$sUrl = (bool) \Aurora\System\Api::GetConf('labs.server-use-url-rewrite', false) ? '/download/' : '?/pub/files/';
-//
-//					$sUrlRewriteBase = (string) \Aurora\System\Api::GetConf('labs.server-url-rewrite-base', '');
-//					if (!empty($sUrlRewriteBase))
-//					{
-//						$sUrlRewriteBase = '<base href="'.$sUrlRewriteBase.'" />';
-//					}
-//
-//					$sResult = file_get_contents($this->GetPath().'/templates/FilesPub.html');
-//					if (is_string($sResult))
-//					{
-//						$sResult = strtr($sResult, array(
-//							'{{Url}}' => $sUrl.$mData['__hash__'], 
-//							'{{FileName}}' => $mData['Name'],
-//							'{{FileSize}}' => \Aurora\System\Utils::GetFriendlySize($mData['Size']),
-//							'{{FileType}}' => \Aurora\System\Utils::GetFileExtension($mData['Name']),
-//							'{{BaseUrl}}' => $sUrlRewriteBase 
-//						));
-//					}
-//					else
-//					{
-//						\Aurora\System\Api::Log('Empty template.', \ELogLevel::Error);
-//					}
-//				}
-//				else 
-//				{
-//					$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
-//					$sResult = strtr($sResult, array(
-//						'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
-//					));
-//					
-//				}
-//			}
-//
-//			return $sResult;
-//		}
-//		else
-//		{
-//			$oModuleDecorator = $this->getMinModuleDecorator();
-//			if ($oModuleDecorator)
-//			{
-//				$aHash = $oModuleDecorator->GetMinByHash($sHash);
-//				if (isset($aHash['__hash__']))
-//				{
-//					if ((isset($aHash['IsFolder']) && (bool) $aHash['IsFolder'] === false) || !isset($aHash['IsFolder']))
-//					{
-//						echo $this->getRawFile(
-//							$this->getUUIDById($aHash['UserId']), 
-//							$aHash['Type'], 
-//							$aHash['Path'], 
-//							$aHash['Name'], 
-//							$sHash, 
-//							$bDownload
-//						);
-//					}
-//					else 
-//					{
-//						$sResult = file_get_contents($this->GetPath().'/templates/NotFound.html');
-//						$sResult = strtr($sResult, array(
-//							'{{NotFound}}' => $this->i18N('INFO_NOTFOUND')
-//						));
-//					}
-//				}
-//			}
-//		}
-//	}
-	
-	/**
 	 * Uploads file from client side.
 	 * 
 	 * @return string "true" or "false"
@@ -614,8 +495,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$aPath = \Aurora\System\Application::GetPaths();
-		
 		$aAppData = array(
 			'EnableModule' => true,
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
@@ -624,9 +503,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
 			'CustomTabTitle' => $this->getConfig('CustomTabTitle', '')
 		);
-		if (isset($aPath[1]))
+		$sPublicHash = \Aurora\System\Application::GetPathItemByIndex(1);
+		if (isset($sPublicHash))
 		{
-			$sPublicHash = $aPath[1];
 			$aAppData['PublicHash'] = $sPublicHash;
 			$oModuleDecorator = $this->getMinModuleDecorator();
 			$mMin = ($oModuleDecorator && $sPublicHash !== null) ? $oModuleDecorator->GetMinByHash($sPublicHash) : array();
@@ -877,8 +756,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		
-		$aPath = \Aurora\System\Application::GetPaths();
-		$sHash = (string) isset($aPath[1]) ? $aPath[1] : '';
+		$sHash = (string) \Aurora\System\Application::GetPathItemByIndex(1, '');
+		$sAction = (string) \Aurora\System\Application::GetPathItemByIndex(2, '');
+
 		$aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
 		
 		$iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
@@ -886,8 +766,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sPath = isset($aValues['Path']) ? urldecode($aValues['Path']) : '';
 		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
 		$SharedHash = isset($aValues['SharedHash']) ? $aValues['SharedHash'] : null;
-		
-		$sAction = (string) isset($aPath[2]) ? $aPath[2] : '';	
 
 		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash, $sAction);		
 	}
