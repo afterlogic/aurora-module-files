@@ -72,7 +72,7 @@ class CApiFilesStorage extends \Aurora\System\Managers\AbstractManagerStorage
 
 	}
 	
-	public function createFile($oAccount, $iType, $sPath, $sFileName, $sData)
+	public function createFile($iUserId, $sType, $sPath, $sFileName, $sData, $rangeType, $offset)
 	{
 
 	}

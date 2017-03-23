@@ -291,7 +291,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aArgs['Path'], 
 				$aArgs['Name'], 
 				$aArgs['Data'], 
-				false,
+				$aArgs['Overwrite'], 
 				$aArgs['RangeType'], 
 				$aArgs['Offset']
 			);
@@ -644,7 +644,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function UploadFile($UserId, $Type, $Path, $UploadData, $RangeType = 2, $Offset = 0)
+	public function UploadFile($UserId, $Type, $Path, $UploadData, $Overwrite = true, $RangeType = 2, $Offset = 0)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
@@ -689,6 +689,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 						'Path' => $Path,
 						'Name' => $sUploadName,
 						'Data' => $rData,
+						'Overwrite' => $Overwrite,
 						'RangeType' => $RangeType,
 						'Offset' => $Offset
 						
