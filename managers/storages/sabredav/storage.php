@@ -585,7 +585,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 *
 	 * @return bool
 	 */
-	public function createFile($iUserId, $sType, $sPath, $sFileName, $sData)
+	public function createFile($iUserId, $sType, $sPath, $sFileName, $sData, $rangeType, $offset)
 	{
 		if ($this->init($iUserId))
 		{
@@ -593,7 +593,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
-				$oDirectory->createFile($sFileName, $sData);
+				$oDirectory->createFile($sFileName, $sData, $rangeType, $offset);
 				return true;
 			}
 		}

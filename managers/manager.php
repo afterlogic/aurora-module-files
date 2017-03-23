@@ -210,13 +210,13 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * 
 	 * @return bool
 	 */
-	public function createFile($iUserId, $iType, $sPath, $sFileName, $mData, $bOverride = true)
+	public function createFile($iUserId, $iType, $sPath, $sFileName, $mData, $bOverride = true, $rangeType = 0, $offset = 0)
 	{
 		if (!$bOverride)
 		{
 			$sFileName = $this->oStorage->getNonExistentFileName($iUserId, $iType, $sPath, $sFileName);
 		}
-		return $this->oStorage->createFile($iUserId, $iType, $sPath, $sFileName, $mData);
+		return $this->oStorage->createFile($iUserId, $iType, $sPath, $sFileName, $mData, $rangeType, $offset);
 	}
 	
 	/**
