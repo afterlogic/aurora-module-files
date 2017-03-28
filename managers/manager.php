@@ -131,9 +131,9 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * 
 	 * @return resource|bool
 	 */
-	public function getFile($iUserId, $iType, $sPath, $sName)
+	public function getFile($iUserId, $iType, $sPath, $sName, $iOffset = 0, $iChunkSize = 0)
 	{
-		return $this->oStorage->getFile($iUserId, $iType, $sPath, $sName);
+		return $this->oStorage->getFile($iUserId, $iType, $sPath, $sName, $iOffset, $iChunkSize);
 	}
 
 	/**
@@ -210,13 +210,13 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * 
 	 * @return bool
 	 */
-	public function createFile($iUserId, $iType, $sPath, $sFileName, $mData, $bOverride = true, $rangeType = 0, $offset = 0)
+	public function createFile($iUserId, $iType, $sPath, $sFileName, $mData, $bOverride = true, $rangeType = 0, $offset = 0, $extendedProps = [])
 	{
 		if (!$bOverride)
 		{
 			$sFileName = $this->oStorage->getNonExistentFileName($iUserId, $iType, $sPath, $sFileName);
 		}
-		return $this->oStorage->createFile($iUserId, $iType, $sPath, $sFileName, $mData, $rangeType, $offset);
+		return $this->oStorage->createFile($iUserId, $iType, $sPath, $sFileName, $mData, $rangeType, $offset, $extendedProps);
 	}
 	
 	/**

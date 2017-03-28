@@ -105,7 +105,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * 
 	 * @return bool
 	 */
-	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '')
+	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
 	{
 		$bDownload = true;
 		$bThumbnail = false;
@@ -120,10 +120,25 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$bDownload = false;
 				$bThumbnail = true;
 			break;
+			case 'download':
+				$bDownload = true;
+				$bThumbnail = false;
+
+			break;
 			default:
 				$bDownload = true;
 				$bThumbnail = false;
 			break;
+		}
+		if (!$bDownload || $iChunkSize == 0)
+		{
+			$iLength = -1;
+			$iOffset = -1;
+		}
+		else
+		{
+			$iLength = $iChunkSize;
+			$iOffset = $iChunkSize * $iOffset;
 		}
 		
 		$oModuleDecorator = $this->getMinModuleDecorator();
@@ -184,13 +199,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 					} 
 					else if ($sContentType === 'text/html') 
 					{
-						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult)));
+						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult, $iLength, $iOffset)));
 					} 
-					else if ($sContentType === 'text/plain') 
+					else if ($sContentType === 'text/plain')
 					{
-						echo(stream_get_contents($mResult));
-					} 
-					else 
+						echo(stream_get_contents($mResult, $iLength, $iOffset));
+					}
+					else if ($iLength > -1 && $iOffset > -1)
+					{
+						\MailSo\Base\Utils::GetFilePart($mResult, $iLength, $iOffset);
+					}
+					else
 					{
 						\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
 					}
@@ -265,7 +284,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
 			}
 			
-			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
+			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $aArgs['Offset'], $aArgs['ChunkSize']);
 		}
 	}	
 	
@@ -293,7 +312,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aArgs['Data'], 
 				$aArgs['Overwrite'], 
 				$aArgs['RangeType'], 
-				$aArgs['Offset']
+				$aArgs['Offset'],
+				$aArgs['ExtendedProps']
 			);
 		}
 	}
@@ -644,7 +664,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function UploadFile($UserId, $Type, $Path, $UploadData, $Overwrite = true, $RangeType = 2, $Offset = 0)
+	public function UploadFile($UserId, $Type, $Path, $UploadData, $Overwrite = true, $RangeType = 0, $Offset = 0, $ExtendedProps = [])
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
@@ -691,7 +711,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 						'Data' => $rData,
 						'Overwrite' => $Overwrite,
 						'RangeType' => $RangeType,
-						'Offset' => $Offset
+						'Offset' => $Offset,
+						'ExtendedProps' => $ExtendedProps
 						
 					);
 					$this->broadcastEvent(
@@ -764,6 +785,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$sHash = (string) \Aurora\System\Application::GetPathItemByIndex(1, '');
 		$sAction = (string) \Aurora\System\Application::GetPathItemByIndex(2, '');
+		$iOffset = (int) \Aurora\System\Application::GetPathItemByIndex(3, '');
+		$iChunkSize = (int) \Aurora\System\Application::GetPathItemByIndex(4, '');
 
 		$aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
 		
@@ -773,7 +796,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
 		$SharedHash = isset($aValues['SharedHash']) ? $aValues['SharedHash'] : null;
 
-		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash, $sAction);		
+		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash, $sAction, $iOffset, $iChunkSize);
 	}
 
 	/**

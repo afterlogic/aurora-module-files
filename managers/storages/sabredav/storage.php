@@ -243,7 +243,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				$sFilePath = str_replace($sRootPath, '', dirname($oItem->getPath()));
 				if ($oItem instanceof Afterlogic\DAV\FS\File)
 				{
-					$aProps = $oItem->getProperties(array('Owner', 'Shared', 'Name' ,'Link'));
+					$aProps = $oItem->getProperties(array('Owner', 'Shared', 'Name' ,'Link', 'ExtendedProps'));
 				}
 				$oResult /*@var $oResult \CFileStorageItem */ = new  \CFileStorageItem();
 
@@ -344,6 +344,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 				$oResult->Shared = isset($aProps['Shared']) ? $aProps['Shared'] : empty($mMin['__hash__']) ? false : true;
 				$oResult->Owner = isset($aProps['Owner']) ? $aProps['Owner'] : $iUserId;
+				$oResult->ExtendedProps = isset($aProps['ExtendedProps']) ? $aProps['ExtendedProps'] : false;
 
 				if ($oResult && '.asc' === \strtolower(\substr(\trim($oResult->Name), -4)))
 				{
@@ -585,7 +586,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 *
 	 * @return bool
 	 */
-	public function createFile($iUserId, $sType, $sPath, $sFileName, $sData, $rangeType, $offset)
+	public function createFile($iUserId, $sType, $sPath, $sFileName, $sData, $rangeType, $offset, $extendedProps = [])
 	{
 		if ($this->init($iUserId))
 		{
@@ -593,7 +594,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 			if ($oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
-				$oDirectory->createFile($sFileName, $sData, $rangeType, $offset);
+				$oDirectory->createFile($sFileName, $sData, $rangeType, $offset, $extendedProps);
 				return true;
 			}
 		}

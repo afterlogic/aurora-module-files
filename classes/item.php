@@ -78,7 +78,8 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'Content' => '',
 			'IsExternal' => false,
 			'RealPath' => '',
-			'Actions' => array()
+			'Actions' => array(),
+			'ExtendedProps' => array()
 		));
 	}
 	
@@ -129,7 +130,8 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'IsExternal' => array('bool'),
 			'RealPath' => array('string'),
 			'Actions' => array('array'),
-			'Hash' => array('string')
+			'Hash' => array('string'),
+			'ExtendedProps' => array('array')
 		);
 	}
 	
@@ -157,7 +159,8 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'Content' => $this->Content,
 			'IsExternal' => $this->IsExternal,
 			'Actions' => $this->Actions,
-			'Hash' => $this->getHash()
+			'Hash' => $this->getHash(),
+			'ExtendedProps' => $this->ExtendedProps
 		);		
 		
 		if ($this->Thumb)
