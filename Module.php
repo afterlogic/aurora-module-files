@@ -1955,7 +1955,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 		else
 		{
-			throw new \Aurora\System\Exceptions\ApiException(\ProjectCore\Notifications::InvalidInputParameter);
+			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}
 
 		return $mResult;
