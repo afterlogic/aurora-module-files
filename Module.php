@@ -248,21 +248,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return isset($aTitle['1']) ? trim($aTitle['1']) : '';
 	}
 	
-	public function getUUIDById($UserId)
-	{
-		if (is_numeric($UserId))
-		{
-			$oManagerApi = \Aurora\System\Api::GetSystemManager('eav', 'db');
-			$oEntity = $oManagerApi->getEntity((int) \Aurora\System\Api::getAuthenticatedUserId());
-			if ($oEntity instanceof \Aurora\System\EAV\Entity)
-			{
-				$UserId = $oEntity->UUID;
-			}
-		}
-		
-		return $UserId;
-	}
-	
 	/**
 	 * Returns file contents.
 	 * 
@@ -279,7 +264,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		if ($this->checkStorageType($aArgs['Type']))
 		{
-			$sUUID = $this->getUUIDById($aArgs['UserId']);
+			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 			{
 				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
@@ -306,7 +291,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($this->checkStorageType($aArgs['Type']))
 		{
 			$Result = $this->oApiFilesManager->createFile(
-				$this->getUUIDById($aArgs['UserId']), 
+				\Aurora\System\Api::getUserUUIDById($aArgs['UserId']), 
 				$aArgs['Type'], 
 				$aArgs['Path'], 
 				$aArgs['Name'], 
@@ -669,7 +654,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$oApiFileCacheManager = \Aurora\System\Api::GetSystemManager('Filecache');
 
 		$sError = '';
@@ -841,7 +826,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		$this->getRawFile(
-			$this->getUUIDById($UserId), 
+			\Aurora\System\Api::getUserUUIDById($UserId), 
 			$Type, 
 			$Path, 
 			$Name, 
@@ -892,7 +877,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		// checkUserRoleIsAtLeast is called in getRawFile
 		return \base64_encode(
 			$this->getRawFile(
-				$this->getUUIDById($UserId), 
+				\Aurora\System\Api::getUserUUIDById($UserId), 
 				$Type, 
 				$Path, 
 				$Name, 
@@ -958,7 +943,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$aStorages = [
 			[
 				'Type' => 'personal', 
@@ -1034,7 +1019,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		return array(
 			'Used' => $this->oApiFilesManager->getUserSpaceUsed($sUUID, [\EFileStorageTypeStr::Personal]),
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
@@ -1105,7 +1090,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1144,7 +1129,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	public function onAfterGetFileInfo($aArgs, &$mResult)
 	{
-		$sUUID = $this->getUUIDById($aArgs['UserId']);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		$mResult = $this->oApiFilesManager->getFileInfo($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
 	}
 
@@ -1218,7 +1203,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$iUserId = $mMin['UserId'];
 				if ($iUserId)
 				{
-					$sUUID = $this->getUUIDById($iUserId);
+					$sUUID = \Aurora\System\Api::getUserUUIDById($iUserId);
 					if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
@@ -1293,7 +1278,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID)) 
@@ -1370,7 +1355,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1443,7 +1428,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	public function onAfterDelete(&$aArgs, &$mResult)
 	{
-		$sUUID = $this->getUUIDById($aArgs['UserId']);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		if ($this->checkStorageType($aArgs['Type']))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1532,7 +1517,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	public function onAfterRename(&$aArgs, &$mResult)
 	{
-		$sUUID = $this->getUUIDById($aArgs['UserId']);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		if ($this->checkStorageType($aArgs['Type']))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1614,7 +1599,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1703,7 +1688,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
 			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1798,7 +1783,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
@@ -1867,7 +1852,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
@@ -1909,7 +1894,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetFilesForUpload($UserId, $Hashes = array())
 	{
-		$sUUID = $this->getUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		
 		$mResult = false;
 		if (is_array($Hashes) && 0 < count($Hashes))
