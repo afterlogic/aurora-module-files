@@ -1440,10 +1440,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 			foreach ($aArgs['Items'] as $oItem)
 			{
-				$oResult = $this->oApiFilesManager->delete($sUUID, $aArgs['Type'], $oItem['Path'], $oItem['Name']);
-				if (!$oResult)
+				if (!empty($oItem['Name']))
 				{
-					break;
+					$oResult = $this->oApiFilesManager->delete($sUUID, $aArgs['Type'], $oItem['Path'], $oItem['Name']);
+					if (!$oResult)
+					{
+						break;
+					}
 				}
 			}
 			$mResult = $oResult;
