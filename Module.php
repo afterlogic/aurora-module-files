@@ -177,7 +177,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				'Type' => $sType,
 				'Path' => $sPath,
 				'Name' => &$sFileName,
-				'IsThumb' => $bThumbnail
+				'IsThumb' => $bThumbnail,
+				'Offset' => $iOffset,
+				'ChunkSize' => $iChunkSize
 			);
 			$mResult = false;
 			$this->broadcastEvent(
@@ -198,7 +200,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 //						$this->cacheByKey($sRawKey);	// todo
 						return \Aurora\System\Managers\Response::GetThumbResource($iUserId, $mResult, $sFileName);
 					} 
-					else if ($sContentType === 'text/html') 
+					else if ($sContentType === 'text/html' && !$bDownload)
 					{
 						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult, $iLength, $iOffset)));
 					} 
@@ -269,8 +271,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 			{
 				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
 			}
-			
-			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $aArgs['Offset'], $aArgs['ChunkSize']);
+			$iOffset = isset($aArgs['Offset']) ? $aArgs['Offset'] : 0;
+			$iChunkSizet = isset($aArgs['ChunkSize']) ? $aArgs['ChunkSize'] : 0;
+			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $iOffset, $iChunkSizet);
 		}
 	}	
 	
