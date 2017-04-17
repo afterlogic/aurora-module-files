@@ -165,6 +165,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		catch (\Aurora\System\Exceptions\ApiException $oEx)
 		{
 			echo 'Access denied';
+			exit();
 		}
 		
 		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
