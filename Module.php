@@ -785,15 +785,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
 		$SharedHash = isset($aValues['SharedHash']) ? $aValues['SharedHash'] : null;
 		
-		$sAuthToken = isset($aValues['AuthToken']) ? $aValues['AuthToken'] : null;
-		if (isset($sAuthToken))
-		{
-			\Aurora\System\Api::setAuthToken($sAuthToken);
-			\Aurora\System\Api::setUserId(
-				\Aurora\System\Api::getAuthenticatedUserId($sAuthToken)
-			);
-		}
-		
 		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash, $sAction, $iOffset, $iChunkSize);
 	}
 
