@@ -327,10 +327,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					$oSettings =& \Aurora\System\Api::GetSettings();
 					if ($oSettings->GetConf('AllowThumbnail', true) && !$oResult->Thumb)
 					{
-						$iThumbnailLimit = $this->oManager->GetModule()->getConfig(
-							'MaxFileSizeForMakingThumbnail', 
-							1024 * 1024 * 5 // 5MB
-						);
+						$iThumbnailLimit = ((int) $oSettings->GetConf('ThumbnailMaxFileSizeMb', 5)) * 1024 * 1024;
 						$oResult->Thumb = $oResult->Size < $iThumbnailLimit && \Aurora\System\Utils::IsGDImageMimeTypeSuppoted($oResult->ContentType, $oResult->Name);
 					}
 
