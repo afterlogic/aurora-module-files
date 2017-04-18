@@ -33,7 +33,6 @@
  * @property bool $LastModified
  * @property string $ContentType
  * @property bool $Thumb
- * @property bool $Iframed
  * @property string $ThumbnailLink
  * @property string $OembedHtml
  * @property bool $Shared
@@ -68,7 +67,6 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'LastModified' => 0,
 			'ContentType' => '',
 			'Thumb' => false,
-			'Iframed' => false,
 			'ThumbnailLink' => '',
 			'OembedHtml' => '',
 			'Shared' => false,
@@ -119,7 +117,6 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'LastModified' => array('int'),
 			'ContentType' => array('string'),
 			'Thumb' => array('bool'),
-			'Iframed' => array('bool'),
 			'ThumbnailLink' => array('string'),
 			'OembedHtml' => array('string'),
 			'Shared' => array('bool'),
@@ -148,7 +145,6 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'LinkUrl' => $this->LinkUrl,
 			'LastModified' => $this->LastModified,
 			'ContentType' => $this->ContentType,
-			'Iframed' => $this->Iframed,
 			'Thumb' => $this->Thumb,
 			'ThumbnailLink' => $this->ThumbnailLink,
 			'OembedHtml' => $this->OembedHtml,

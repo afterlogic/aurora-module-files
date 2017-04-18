@@ -330,9 +330,6 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						$iThumbnailLimit = ((int) $oSettings->GetConf('ThumbnailMaxFileSizeMb', 5)) * 1024 * 1024;
 						$oResult->Thumb = $oResult->Size < $iThumbnailLimit && \Aurora\System\Utils::IsGDImageMimeTypeSuppoted($oResult->ContentType, $oResult->Name);
 					}
-
-					$oResult->Iframed = !$oResult->IsFolder && !$oResult->IsLink &&
-						\Aurora\System\Api::isIframedMimeTypeSupported($oResult->ContentType, $oResult->Name);
 				}
 
 				$mMin = $oMin->getMinByID($sID);
