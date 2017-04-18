@@ -40,6 +40,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function init() 
 	{
+		ini_set( 'default_charset', 'UTF-8' ); //support for cyrillic characters in file names
 		$this->incClass('item');
 		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
 		$this->oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
@@ -688,55 +689,62 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			if (is_array($UploadData))
 			{
-				$iSize = (int) $UploadData['size'];
-				if ($Type === \EFileStorageTypeStr::Personal)
+				if (isset($ExtendedProps['FirstChunk']) && $ExtendedProps['FirstChunk'] === true && $this->isFileExists($sUUID, $Type, $Path, $UploadData['name']))
 				{
-					$aQuota = $this->GetQuota($sUUID);
-					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
+					$sError = \Aurora\System\Notifications::FileAlreadyExists;
+				}
+				else
+				{
+					$iSize = (int) $UploadData['size'];
+					if ($Type === \EFileStorageTypeStr::Personal)
 					{
-						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
+						$aQuota = $this->GetQuota($sUUID);
+						if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
+						{
+							throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
+						}
 					}
-				}
-				
-				$sUploadName = $UploadData['name'];
-				$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
-				$sSavedName = 'upload-post-'.md5($UploadData['name'].$UploadData['tmp_name']);
-				$rData = false;
-				if (\is_resource($UploadData['tmp_name']))
-				{
-					$rData = $UploadData['tmp_name'];
-				}
-				else if ($oApiFileCacheManager->moveUploadedFile($sUUID, $sSavedName, $UploadData['tmp_name']))
-				{
-					$rData = $oApiFileCacheManager->getFile($sUUID, $sSavedName);
-				}
-				if ($rData)
-				{
-					$aArgs = array(
-						'UserId' => $sUUID,
-						'Type' => $Type,
-						'Path' => $Path,
-						'Name' => $sUploadName,
-						'Data' => $rData,
-						'Overwrite' => $Overwrite,
-						'RangeType' => $RangeType,
-						'Offset' => $Offset,
-						'ExtendedProps' => $ExtendedProps
-						
-					);
-					$this->broadcastEvent(
-						'CreateFile', 
-						$aArgs,
-						$mResult
-					);			
-					
-					$aResponse['File'] = array(
-						'Name' => $sUploadName,
-						'TempName' => $sSavedName,
-						'MimeType' => $sMimeType,
-						'Size' =>  (int) $iSize
-					);
+					$sUploadName = $UploadData['name'];
+					$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
+
+					$sSavedName = 'upload-post-'.md5($UploadData['name'].$UploadData['tmp_name']);
+					$rData = false;
+					if (\is_resource($UploadData['tmp_name']))
+					{
+						$rData = $UploadData['tmp_name'];
+					}
+					else if ($oApiFileCacheManager->moveUploadedFile($sUUID, $sSavedName, $UploadData['tmp_name']))
+					{
+						$rData = $oApiFileCacheManager->getFile($sUUID, $sSavedName);
+					}
+					if ($rData)
+					{
+						$aArgs = array(
+							'UserId' => $sUUID,
+							'Type' => $Type,
+							'Path' => $Path,
+							'Name' => $sUploadName,
+							'Data' => $rData,
+							'Overwrite' => $Overwrite,
+							'RangeType' => $RangeType,
+							'Offset' => $Offset,
+							'ExtendedProps' => $ExtendedProps
+
+						);
+						$this->broadcastEvent(
+							'CreateFile',
+							$aArgs,
+							$mResult
+						);
+
+						$aResponse['File'] = array(
+							'Name' => $sUploadName,
+							'TempName' => $sSavedName,
+							'MimeType' => $sMimeType,
+							'Size' =>  (int) $iSize
+						);
+					}
 				}
 			}
 		}
@@ -2056,7 +2064,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 
 		return $mResult;
-	}	
+	}
+
+	/**
+	 * Checks if file exists.
+	 *
+	 * @param int $UserId
+	 * @param string $Type
+	 * @param string $Path
+	 * @param string $Name
+	 */
+
+	public function isFileExists($iUserId, $iType, $sPath, $sName)
+	{
+		$sUUID = \Aurora\System\Api::getUserUUIDById($iUserId);
+		return $this->oApiFilesManager->isFileExists($sUUID, $iType, $sPath, $sName);
+	}
 	
 	/**
 	 * 
