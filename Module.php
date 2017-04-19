@@ -1953,5 +1953,72 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResult;
 	}	
 	
+	/**
+	 * 
+	 * @param type $UserId
+	 * @param type $Storage
+	 * @param type $Path
+	 * @param type $Name
+	 */
+	public function SaveFilesAsTempFiles($UserId, $Files)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+
+		$mResult = false;
+
+		if (is_array($Files) && count($Files) > 0)
+		{
+			$mResult = array();
+			foreach ($Files as $aFile)
+			{
+				$Storage = $aFile['Storage'];
+				$Path = $aFile['Path'];
+				$Name = $aFile['Name'];
+						
+				$aArgs = array(
+					'UserId' => $UserId,
+					'Type' => $Storage,
+					'Path' => $Path,
+					'Name' => &$Name,
+					'IsThumb' => false,
+					'Offset' => 0,
+					'ChunkSize' => 0
+				);
+				$mFileResource = false;
+				$this->broadcastEvent(
+					'GetFile', 
+					$aArgs,
+					$mFileResource
+				);			
+
+				if (is_resource($mFileResource)) 
+				{
+					$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
+					try
+					{
+						$sTempName = md5($sUUID.$Storage.$Path.$Name);
+						$oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
+
+						if (!$oApiFileCache->isFileExists($sUUID, $sTempName))
+						{
+							$oApiFileCache->put($sUUID, $sTempName, $mFileResource);
+						}
+
+						if ($oApiFileCache->isFileExists($sUUID, $sTempName))
+						{
+							$mResult[] = \Aurora\System\Utils::GetClientFileResponse($UserId, $Name, $sTempName, $oApiFileCache->fileSize($sUUID, $sTempName));
+						}
+					}
+					catch (\Exception $oException)
+					{
+						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed, $oException);
+					}
+				}
+			}
+		}
+		
+		return $mResult;		
+	}	
+	
 	/***** public functions might be called with web API *****/
 }
