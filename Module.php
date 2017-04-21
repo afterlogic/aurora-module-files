@@ -416,7 +416,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 						'Type' => $sType,
 						'Path' => dirname($sFilePath),
 						'Name' => basename($sFilePath),
-						'Data' => $rData
+						'Data' => $rData,
+						'Overwrite' => true, 
+						'RangeType' => 0, 
+						'Offset' => 0,
+						'ExtendedProps' => array()
 					);
 					$this->broadcastEvent(
 						'CreateFile', 
