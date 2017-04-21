@@ -404,7 +404,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$aFilePath = array_slice($aPaths, 3);
 			$sFilePath = urldecode(implode('/', $aFilePath));
 			$iUserId = \Aurora\System\Api::getAuthenticatedUserId(
-				$this->oHttp->GetHeader('Auth-Token')
+				\Aurora\System\Api::getAuthTokenFromHeaders()
 			);
 			$oUser = \Aurora\System\Api::getAuthenticatedUser($iUserId);
 			if ($oUser)
@@ -2001,7 +2001,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 						if (!$oApiFileCache->isFileExists($sUUID, $sTempName))
 						{
-							$oApiFileCache->put($sUUID, $sTempName, $mFileResource);
+							$oApiFileCache->putFile($sUUID, $sTempName, $mFileResource);
 						}
 
 						if ($oApiFileCache->isFileExists($sUUID, $sTempName))
