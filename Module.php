@@ -288,15 +288,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($this->checkStorageType($aArgs['Type']))
 		{
 			$Result = $this->oApiFilesManager->createFile(
-				\Aurora\System\Api::getUserUUIDById($aArgs['UserId']), 
-				$aArgs['Type'], 
-				$aArgs['Path'], 
-				$aArgs['Name'], 
-				$aArgs['Data'], 
-				$aArgs['Overwrite'], 
-				$aArgs['RangeType'], 
-				$aArgs['Offset'],
-				$aArgs['ExtendedProps']
+				\Aurora\System\Api::getUserUUIDById(isset($aArgs['UserId']) ? $aArgs['UserId'] : null),
+				isset($aArgs['Type']) ? $aArgs['Type'] : null,
+				isset($aArgs['Path']) ? $aArgs['Path'] : null,
+				isset($aArgs['Name']) ? $aArgs['Name'] : null,
+				isset($aArgs['Data']) ? $aArgs['Data'] : null,
+				isset($aArgs['Overwrite']) ? $aArgs['Overwrite'] : null,
+				isset($aArgs['RangeType']) ? $aArgs['RangeType'] : null,
+				isset($aArgs['Offset']) ? $aArgs['Offset'] : null,
+				isset($aArgs['ExtendedProps']) ? $aArgs['ExtendedProps'] : null
 			);
 		}
 	}
@@ -689,9 +689,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			if (is_array($UploadData))
 			{
-				if (isset($ExtendedProps['FirstChunk']) && $ExtendedProps['FirstChunk'] === true && $this->isFileExists($sUUID, $Type, $Path, $UploadData['name']))
-				{
+				if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && $this->isFileExists($sUUID, $Type, $Path, $UploadData['name']))
+				{// It is forbidden to write first сhunk to the end of a existing file
 					$sError = \Aurora\System\Notifications::FileAlreadyExists;
+				}
+				else if (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !$this->isFileExists($sUUID, $Type, $Path, $UploadData['name']))
+				{ // It is forbidden to write to the end of a nonexistent file
+					$sError = \Aurora\System\Notifications::FileNotFound;
 				}
 				else
 				{
