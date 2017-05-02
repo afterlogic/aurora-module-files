@@ -462,15 +462,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiGroup Files
 	 * @apiDescription Obtains list of module settings for authenticated user.
 	 * 
+	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetSettings} Method Method name
-	 * @apiParam {string} [AuthToken] Auth token
 	 * 
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
-	 *	Method: 'GetSettings',
-	 *	AuthToken: 'token_value'
+	 *	Method: 'GetSettings'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -539,9 +543,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiGroup Files
 	 * @apiDescription Updates module's settings - saves them to config.json file.
 	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=UpdateSettings} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **EnableUploadSizeLimit** *bool* Enable file upload size limit setting.<br>
@@ -554,7 +563,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 10 }'
 	 * }
 	 * 
@@ -605,10 +613,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Uploads file from client side.
 	 * @apiName UploadFile
 	 * @apiGroup Files
+		 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=UploadFile} Method Method name
-	 * @apiParam {string} AuthToken Authentication token
-	 * 
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
@@ -742,9 +755,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Downloads file.
 	 * @apiName DownloadFile
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=DownloadFile} Method Method name
-	 * @apiParam {string} [AuthToken] Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -757,7 +776,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'DownloadFile',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
 	 * 
@@ -798,9 +816,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Views file.
 	 * @apiName ViewFile
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=ViewFile} Method Method name
-	 * @apiParam {string} [AuthToken] Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -813,7 +837,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'ViewFile',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
 	 * 
@@ -848,9 +871,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Makes thumbnail for file.
 	 * @apiName GetFileThumbnail
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetFileThumbnail} Method Method name
-	 * @apiParam {string} [AuthToken] Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
@@ -863,7 +892,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetFileThumbnail',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
 	 * 
@@ -901,15 +929,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Returns storages avaliable for logged in user.
 	 * @apiName GetStorages
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetStorages} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * 
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
-	 *	Method: 'GetStorages',
-	 *	AuthToken: 'token_value'
+	 *	Method: 'GetStorages'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -975,9 +1008,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Returns used space and space limit for specified user.
 	 * @apiName GetQuota
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetQuota} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **UserId** *int* User identifier.<br>
@@ -987,7 +1026,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateAccount',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ UserId: 123 }'
 	 * }
 	 * 
@@ -1038,10 +1076,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @api {post} ?/Api/ GetFiles
 	 * @apiDescription Returns file list and user quota information.
 	 * @apiName GetFiles
-	 * @apiGroup Files
+
+	 * 	 * @apiGroup Files
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetFiles} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage.<br>
@@ -1053,7 +1097,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetFiles',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", Pattern: "" }'
 	 * }
 	 * 
@@ -1232,9 +1275,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Creates folder.
 	 * @apiName CreateFolder
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreateFolder} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
@@ -1246,7 +1295,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreateFolder',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", FolderName: "new_folder" }'
 	 * }
 	 * 
@@ -1303,9 +1351,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Creates link.
 	 * @apiName CreateLink
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreateLink} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
@@ -1318,7 +1372,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreateLink',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", Link: "link_value", Name: "name_value" }'
 	 * }
 	 * 
@@ -1381,9 +1434,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Deletes files and folder specified with list.
 	 * @apiName Delete
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Delete} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
@@ -1394,7 +1453,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Delete',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Items: [{ "Path": "", "Name": "2.png" }, { "Path": "", "Name": "logo.png" }] }'
 	 * }
 	 * 
@@ -1467,9 +1525,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Renames folder, file or link.
 	 * @apiName Rename
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Rename} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
@@ -1483,7 +1547,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Rename',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "old_name.png", NewName: "new_name.png", IsLink: false }'
 	 * }
 	 * 
@@ -1548,9 +1611,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Copies files and/or folders from one folder to another.
 	 * @apiName Copy
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Copy} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **FromType** *string* Storage type of folder items will be copied from.<br>
@@ -1564,7 +1633,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Copy',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ Name: "logo.png", IsFolder: false }, { Name: "details.png", IsFolder: false }] }'
 	 * }
 	 * 
@@ -1638,9 +1706,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Moves files and/or folders from one folder to another.
 	 * @apiName Move
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Move} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **FromType** *string* Storage type of folder items will be moved from.<br>
@@ -1654,7 +1728,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Move',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ "Name": "logo.png", "IsFolder": false },{ "Name": "details.png", "IsFolder": false }] }'
 	 * }
 	 * 
@@ -1736,9 +1809,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Creates public link for file or folder.
 	 * @apiName CreatePublicLink
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreatePublicLink} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage contains the item.<br>
@@ -1752,7 +1831,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreatePublicLink',
-	 *	AuthToken: 'token_value',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png", Size: 100, "IsFolder": false }'
 	 * }
 	 * 
@@ -1809,9 +1887,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Deletes public link from file or folder.
 	 * @apiName DeletePublicLink
 	 * @apiGroup Files
+	 * 
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 * 
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=DeletePublicLink} Method Method name
-	 * @apiParam {string} AuthToken Auth token
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage contains the item.<br>
@@ -1822,8 +1906,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
-	 *	Method: 'UpdateAccount',
-	 *	AuthToken: 'DeletePublicLink',
+	 *	Method: 'DeletePublicLink',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
 	 * 
