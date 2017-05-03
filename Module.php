@@ -495,7 +495,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetSettings',
-	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
+	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true,
+	 *		UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -563,7 +564,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
-	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true, UserSpaceLimitMb: 10 }'
+	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true,
+	 *		UserSpaceLimitMb: 10 }'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -644,7 +646,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UploadFile',
-	 *	Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378', MimeType: 'image/png', Size: 1813 } }
+	 *	Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378',
+	 *		MimeType: 'image/png', Size: 1813 } }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -958,7 +961,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetStorages',
-	 *	Result: [{ Type: "personal", DisplayName: "Personal", IsExternal: false }, { Type: "corporate", DisplayName: "Corporate", IsExternal: false }, { Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
+	 *	Result: [{ Type: "personal", DisplayName: "Personal", IsExternal: false },
+	 *		{ Type: "corporate", DisplayName: "Corporate", IsExternal: false },
+	 *		{ Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -1112,7 +1117,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetFiles',
-	 *	Result: { Items: [{Id: "image.png", Type: "personal", Path: "", FullPath: "/image.png", Name: "image.png", Size: 1813, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475498855, ContentType: "image/png", Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
+	 *	Result: { Items: [{ Id: "image.png", Type: "personal", Path: "", FullPath: "/image.png",
+	 * Name: "image.png", Size: 1813, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "",
+	 * LastModified: 1475498855, ContentType: "image/png", Thumb: true, ThumbnailLink: "", OembedHtml: "",
+	 * Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -1215,7 +1223,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetPublicFiles',
-	 *	Result: { Items: [{ Id: "image.png", Type: "personal", Path: "/shared_folder", FullPath: "/shared_folder/image.png", Name: "image.png", Size: 43549, IsFolder: false, IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475500277, ContentType: "image/png", Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39", Content: "", IsExternal: false }] }
+	 *	Result: { Items: [{ Id: "image.png", Type: "personal", Path: "/shared_folder",
+	 * FullPath: "/shared_folder/image.png", Name: "image.png", Size: 43549, IsFolder: false,
+	 * IsLink: false, LinkType: "", LinkUrl: "", LastModified: 1475500277, ContentType: "image/png",
+	 * Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39",
+	 * Content: "", IsExternal: false }] }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -1389,7 +1401,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreateLink',
-	 *	Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s", Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
+	 *	Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s",
+	 *		Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -1453,7 +1466,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Delete',
-	 *	Parameters: '{ Type: "personal", Items: [{ "Path": "", "Name": "2.png" }, { "Path": "", "Name": "logo.png" }] }'
+	 *	Parameters: '{ Type: "personal", Items: [{ "Path": "", "Name": "2.png" },
+	 *		{ "Path": "", "Name": "logo.png" }] }'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -1547,7 +1561,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Rename',
-	 *	Parameters: '{ Type: "personal", Path: "", Name: "old_name.png", NewName: "new_name.png", IsLink: false }'
+	 *	Parameters: '{ Type: "personal", Path: "", Name: "old_name.png", NewName: "new_name.png",
+	 *		IsLink: false }'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -1633,7 +1648,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Copy',
-	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ Name: "logo.png", IsFolder: false }, { Name: "details.png", IsFolder: false }] }'
+	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "",
+	 * Files: [{ Name: "logo.png", IsFolder: false }, { Name: "details.png", IsFolder: false }] }'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -1728,7 +1744,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Move',
-	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "", Files: [{ "Name": "logo.png", "IsFolder": false },{ "Name": "details.png", "IsFolder": false }] }'
+	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "",
+	 *		Files: [{ "Name": "logo.png", "IsFolder": false },
+	 *		{ "Name": "details.png", "IsFolder": false }] }'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
