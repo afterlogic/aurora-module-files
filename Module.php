@@ -788,9 +788,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sType = isset($aValues['Type']) ? $aValues['Type'] : '';
 		$sPath = isset($aValues['Path']) ? urldecode($aValues['Path']) : '';
 		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
-		$SharedHash = isset($aValues['SharedHash']) ? $aValues['SharedHash'] : null;
+		$sPublicHash = isset($aValues['PublicHash']) ? $aValues['PublicHash'] : null;
 		
-		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash, $sAction, $iOffset, $iChunkSize);
+		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $sPublicHash, $sAction, $iOffset, $iChunkSize);
 	}
 
 	/**
@@ -1218,7 +1218,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					}
 					$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
-					$oResult['Items'] = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path);
+					$oResult['Items'] = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path, '', $Hash);
 					$oResult['Quota'] = $this->GetQuota($iUserId);
 				}
 			}

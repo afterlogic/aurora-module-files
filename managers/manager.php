@@ -173,12 +173,13 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * @param string $sType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * @param string $sPattern Search string. 
+	 * @param string $sPublicHash Public hash. 
 	 * 
 	 * @return array|bool array of \CFileStorageItem. 
 	 */
-	public function getFiles($iUserId, $sType, $sPath, $sPattern = '')
+	public function getFiles($iUserId, $sType, $sPath, $sPattern = '', $sPublicHash = null)
 	{
-		return $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern);
+		return $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern, $sPublicHash);
 	}
 
 	/**

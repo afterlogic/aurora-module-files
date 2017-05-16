@@ -226,10 +226,11 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 * @param int $iUserId
 	 * @param string $sType
 	 * @param object $oItem
+	 * @param string $sPublicHash
 	 *
 	 * @return CFileStorageItem|null
 	 */
-	public function getFileInfo($iUserId, $sType, $oItem)
+	public function getFileInfo($iUserId, $sType, $oItem, $sPublicHash = null)
 	{
 		$oResult = null;
 		if ($this->init($iUserId))
@@ -241,7 +242,15 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				$sFilePath = str_replace($sRootPath, '', dirname($oItem->getPath()));
 				if ($oItem instanceof Afterlogic\DAV\FS\File)
 				{
-					$aProps = $oItem->getProperties(array('Owner', 'Shared', 'Name' ,'Link', 'ExtendedProps'));
+					$aProps = $oItem->getProperties(
+						array(
+							'Owner', 
+							'Shared', 
+							'Name' ,
+							'Link', 
+							'ExtendedProps'
+						)
+					);
 				}
 				$oResult /*@var $oResult \CFileStorageItem */ = new  \CFileStorageItem();
 
@@ -267,7 +276,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				{
 					$oResult->AddAction([
 						'view' => [
-							'url' => '?download-file/' . $oResult->getHash() .'/view'
+							'url' => '?download-file/' . $oResult->getHash($sPublicHash) .'/view'
 						]
 					]);
 					$sID = $this->generateHashId($iUserId, $sType, $sFilePath, $oItem->getName());
@@ -292,7 +301,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 						{
 							$oResult->AddAction([
 								'download' => [
-									'url' => '?download-file/' . $oResult->getHash()
+									'url' => '?download-file/' . $oResult->getHash($sPublicHash)
 								]
 							]);						
 						}
@@ -305,7 +314,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 					{
 						$oResult->AddAction([
 							'download' => [
-								'url' => '?download-file/' . $oResult->getHash()
+								'url' => '?download-file/' . $oResult->getHash($sPublicHash)
 							]
 						]);
 						$oResult->ContentType = $oItem->getContentType();
@@ -415,6 +424,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		$mResult = false;
 
 		$sID = $this->generateHashId($iUserId, $sType, $sPath, $sName);
+		
 		$oMin = $this->getApiMinManager();
 		$mMin = $oMin->getMinByID($sID);
 		if (!empty($mMin['__hash__']))
@@ -461,11 +471,13 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 * @param string $sType
 	 * @param string $sPath
 	 * @param string $sPattern
+	 * @param string $sPublicHash
 	 *
 	 * @return array
 	 */
-	public function getFiles($iUserId, $sType = \EFileStorageTypeStr::Personal, $sPath = '', $sPattern = '')
+	public function getFiles($iUserId, $sType = \EFileStorageTypeStr::Personal, $sPath = '', $sPattern = '', $sPublicHash = null)
 	{
+		
 		$oDirectory = null;
 		$aItems = array();
 		$aResult = array();
@@ -502,7 +514,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 
 				foreach ($aItems as $oItem) 
 				{
-					$aResult[] = $this->getFileInfo($iUserId, $sType, $oItem);
+					$aResult[] = $this->getFileInfo($iUserId, $sType, $oItem, $sPublicHash);
 				}
 			}
 		}

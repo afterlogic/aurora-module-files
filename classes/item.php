@@ -33,7 +33,7 @@
  * @property bool $LastModified
  * @property string $ContentType
  * @property bool $Thumb
- * @property string $ThumbnailLink
+ * @property string $ThumbnailUrl
  * @property string $OembedHtml
  * @property bool $Shared
  * @property string $Owner
@@ -67,7 +67,7 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'LastModified' => 0,
 			'ContentType' => '',
 			'Thumb' => false,
-			'ThumbnailLink' => '',
+			'ThumbnailUrl' => '',
 			'OembedHtml' => '',
 			'Shared' => false,
 			'Owner' => '',
@@ -79,14 +79,27 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 		));
 	}
 	
-	public function getHash()
+	/**
+	 * 
+	 * @param string $sPublicHash
+	 * @return type
+	 */
+	public function getHash($sPublicHash = null)
 	{
-		return \Aurora\System\Api::EncodeKeyValues(array(
+		$aResult = array(
 			'UserId' => \Aurora\System\Api::getAuthenticatedUserId(), 
+			'Id' => $this->Id, 
 			'Type' => $this->TypeStr,
 			'Path' => $this->Path,
 			'Name' => $this->Name
-		));		
+		);		
+		
+		if (isset($sPublicHash))
+		{
+			$aResult['PublicHash'] = $sPublicHash;
+		}
+		
+		return \Aurora\System\Api::EncodeKeyValues($aResult);
 	}
 
 	/**
@@ -117,7 +130,7 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'LastModified' => array('int'),
 			'ContentType' => array('string'),
 			'Thumb' => array('bool'),
-			'ThumbnailLink' => array('string'),
+			'ThumbnailUrl' => array('string'),
 			'OembedHtml' => array('string'),
 			'Shared' => array('bool'),
 			'Owner' => array('string'),		
@@ -145,8 +158,6 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 			'LinkUrl' => $this->LinkUrl,
 			'LastModified' => $this->LastModified,
 			'ContentType' => $this->ContentType,
-			'Thumb' => $this->Thumb,
-			'ThumbnailLink' => $this->ThumbnailLink,
 			'OembedHtml' => $this->OembedHtml,
 			'Shared' => $this->Shared,
 			'Owner' => $this->Owner,
@@ -159,7 +170,11 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 		
 		if ($this->Thumb)
 		{
-			$aResult['ThumbnailUrl'] = '?download-file/' . $this->getHash() .'/thumb';
+			if (empty($this->ThumbnailUrl) && $this->GetActionUrl('download'))
+			{
+				$this->ThumbnailUrl = $this->GetActionUrl('download') . '/thumb';
+			}
+			$aResult['ThumbnailUrl'] = $this->ThumbnailUrl;
 		}
 		
 		return $aResult;
@@ -184,5 +199,17 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 		$aActions = $this->Actions;
 		$aActions[$sKey] = $aAction[$sKey];
 		$this->Actions = $aActions;
+	}
+	
+	public function GetActionUrl($sAction)
+	{
+		$bResult = false;
+		$aActions = $this->Actions;
+		if (isset($aActions[$sAction]) && isset($aActions[$sAction]['url']))
+		{
+			$bResult = $aActions[$sAction]['url'];
+		}
+		
+		return $bResult;
 	}
 }
