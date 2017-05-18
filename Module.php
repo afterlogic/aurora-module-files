@@ -395,6 +395,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$rData = fopen("php://input", "r");
 			$aFilePath = array_slice($aPaths, 3);
 			$sFilePath = urldecode(implode('/', $aFilePath));
+			
+			$bOverwrite = true;
+			if (strpos($sFilePath, '!') === 0)
+			{
+				$sFilePath = substr($sFilePath, 1);
+				$bOverwrite = false;
+			}
+			
 			$iUserId = \Aurora\System\Api::getAuthenticatedUserId(
 				\Aurora\System\Api::getAuthTokenFromHeaders()
 			);
@@ -409,7 +417,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 						'Path' => dirname($sFilePath),
 						'Name' => basename($sFilePath),
 						'Data' => $rData,
-						'Overwrite' => true, 
+						'Overwrite' => $bOverwrite, 
 						'RangeType' => 0, 
 						'Offset' => 0,
 						'ExtendedProps' => array()
