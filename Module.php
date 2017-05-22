@@ -143,11 +143,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			if ($iUserId && $SharedHash !== null)
 			{
-				\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+				\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 			}
 			else 
 			{
-				\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+				\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 				if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId())
 				{
 					throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::AccessDenied);
@@ -514,7 +514,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetSettings()
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		
 		$aAppData = array(
 			'EnableModule' => true,
@@ -600,7 +600,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate, $UserSpaceLimitMb)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::TenantAdmin);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 		
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
@@ -676,7 +676,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function UploadFile($UserId, $Type, $Path, $UploadData, $Overwrite = true, $RangeType = 0, $Offset = 0, $ExtendedProps = [])
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$oApiFileCacheManager = \Aurora\System\Api::GetSystemManager('Filecache');
@@ -987,7 +987,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetStorages($UserId)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$aStorages = [
@@ -1068,7 +1068,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetQuota($UserId)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		return array(
@@ -1147,7 +1147,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetFiles($UserId, $Type, $Path, $Pattern)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
@@ -1252,7 +1252,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		
 		$iUserId = null;
 		$oResult = array();
@@ -1344,7 +1344,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function CreateFolder($UserId, $Type, $Path, $FolderName)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
@@ -1427,7 +1427,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function CreateLink($UserId, $Type, $Path, $Link, $Name)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
@@ -1503,7 +1503,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function Delete($UserId, $Type, $Items)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
 	
 	public function onAfterDelete(&$aArgs, &$mResult)
@@ -1601,7 +1601,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}	
 	
 	public function onAfterRename(&$aArgs, &$mResult)
@@ -1692,7 +1692,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function Copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
@@ -1788,7 +1788,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
@@ -1888,7 +1888,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1962,7 +1962,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function DeletePublicLink($UserId, $Type, $Path, $Name)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
@@ -1986,7 +1986,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function CheckUrl($Url)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		$mResult = false;
 		
 		$aArgs = array(
@@ -2067,7 +2067,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function SaveFilesAsTempFiles($UserId, $Files)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 		$mResult = false;
 
