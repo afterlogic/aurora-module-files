@@ -13,14 +13,18 @@
  * 
  * @package Filestorage
  */
-class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorage
+
+namespace Aurora\Modules\Files;
+
+class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 {
 	/**
 	 * @param \Aurora\System\Managers\GlobalManager &$oManager
 	 */
-	public function __construct(\Aurora\System\Managers\GlobalManager &$oManager, $sForcedStorage = '', \Aurora\System\Module\AbstractModule $oModule = null)
+	public function __construct($sForcedStorage = '', \Aurora\System\Module\AbstractModule $oModule = null)
 	{
-		parent::__construct('', $oManager, $sForcedStorage, $oModule);
+		parent::__construct('', $sForcedStorage, $oModule);
+		$this->oStorage = new Storages\Sabredav\Storage($this);
 	}
 	
 	/**
@@ -43,7 +47,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Checks if file exists. 
 	 * 
 	 * @param int $iUserId Account object. 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
@@ -58,7 +62,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Allows for reading contents of the shared file. [Aurora only.](http://dev.afterlogic.com/aurora)
 	 * 
 	 * @param int $iUserId
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
@@ -73,7 +77,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Retrieves array of metadata on the specific file. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param string $sType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param string $sType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder.
 	 * @param string $sName Filename. 
 	 * 
@@ -101,7 +105,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Retrieves array of metadata on the specific directory. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * 
 	 * @return CFileStorageItem
@@ -115,7 +119,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Allows for reading contents of the file. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
@@ -130,7 +134,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Creates public link for specific file or folder. 
 	 * 
 	 * @param int $iUserId
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * @param string $sName Filename. 
 	 * @param string $sSize Size information, it will be displayed when recipient opens the link. 
@@ -147,7 +151,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Removes public link created for specific file or folder. 
 	 * 
 	 * @param int $iUserId
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * @param string $sName Filename. 
 	 * 
@@ -162,7 +166,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Performs search for files. 
 	 * 
 	 * @param int $iUserId 
-	 * @param string $sType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param string $sType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * @param string $sPattern Search string. 
 	 * @param string $sPublicHash Public hash. 
@@ -178,7 +182,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Creates a new folder. 
 	 * 
 	 * @param int $iUserId
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the parent folder, empty string means top-level folder is created. 
 	 * @param string $sFolderName Folder name. 
 	 * 
@@ -193,7 +197,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Creates a new file. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is created in the root folder. 
 	 * @param string $sFileName Filename. 
 	 * @param $mData Data to be stored in the file. 
@@ -214,7 +218,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Creates a link to arbitrary online content. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the link. 
 	 * @param string $sLink URL of the item to be linked. 
 	 * @param string $sName Name of the link. 
@@ -230,7 +234,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Removes file or folder. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Filename. 
 	 * 
@@ -281,7 +285,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Renames file or folder. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sName Name of file or folder. 
 	 * @param string $sNewName New name. 
@@ -315,8 +319,8 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Move file or folder to a different location. In terms of Aurora, item can be moved to a different storage as well. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iFromType Source storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
-	 * @param int $iToType Destination storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iFromType Source storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
+	 * @param int $iToType Destination storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sFromPath Path to the folder which contains the item. 
 	 * @param string $sToPath Destination path of the item. 
 	 * @param string $sName Current name of file or folder. 
@@ -351,8 +355,8 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Copies file or folder, optionally renames it. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iFromType Source storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
-	 * @param int $iToType Destination storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iFromType Source storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
+	 * @param int $iToType Destination storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sFromPath Path to the folder which contains the item. 
 	 * @param string $sToPath Destination path of the item.
 	 * @param string $sName Current name of file or folder. 
@@ -369,11 +373,11 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Returns space used by the user in specified storages, in bytes.
 	 * 
 	 * @param int $iUserId User identifier.
-	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
+	 * @param string $aTypes Storage type list. Accepted values in array: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**.
 	 * 
 	 * @return int;
 	 */
-	public function getUserSpaceUsed($iUserId, $aTypes = array(EFileStorageTypeStr::Personal))
+	public function getUserSpaceUsed($iUserId, $aTypes = array(\Aurora\System\Enums\FileStorageType::Personal))
 	{
 		return $this->oStorage->getUserSpaceUsed($iUserId, $aTypes);
 	}
@@ -382,7 +386,7 @@ class CApiFilesManager extends \Aurora\System\Managers\AbstractManagerWithStorag
 	 * Allows for obtaining filename which doesn't exist in current directory. For example, if you need to store **data.txt** file but it already exists, this method will return **data_1.txt**, or **data_2.txt** if that one already exists, and so on. 
 	 * 
 	 * @param int $iUserId Account object 
-	 * @param int $iType Storage type. Accepted values: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**. 
+	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
 	 * @param string $sFileName Filename. 
 	 * 

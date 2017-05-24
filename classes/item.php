@@ -46,8 +46,7 @@ class CFileStorageItem  extends \Aurora\System\AbstractContainer
 
 		$this->SetDefaults(array(
 			'Id' => '',
-			'Type' => \EFileStorageType::Personal,
-			'TypeStr' => \EFileStorageTypeStr::Personal,
+			'TypeStr' => \Aurora\System\Enums\FileStorageType::Personal,
 			'Path' => '',
 			'FullPath' => '',
 			'Name' => '',

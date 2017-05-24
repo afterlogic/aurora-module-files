@@ -42,7 +42,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		ini_set( 'default_charset', 'UTF-8' ); //support for cyrillic characters in file names
 		$this->incClass('item');
-		$this->oApiFilesManager = $this->GetManager('', 'sabredav');
+		$this->oApiFilesManager = new Manager('', $this);
 		$this->oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
 		
 		$this->AddEntries(
@@ -700,7 +700,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				else
 				{
 					$iSize = (int) $UploadData['size'];
-					if ($Type === \EFileStorageTypeStr::Personal)
+					if ($Type === \Aurora\System\Enums\FileStorageType::Personal)
 					{
 						$aQuota = $this->GetQuota($sUUID);
 						if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
@@ -1084,7 +1084,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		return array(
-			'Used' => $this->oApiFilesManager->getUserSpaceUsed($sUUID, [\EFileStorageTypeStr::Personal]),
+			'Used' => $this->oApiFilesManager->getUserSpaceUsed($sUUID, [\Aurora\System\Enums\FileStorageType::Personal]),
 			'Limit' => $this->getConfig('UserSpaceLimitMb', 0) * 1024 * 1024
 		);
 	}
@@ -1813,7 +1813,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 			foreach ($Files as $aItem)
 			{
-				if ($ToType === \EFileStorageTypeStr::Personal)
+				if ($ToType === \Aurora\System\Enums\FileStorageType::Personal)
 				{
 					$oFileItem = $this->oApiFilesManager->getFileInfo($sUUID, $FromType, $FromPath, $aItem['Name']);
 					$aQuota = $this->GetQuota($sUUID);

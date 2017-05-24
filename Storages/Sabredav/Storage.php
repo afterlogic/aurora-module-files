@@ -14,7 +14,10 @@
  * @package Filestorage
  * @subpackage Storages
  */
-class CApiFilesSabredavStorage extends CApiFilesStorage
+
+namespace Aurora\Modules\Files\Storages\Sabredav;
+
+class Storage extends \Aurora\Modules\Files\Storages\Storage
 {
 	/**
 	 * @var bool
@@ -100,7 +103,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 			$sRootPath = \Aurora\System\Api::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\Afterlogic\DAV\Constants::FILESTORAGE_PATH_PERSONAL . $sUser;
 
-			if ($sType === \EFileStorageTypeStr::Corporate)
+			if ($sType === \Aurora\System\Enums\FileStorageType::Corporate)
 			{
 				$iTenantId = /*$oAccount ? $oAccount->IdTenant :*/ 0;
 
@@ -108,7 +111,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 				$sRootPath = \Aurora\System\Api::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\Afterlogic\DAV\Constants::FILESTORAGE_PATH_CORPORATE . $sTenant;
 			}
-			else if ($sType === \EFileStorageTypeStr::Shared)
+			else if ($sType === \Aurora\System\Enums\FileStorageType::Shared)
 			{
 				$sRootPath = \Aurora\System\Api::DataPath() . \Afterlogic\DAV\Constants::FILESTORAGE_PATH_ROOT . 
 					\Afterlogic\DAV\Constants::FILESTORAGE_PATH_SHARED . $sUser;
@@ -133,16 +136,16 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 		{
 			$sRootPath = $this->getRootPath($iUserId, $sType);
 			
-			if ($sType === \EFileStorageTypeStr::Personal) 
+			if ($sType === \Aurora\System\Enums\FileStorageType::Personal) 
 			{
 				$oDirectory = new \Afterlogic\DAV\FS\RootPersonal($sRootPath);
 			} 
-			else if ($sType === \EFileStorageTypeStr::Corporate) 
+			else if ($sType === \Aurora\System\Enums\FileStorageType::Corporate) 
 			{
 				$oDirectory = new \Afterlogic\DAV\FS\RootPublic($sRootPath);
 			} 
 			else if 
-			($sType === \EFileStorageTypeStr::Shared) 
+			($sType === \Aurora\System\Enums\FileStorageType::Shared) 
 			{
 				$oDirectory = new \Afterlogic\DAV\FS\RootShared($sRootPath);
 			}
@@ -467,7 +470,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 *
 	 * @return array
 	 */
-	public function getFiles($iUserId, $sType = \EFileStorageTypeStr::Personal, $sPath = '', $sPattern = '', $sPublicHash = null)
+	public function getFiles($iUserId, $sType = \Aurora\System\Enums\FileStorageType::Personal, $sPath = '', $sPattern = '', $sPublicHash = null)
 	{
 		
 		$oDirectory = null;
@@ -843,7 +846,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	 * Returns user used space in bytes for specified storages.
 	 * 
 	 * @param int $iUserId User identifier.
-	 * @param string $aTypes Storage type list. Accepted values in array: **EFileStorageType::Personal**, **EFileStorageType::Corporate**, **EFileStorageType::Shared**.
+	 * @param string $aTypes Storage type list. Accepted values in array: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**.
 	 * 
 	 * @return int;
 	 */
@@ -904,7 +907,7 @@ class CApiFilesSabredavStorage extends CApiFilesStorage
 	{
 		if ($iUserId)
 		{
-			$sRootPath = $this->getRootPath($iUserId, \EFileStorageTypeStr::Personal, true);
+			$sRootPath = $this->getRootPath($iUserId, \Aurora\System\Enums\FileStorageType::Personal, true);
 			\Aurora\System\Utils::RecRmdir($sRootPath);
 		}
 	}
