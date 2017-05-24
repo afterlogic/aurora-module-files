@@ -235,7 +235,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 				$oMin = $this->getApiMinManager();
 				$sRootPath = $this->getRootPath($iUserId, $sType, true);
 				$sFilePath = str_replace($sRootPath, '', dirname($oItem->getPath()));
-				if ($oItem instanceof Afterlogic\DAV\FS\File)
+				if ($oItem instanceof \Afterlogic\DAV\FS\File)
 				{
 					$aProps = $oItem->getProperties(
 						array(
@@ -370,7 +370,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 		if ($this->init($iUserId))
 		{
 			$oDirectory = $this->getDirectory($iUserId, $sType, $sPath);
-			if ($oDirectory !== null && $oDirectory instanceof Afterlogic\DAV\FS\Directory)
+			if ($oDirectory !== null && $oDirectory instanceof \Afterlogic\DAV\FS\Directory)
 			{
 				$sResult = $oDirectory->getChildrenProperties();
 			}
