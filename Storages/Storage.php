@@ -17,7 +17,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	 */
 	public function __construct($sStorageName, \Aurora\System\Managers\AbstractManager &$oManager)
 	{
-		parent::__construct('filestorage', $sStorageName, $oManager);
+		parent::__construct($oManager);
 	}
 	
 	/**
