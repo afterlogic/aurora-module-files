@@ -1175,7 +1175,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			{
 				if (!isset($aUsers[$oFile->Owner]))
 				{
-					$oUser = \Aurora\System\Api::GetModuleDecorator('Core')->GetUser($oFile->Owner);
+					$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUser($oFile->Owner);
 					$aUsers[$oFile->Owner] = $oUser ? $oUser->PublicId : '';
 				}
 				$oFile->Owner = $aUsers[$oFile->Owner];

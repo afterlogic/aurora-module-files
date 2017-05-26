@@ -36,7 +36,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 		static $oMinModuleDecorator = null;
 		if ($oMinModuleDecorator === null)
 		{
-			$oMinModuleDecorator = \Aurora\System\Api::GetModuleDecorator('Min');
+			$oMinModuleDecorator = \Aurora\Modules\Min\Module::Decorator();
 		}
 		
 		return $oMinModuleDecorator;
