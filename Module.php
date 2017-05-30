@@ -161,8 +161,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			exit();
 		}
 		
-		if ($this->oApiCapabilityManager->isFilesSupported($iUserId) && 
-			isset($sType, $sPath, $sFileName)) 
+		if (isset($sType, $sPath, $sFileName)) 
 		{
 			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 			
@@ -261,10 +260,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($this->checkStorageType($aArgs['Type']))
 		{
 			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
 			$iOffset = isset($aArgs['Offset']) ? $aArgs['Offset'] : 0;
 			$iChunkSizet = isset($aArgs['ChunkSize']) ? $aArgs['ChunkSize'] : 0;
 			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $iOffset, $iChunkSizet);
@@ -1164,11 +1159,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
-
 			$aUsers = array();
 			$aFiles = $this->oApiFilesManager->getFiles($sUUID, $Type, $Path, $Pattern);
 			foreach ($aFiles as $oFile)
@@ -1279,10 +1269,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($iUserId)
 				{
 					$sUUID = \Aurora\System\Api::getUserUUIDById($iUserId);
-					if (!$this->oApiCapabilityManager->isFilesSupported($iUserId))
-					{
-						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-					}
 					$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
 					$oResult['Items'] = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path, '', $Hash);
@@ -1361,11 +1347,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID)) 
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
-
 			return $this->oApiFilesManager->createFolder($sUUID, $Type, $Path, $FolderName);
 		}
 	}
@@ -1444,11 +1425,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
-
 			$Name = \trim(\MailSo\Base\Utils::ClearFileName($Name));
 			return $this->oApiFilesManager->createLink($sUUID, $Type, $Path, $Link, $Name);
 		}
@@ -1523,11 +1499,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		if ($this->checkStorageType($aArgs['Type']))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
-
 			$oResult = false;
 
 			foreach ($aArgs['Items'] as $oItem)
@@ -1621,11 +1592,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		if ($this->checkStorageType($aArgs['Type']))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
-
 			$sNewName = \trim(\MailSo\Base\Utils::ClearFileName($aArgs['NewName']));
 
 			$sNewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $aArgs['Type'], $aArgs['Path'], $sNewName);
@@ -1709,11 +1675,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
-
 			$oResult = null;
 
 			foreach ($Files as $aItem)
@@ -1805,10 +1766,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
 		{
-			if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-			}
 			$oResult = null;
 
 			foreach ($Files as $aItem)
@@ -1903,11 +1860,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-		{
-			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-		}
-		
 		$bFolder = $IsFolder === '1' ? true : false;
 		return $this->oApiFilesManager->createPublicLink($sUUID, $Type, $Path, $Name, $Size, $bFolder);
 	}	
@@ -1977,10 +1929,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		if (!$this->oApiCapabilityManager->isFilesSupported($sUUID))
-		{
-			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed);
-		}
 		
 		return $this->oApiFilesManager->deletePublicLink($sUUID, $Type, $Path, $Name);
 	}
