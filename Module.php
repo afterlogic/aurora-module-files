@@ -43,7 +43,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		ini_set( 'default_charset', 'UTF-8' ); //support for cyrillic characters in file names
 		$this->incClass('item');
 		$this->oApiFilesManager = new Manager('', $this);
-		$this->oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
+		$this->oApiFileCache = new \Aurora\System\Managers\Filecache\Manager();
 		
 		$this->AddEntries(
 			array(
@@ -675,7 +675,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		$oApiFileCacheManager = \Aurora\System\Api::GetSystemManager('Filecache');
+		$oApiFileCacheManager = new \Aurora\System\Managers\Filecache\Manager();
 
 		$sError = '';
 		$aResponse = array();
@@ -2077,7 +2077,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					try
 					{
 						$sTempName = md5($sUUID.$Storage.$Path.$Name);
-						$oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
+						$oApiFileCache = new \Aurora\System\Managers\Filecache\Manager();
 
 						if (!$oApiFileCache->isFileExists($sUUID, $sTempName))
 						{
