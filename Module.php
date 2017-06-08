@@ -510,7 +510,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetSettings()
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$aAppData = array(
 			'EnableModule' => true,
@@ -994,7 +994,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetStorages($UserId)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$aStorages = [
@@ -1075,7 +1075,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetQuota($UserId)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		return array(
@@ -1154,7 +1154,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetFiles($UserId, $Type, $Path, $Pattern)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
