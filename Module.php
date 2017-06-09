@@ -1858,9 +1858,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		$bFolder = $IsFolder === '1' ? true : false;
+		$bFolder = (bool)$IsFolder;
 		return $this->oApiFilesManager->createPublicLink($sUUID, $Type, $Path, $Name, $Size, $bFolder);
 	}	
 	
