@@ -814,8 +814,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
 		$sType = isset($aValues['Type']) ? $aValues['Type'] : '';
-		$sPath = isset($aValues['Path']) ? urldecode($aValues['Path']) : '';
-		$sFileName = isset($aValues['Name']) ? urldecode($aValues['Name']) : '';
+		$sPath = isset($aValues['Path']) ? $aValues['Path'] : '';
+		$sFileName = isset($aValues['Name']) ? $aValues['Name'] : '';
 		$sPublicHash = isset($aValues['PublicHash']) ? $aValues['PublicHash'] : null;
 		
 		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $sPublicHash, $sAction, $iOffset, $iChunkSize);
