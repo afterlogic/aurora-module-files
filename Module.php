@@ -358,7 +358,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$sFileExtension = \Aurora\System\Utils::GetFileExtension($sFileName);
 			if ($sFileExtension === 'htm' || $sFileExtension === 'html')
 			{
-				$oItem->Name = $this->getHtmlTitle($oItem->LinkUrl);
+//				$oItem->Name = $this->getHtmlTitle($oItem->LinkUrl);
 				return true;
 			}
 		}
