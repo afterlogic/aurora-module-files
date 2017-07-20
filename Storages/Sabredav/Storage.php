@@ -441,7 +441,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 			);
 		}
 		
-		return \Aurora\System\Utils::GetAppUrl() . '?/files-pub/' . $mResult . '/list';
+		return '?/files-pub/' . $mResult . '/list';
 	}
 
 	/**
