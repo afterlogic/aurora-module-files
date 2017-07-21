@@ -510,7 +510,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetSettings()
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		
 		$aAppData = array(
 			'EnableModule' => true,
@@ -1272,7 +1272,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
 
 					$oResult['Items'] = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path, '', $Hash);
-					$oResult['Quota'] = $this->GetQuota($iUserId);
+//					$oResult['Quota'] = $this->GetQuota($iUserId);
 				}
 			}
 		}
