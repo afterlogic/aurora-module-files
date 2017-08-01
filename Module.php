@@ -985,22 +985,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	/**
 	 * Returns storages avaliable for logged in user.
 	 * 
-	 * @param int $UserId User identifier.
 	 * @return array {
 	 *		*string* **Type** Storage type - personal, corporate.
 	 *		*string* **DisplayName** Storage display name.
 	 *		*bool* **IsExternal** Indicates if storage external or not.
 	 * }
 	 */
-	public function GetStorages($UserId)
+	public function GetStorages()
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
-		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$aStorages = [
 			[
 				'Type' => 'personal', 
-				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE', $sUUID), 
+				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE'), 
 				'IsExternal' => false
 			]
 		];
@@ -1008,7 +1006,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$aStorages[] = [
 				'Type' => 'corporate', 
-				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE', $sUUID), 
+				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE'), 
 				'IsExternal' => false
 			];
 		}
