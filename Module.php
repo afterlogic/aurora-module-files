@@ -1267,9 +1267,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($iUserId)
 				{
 					$sUUID = \Aurora\System\Api::getUserUUIDById($iUserId);
-					$Path =  implode('/', array($mMin['Path'], $mMin['Name'])) . $Path;
+					$aItems = array();
+					$sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
+					$mPos = strpos($Path, $sMinPath);
+					if ($mPos === false || $mPos === 0 || $Path === '')
+					{
+						if ($mPos !== 0)
+						{
+							$Path =  $sMinPath . $Path;
+						}
+						$aItems = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path, '', $Hash);
+					}
+					$oResult['Items'] = $aItems;
 
-					$oResult['Items'] = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path, '', $Hash);
 //					$oResult['Quota'] = $this->GetQuota($iUserId);
 				}
 			}
