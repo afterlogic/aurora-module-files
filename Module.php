@@ -1270,7 +1270,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$aItems = array();
 					$sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
 					$mPos = strpos($Path, $sMinPath);
-					if ($mPos === false || $mPos === 0 || $Path === '')
+					$oResult['Path'] = $Path;
+					$oResult['MinPath'] = $sMinPath;
+					$oResult['Pos'] = $mPos;
+					if ($mPos === 0 || $Path === '')
 					{
 						if ($mPos !== 0)
 						{
