@@ -1270,16 +1270,21 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$aItems = array();
 					$sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
 					$mPos = strpos($Path, $sMinPath);
-					$oResult['Path'] = $Path;
-					$oResult['MinPath'] = $sMinPath;
-					$oResult['Pos'] = $mPos;
 					if ($mPos === 0 || $Path === '')
 					{
 						if ($mPos !== 0)
 						{
 							$Path =  $sMinPath . $Path;
 						}
-						$aItems = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path, '', $Hash);
+						$Path = str_replace('.', '', $Path);
+						try
+						{
+							$aItems = $this->oApiFilesManager->getFiles($sUUID, $mMin['Type'], $Path, '', $Hash);
+						}
+						catch (\Exception $oEx)
+						{
+							$aItems = array();
+						}
 					}
 					$oResult['Items'] = $aItems;
 
