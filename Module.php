@@ -936,7 +936,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	/**
 	 * @api {post} ?/Api/ GetStorages
-	 * @apiDescription Returns storages avaliable for logged in user.
+	 * @apiDescription Returns storages available for logged in user.
 	 * @apiName GetStorages
 	 * @apiGroup Files
 	 * 
@@ -983,7 +983,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	
 	/**
-	 * Returns storages avaliable for logged in user.
+	 * Returns storages available for logged in user.
 	 * 
 	 * @return array {
 	 *		*string* **Type** Storage type - personal, corporate.
