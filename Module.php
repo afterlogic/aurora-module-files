@@ -695,6 +695,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 				else
 				{
 					$iSize = (int) $UploadData['size'];
+					$iUploadSizeLimitMb = $this->getConfig('UploadSizeLimitMb', 0);
+					if ($iUploadSizeLimitMb > 0 && $iSize/(1024*1024) > $iUploadSizeLimitMb)
+					{
+						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
+					}
+					
 					if ($Type === \Aurora\System\Enums\FileStorageType::Personal)
 					{
 						$aQuota = $this->GetQuota($sUUID);
