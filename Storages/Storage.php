@@ -21,7 +21,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	}
 	
 	/**
-	 * @param CAccount $oAccount
+	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
 	 */
 	public function init($oAccount)
 	{

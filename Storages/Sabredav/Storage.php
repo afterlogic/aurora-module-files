@@ -40,7 +40,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 	}
 
 	/**
-	 * @param CAccount|CHelpdeskUser $iUserId
+	 * @param \Aurora\Modules\StandardAuth\Classes\Account|CHelpdeskUser $iUserId
 	 * @param string $sType
 	 * @param string $sPath
 	 * @param string $sFileName
@@ -860,7 +860,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
 	 * @param int $iType
 	 * @param string $sPath
 	 * @param string $sFileName
