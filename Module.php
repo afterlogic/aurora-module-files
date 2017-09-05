@@ -41,7 +41,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function init() 
 	{
 		ini_set( 'default_charset', 'UTF-8' ); //support for cyrillic characters in file names
-		$this->incClass('item');
 		$this->oApiFilesManager = new Manager('', $this);
 		$this->oApiFileCache = new \Aurora\System\Managers\Filecache();
 		

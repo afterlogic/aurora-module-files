@@ -40,7 +40,7 @@ namespace Aurora\Modules\Files\Classes;
  * @package Classes
  * @subpackage FileStorage
  */
-class \Aurora\Modules\Files\Classes\FileItem  extends \Aurora\System\AbstractContainer
+class FileItem  extends \Aurora\System\AbstractContainer
 {
 	public function __construct()
 	{
