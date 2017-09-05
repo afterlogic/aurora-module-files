@@ -315,7 +315,9 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 						$oResult->ContentType = $oItem->getContentType();
 					}
 
-					$aArgs = array();
+					$aArgs = array(
+						'UserId' => $iUserId
+					);
 					$this->oManager->GetModule()->broadcastEvent(
 						'PopulateFileItem', 
 						$aArgs,
@@ -341,16 +343,6 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 				$oResult->Shared = isset($aProps['Shared']) ? $aProps['Shared'] : empty($mMin['__hash__']) ? false : true;
 				$oResult->Owner = isset($aProps['Owner']) ? $aProps['Owner'] : $iUserId;
 				$oResult->ExtendedProps = isset($aProps['ExtendedProps']) ? $aProps['ExtendedProps'] : false;
-
-				if ($oResult && '.asc' === \strtolower(\substr(\trim($oResult->Name), -4)))
-				{
-					$mResult = $this->getFile($iUserId, $oResult->Type, $oResult->Path, $oResult->Name);
-
-					if (is_resource($mResult))
-					{
-						$oResult->Content = stream_get_contents($mResult);
-					}
-				}
 			}
 		}
 

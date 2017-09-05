@@ -1183,6 +1183,27 @@ class Module extends \Aurora\System\Module\AbstractModule
 	}
 	
 	/**
+	 * Return content of a file.
+	 * 
+	 * @param int $UserId
+	 * @param string $Type
+	 * @param string $Path
+	 * @param string $Name
+	 */
+	public function GetFileContent($UserId, $Type, $Path, $Name) 
+	{
+		$mResult = null;
+		
+		$mFile = $this->oApiFilesManager->getFile($UserId, $Type, $Path, $Name);
+		if (is_resource($mFile))
+		{
+			$mResult = stream_get_contents($mFile);
+		}
+		
+		return $mResult;
+	}
+	
+	/**
 	 * Return information about file. Subscribers of "Files::GetFileInfo::after" event are used for collecting information.
 	 * 
 	 * @param int $UserId
