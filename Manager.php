@@ -80,7 +80,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder.
 	 * @param string $sName Filename. 
 	 * 
-	 * @return CFileStorageItem
+	 * @return \Aurora\Modules\Files\Classes\FileItem
 	 */
 	public function getFileInfo($iUserId, $sType, $sPath, $sName)
 	{
@@ -107,7 +107,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
 	 * @param string $sPath Path to the folder. 
 	 * 
-	 * @return CFileStorageItem
+	 * @return \Aurora\Modules\Files\Classes\FileItem
 	 */
 	public function getDirectoryInfo($iUserId, $iType, $sPath)
 	{
@@ -170,7 +170,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param string $sPattern Search string. 
 	 * @param string $sPublicHash Public hash. 
 	 * 
-	 * @return array|bool array of \CFileStorageItem. 
+	 * @return array|bool array of \Aurora\Modules\Files\Classes\FileItem. 
 	 */
 	public function getFiles($iUserId, $sType, $sPath, $sPattern = '', $sPublicHash = null)
 	{

@@ -347,7 +347,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	/**
 	 * @ignore
-	 * @param \CFileStorageItem $oItem
+	 * @param \Aurora\Modules\Files\Classes\FileItem $oItem
 	 * @return bool
 	 */
 	public function onPopulateFileItem($aArgs, &$oItem)

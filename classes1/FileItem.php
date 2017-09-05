@@ -8,8 +8,10 @@
  * For full statements of the licenses see LICENSE-AFTERLOGIC and LICENSE-AGPL3 files.
  */
 
+namespace Aurora\Modules\Files\Classes;
+
 /**
- * CFileStorageItem class summary
+ * FileItem class summary
  * 
  * @property string $Id
  * @property int $Type
@@ -38,7 +40,7 @@
  * @package Classes
  * @subpackage FileStorage
  */
-class CFileStorageItem  extends \Aurora\System\AbstractContainer
+class \Aurora\Modules\Files\Classes\FileItem  extends \Aurora\System\AbstractContainer
 {
 	public function __construct()
 	{

@@ -223,7 +223,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 	 * @param object $oItem
 	 * @param string $sPublicHash
 	 *
-	 * @return CFileStorageItem|null
+	 * @return \Aurora\Modules\Files\Classes\FileItem|null
 	 */
 	public function getFileInfo($iUserId, $sType, $oItem, $sPublicHash = null)
 	{
@@ -247,7 +247,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 						)
 					);
 				}
-				$oResult /*@var $oResult \CFileStorageItem */ = new  \CFileStorageItem();
+				$oResult /*@var $oResult \Aurora\Modules\Files\Classes\FileItem */ = new  \Aurora\Modules\Files\Classes\FileItem();
 
 				$oResult->Type = $sType;
 				$oResult->TypeStr = $sType;
