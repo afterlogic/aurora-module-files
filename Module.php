@@ -1715,21 +1715,21 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
-		{
-			$oResult = null;
+		$oResult = null;
 
-			foreach ($Files as $aItem)
+		foreach ($Files as $aItem)
+		{
+			if ($this->checkStorageType($aItem['FromType']) && $this->checkStorageType($ToType))
 			{
-				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
+				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $aItem['FromPath'].'/'.$aItem['Name'];
 				if (!$bFolderIntoItself)
 				{
 					$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
-					$oResult = $this->oApiFilesManager->copy($sUUID, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
+					$oResult = $this->oApiFilesManager->copy($sUUID, $aItem['FromType'], $ToType, $aItem['FromPath'], $ToPath, $aItem['Name'], $NewName);
 				}
 			}
-			return $oResult;
 		}
+		return $oResult;
 	}	
 
 	/**
@@ -1806,31 +1806,31 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		if ($this->checkStorageType($FromType) && $this->checkStorageType($ToType))
-		{
-			$oResult = null;
+		$oResult = null;
 
+		if ($ToType === \Aurora\System\Enums\FileStorageType::Personal)
+		{
 			foreach ($Files as $aItem)
 			{
-				if ($ToType === \Aurora\System\Enums\FileStorageType::Personal)
+				if ($this->checkStorageType($aItem['FromType']) && $this->checkStorageType($ToType))
 				{
-					$oFileItem = $this->oApiFilesManager->getFileInfo($sUUID, $FromType, $FromPath, $aItem['Name']);
-					$aQuota = $this->GetQuota($sUUID);
-					if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $oFileItem->Size > $aQuota['Limit'])
+						$oFileItem = $this->oApiFilesManager->getFileInfo($sUUID, $aItem['FromType'], $aItem['FromPath'], $aItem['Name']);
+						$aQuota = $this->GetQuota($sUUID);
+						if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $oFileItem->Size > $aQuota['Limit'])
+						{
+							throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
+						}
+
+					$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $aItem['FromPath'].'/'.$aItem['Name'];
+					if (!$bFolderIntoItself)
 					{
-						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
+						$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
+						$oResult = $this->oApiFilesManager->move($sUUID, $aItem['FromType'], $ToType, $aItem['FromPath'], $ToPath, $aItem['Name'], $NewName);
 					}
 				}
-				
-				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $FromPath.'/'.$aItem['Name'];
-				if (!$bFolderIntoItself)
-				{
-					$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
-					$oResult = $this->oApiFilesManager->move($sUUID, $FromType, $ToType, $FromPath, $ToPath, $aItem['Name'], $NewName);
-				}
 			}
-			return $oResult;
 		}
+		return $oResult;
 	}	
 	
 	/**
