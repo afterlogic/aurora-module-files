@@ -1717,15 +1717,18 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$oResult = null;
 
-		foreach ($Files as $aItem)
+		if ($ToType === \Aurora\System\Enums\FileStorageType::Personal || $ToType === \Aurora\System\Enums\FileStorageType::Corporate)
 		{
-			if ($this->checkStorageType($aItem['FromType']) && $this->checkStorageType($ToType))
+			foreach ($Files as $aItem)
 			{
-				$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $aItem['FromPath'].'/'.$aItem['Name'];
-				if (!$bFolderIntoItself)
+				if ($this->checkStorageType($aItem['FromType']) && $this->checkStorageType($ToType))
 				{
-					$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
-					$oResult = $this->oApiFilesManager->copy($sUUID, $aItem['FromType'], $ToType, $aItem['FromPath'], $ToPath, $aItem['Name'], $NewName);
+					$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $aItem['FromPath'].'/'.$aItem['Name'];
+					if (!$bFolderIntoItself)
+					{
+						$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
+						$oResult = $this->oApiFilesManager->copy($sUUID, $aItem['FromType'], $ToType, $aItem['FromPath'], $ToPath, $aItem['Name'], $NewName);
+					}
 				}
 			}
 		}
@@ -1808,7 +1811,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		$oResult = null;
 
-		if ($ToType === \Aurora\System\Enums\FileStorageType::Personal)
+		if ($ToType === \Aurora\System\Enums\FileStorageType::Personal || $ToType === \Aurora\System\Enums\FileStorageType::Corporate)
 		{
 			foreach ($Files as $aItem)
 			{
