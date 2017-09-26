@@ -174,7 +174,19 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 */
 	public function getFiles($iUserId, $sType, $sPath, $sPattern = '', $sPublicHash = null)
 	{
-		return $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern, $sPublicHash);
+		$aFiles = $this->oStorage->getFiles($iUserId, $sType, $sPath, $sPattern, $sPublicHash);
+		$aUsers = array();
+		foreach ($aFiles as $oFile)
+		{
+			if (!isset($aUsers[$oFile->Owner]))
+			{
+				$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUser($oFile->Owner);
+				$aUsers[$oFile->Owner] = $oUser ? $oUser->PublicId : '';
+			}
+			$oFile->Owner = $aUsers[$oFile->Owner];
+		}
+		
+		return $aFiles;
 	}
 
 	/**

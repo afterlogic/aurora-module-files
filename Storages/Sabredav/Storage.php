@@ -143,7 +143,7 @@ class Storage extends \Aurora\Modules\Files\Storages\Storage
 			} 
 			else if ($sType === \Aurora\System\Enums\FileStorageType::Corporate) 
 			{
-				$oDirectory = new \Afterlogic\DAV\FS\RootPublic($sRootPath);
+				$oDirectory = new \Afterlogic\DAV\FS\RootCorporate($sRootPath);
 			} 
 			else if 
 			($sType === \Aurora\System\Enums\FileStorageType::Shared) 

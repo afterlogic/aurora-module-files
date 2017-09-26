@@ -15,6 +15,8 @@ namespace Aurora\Modules\Files;
  */
 class Module extends \Aurora\System\Module\AbstractModule
 {
+	protected static $sStorageType = 'personal';
+	
 	/* 
 	 * @var $oApiFileCache \Aurora\System\Managers\Filecache 
 	 */	
@@ -51,12 +53,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 			)
 		);
 		
-		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'));
 		$this->subscribeEvent('Files::GetFile', array($this, 'onGetFile'));
 		$this->subscribeEvent('Files::CreateFile', array($this, 'onCreateFile'));
 		$this->subscribeEvent('Files::GetLinkType', array($this, 'onGetLinkType'));
 		$this->subscribeEvent('Files::CheckUrl', array($this, 'onCheckUrl'));
 
+		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'));
+		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'));
+		$this->subscribeEvent('Files::GetFiles::after', array($this, 'onAfterGetFiles'));
+		$this->subscribeEvent('Files::Copy::after', array($this, 'onAfterCopy'));
+		$this->subscribeEvent('Files::Move::after', array($this, 'onAfterMove'));
 		$this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'));
 		$this->subscribeEvent('Files::Delete::after', array($this, 'onAfterDelete'));
 
@@ -83,7 +89,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	protected function checkStorageType($Type)
 	{
-		return in_array($Type, array('personal', 'corporate'));
+		return $Type === static::$sStorageType;
 	}	
 	
 	/**
@@ -999,24 +1005,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetStorages()
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
-		$aStorages = [
-			[
-				'Type' => 'personal', 
-				'DisplayName' => $this->i18N('LABEL_PERSONAL_STORAGE'), 
-				'IsExternal' => false
-			]
-		];
-		if ($this->getConfig('EnableCorporate', false))
-		{
-			$aStorages[] = [
-				'Type' => 'corporate', 
-				'DisplayName' => $this->i18N('LABEL_CORPORATE_STORAGE'), 
-				'IsExternal' => false
-			];
-		}
-		return $aStorages;
-	}	
+		return array();
+	}
+	public function onAfterGetStorages($aArgs, &$mResult)
+	{
+		array_unshift($mResult, [
+			'Type' => static::$sStorageType, 
+			'DisplayName' => $this->i18N('LABEL_STORAGE'), 
+			'IsExternal' => false
+		]);
+	}
 	
 	/**
 	 * @api {post} ?/Api/ GetQuota
@@ -1155,28 +1153,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function GetFiles($UserId, $Type, $Path, $Pattern)
+	public function GetFiles($UserId, $Type, $Path, $Pattern){}
+	public function onAfterGetFiles($aArgs, &$mResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
-		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		if ($this->checkStorageType($Type))
+		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
+		if ($this->checkStorageType($aArgs['Type']))
 		{
-			$aUsers = array();
-			$aFiles = $this->oApiFilesManager->getFiles($sUUID, $Type, $Path, $Pattern);
-			foreach ($aFiles as $oFile)
-			{
-				if (!isset($aUsers[$oFile->Owner]))
-				{
-					$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUser($oFile->Owner);
-					$aUsers[$oFile->Owner] = $oUser ? $oUser->PublicId : '';
-				}
-				$oFile->Owner = $aUsers[$oFile->Owner];
-			}
+			$aFiles = $this->oApiFilesManager->getFiles($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Pattern']);
 
-			return array(
+			$mResult = array(
 				'Items' => $aFiles,
-				'Quota' => $this->GetQuota($UserId)
+				'Quota' => $this->GetQuota($aArgs['UserId'])
 			);
 		}
 	}
@@ -1211,7 +1200,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Name
 	 */
 	public function GetFileInfo($UserId, $Type, $Path, $Name) {}
-	
 	public function onAfterGetFileInfo($aArgs, &$mResult)
 	{
 		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
@@ -1385,11 +1373,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function CreateFolder($UserId, $Type, $Path, $FolderName)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
-		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		if ($this->checkStorageType($Type))
+	}
+	public function onAfterCreateFolder(&$aArgs, &$mResult)
+	{
+		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
+		if ($this->checkStorageType($aArgs['Type']))
 		{
-			return $this->oApiFilesManager->createFolder($sUUID, $Type, $Path, $FolderName);
+			$mResult = $this->oApiFilesManager->createFolder($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['FolderName']);
 		}
 	}
 
@@ -1535,7 +1525,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
-	
 	public function onAfterDelete(&$aArgs, &$mResult)
 	{
 		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
@@ -1628,7 +1617,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}	
-	
 	public function onAfterRename(&$aArgs, &$mResult)
 	{
 		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
@@ -1713,27 +1701,37 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
-		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		$oResult = null;
+		return null;
+	}	
+	public function onAfterCopy(&$aArgs, &$mResult)
+	{
+		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 
-		if ($ToType === \Aurora\System\Enums\FileStorageType::Personal || $ToType === \Aurora\System\Enums\FileStorageType::Corporate)
+		if ($this->checkStorageType($aArgs['FromType']))
 		{
-			foreach ($Files as $aItem)
+			foreach ($aArgs['Files'] as $aItem)
 			{
-				if ($this->checkStorageType($aItem['FromType']) && $this->checkStorageType($ToType))
+				$bFolderIntoItself = $aItem['IsFolder'] && $aArgs['ToPath'] === $aItem['FromPath'].'/'.$aItem['Name'];
+				if (!$bFolderIntoItself)
 				{
-					$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $aItem['FromPath'].'/'.$aItem['Name'];
-					if (!$bFolderIntoItself)
-					{
-						$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
-						$oResult = $this->oApiFilesManager->copy($sUUID, $aItem['FromType'], $ToType, $aItem['FromPath'], $ToPath, $aItem['Name'], $NewName);
-					}
+					$mResult = $this->oApiFilesManager->copy(
+						$sUUID, 
+						$aItem['FromType'], 
+						$aArgs['ToType'], 
+						$aItem['FromPath'], 
+						$aArgs['ToPath'], 
+						$aItem['Name'], 
+						$this->oApiFilesManager->getNonExistentFileName(
+							$sUUID, 
+							$aArgs['ToType'], 
+							$aArgs['ToPath'], 
+							$aItem['Name']
+						)
+					);
 				}
 			}
 		}
-		return $oResult;
-	}	
+	}
 
 	/**
 	 * @api {post} ?/Api/ Move
@@ -1807,34 +1805,36 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
-		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		$oResult = null;
+	}	
+	public function onAfterMove(&$aArgs, &$mResult)
+	{
+		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 
-		if ($ToType === \Aurora\System\Enums\FileStorageType::Personal || $ToType === \Aurora\System\Enums\FileStorageType::Corporate)
+		if ($this->checkStorageType($aArgs['FromType']))
 		{
-			foreach ($Files as $aItem)
+			foreach ($aArgs['Files'] as $aItem)
 			{
-				if ($this->checkStorageType($aItem['FromType']) && $this->checkStorageType($ToType))
+				$bFolderIntoItself = $aItem['IsFolder'] && $aArgs['ToPath'] === $aItem['FromPath'].'/'.$aItem['Name'];
+				if (!$bFolderIntoItself)
 				{
-						$oFileItem = $this->oApiFilesManager->getFileInfo($sUUID, $aItem['FromType'], $aItem['FromPath'], $aItem['Name']);
-						$aQuota = $this->GetQuota($sUUID);
-						if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $oFileItem->Size > $aQuota['Limit'])
-						{
-							throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
-						}
-
-					$bFolderIntoItself = $aItem['IsFolder'] && $ToPath === $aItem['FromPath'].'/'.$aItem['Name'];
-					if (!$bFolderIntoItself)
-					{
-						$NewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $ToType, $ToPath, $aItem['Name']);
-						$oResult = $this->oApiFilesManager->move($sUUID, $aItem['FromType'], $ToType, $aItem['FromPath'], $ToPath, $aItem['Name'], $NewName);
-					}
+					$mResult = $this->oApiFilesManager->move(
+						$sUUID, 
+						$aItem['FromType'], 
+						$aArgs['ToType'], 
+						$aItem['FromPath'], 
+						$aArgs['ToPath'], 
+						$aItem['Name'], 
+						$this->oApiFilesManager->getNonExistentFileName(
+							$sUUID, 
+							$aArgs['ToType'], 
+							$aArgs['ToPath'], 
+							$aItem['Name']
+						)
+					);
 				}
 			}
 		}
-		return $oResult;
-	}	
+	}
 	
 	/**
 	 * @api {post} ?/Api/ CreatePublicLink
