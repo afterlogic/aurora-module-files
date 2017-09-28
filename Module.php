@@ -2043,6 +2043,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 							'Name' => $aItem['Name'],
 							'TempName' => $sTempName
 						));
+						
+						$aActions = array(
+							'view' => array(
+								'url' => '?file-cache/' . $aItem['NewHash'] .'/view'
+							),
+							'download' => array(
+								'url' => '?file-cache/' . $aItem['NewHash']
+							)
+						);
+						$aItem['Actions'] = $aActions;
 
 						$mResult[] = $aItem;
 
