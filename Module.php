@@ -61,6 +61,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'));
 		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'));
 		$this->subscribeEvent('Files::GetFiles::after', array($this, 'onAfterGetFiles'));
+		$this->subscribeEvent('Files::CreateFolder::after', array($this, 'onAfterCreateFolder'));
 		$this->subscribeEvent('Files::Copy::after', array($this, 'onAfterCopy'));
 		$this->subscribeEvent('Files::Move::after', array($this, 'onAfterMove'));
 		$this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'));
@@ -195,7 +196,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 			
 					if ($bThumbnail) 
 					{
-//						$this->cacheByKey($sRawKey);	// todo
+						$sRawKey = (string) \Aurora\System\Application::GetPathItemByIndex(1, '');
+						if (!empty($sRawKey))
+						{
+							\Aurora\System\Managers\Response::verifyCacheByKey($sRawKey);
+						}
 						return \Aurora\System\Managers\Response::GetThumbResource($iUserId, $mResult, $sFileName);
 					} 
 					else if ($sContentType === 'text/html' && !$bDownload)
