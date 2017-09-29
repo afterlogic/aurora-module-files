@@ -59,7 +59,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Files::CheckUrl', array($this, 'onCheckUrl'));
 
 		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'));
-		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'));
+		$this->subscribeEvent('Files::GetFileInfo::after', array($this, 'onAfterGetFileInfo'), 10);
 		$this->subscribeEvent('Files::GetFiles::after', array($this, 'onAfterGetFiles'));
 		$this->subscribeEvent('Files::CreateFolder::after', array($this, 'onAfterCreateFolder'));
 		$this->subscribeEvent('Files::Copy::after', array($this, 'onAfterCopy'));
@@ -273,6 +273,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$iOffset = isset($aArgs['Offset']) ? $aArgs['Offset'] : 0;
 			$iChunkSizet = isset($aArgs['ChunkSize']) ? $aArgs['ChunkSize'] : 0;
 			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $iOffset, $iChunkSizet);
+			
+			return true;
 		}
 	}	
 	
@@ -303,6 +305,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				isset($aArgs['Offset']) ? $aArgs['Offset'] : null,
 				isset($aArgs['ExtendedProps']) ? $aArgs['ExtendedProps'] : null
 			);
+			
+			return true;
 		}
 	}
 	
@@ -1163,15 +1167,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
-		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		if ($this->checkStorageType($aArgs['Type']))
 		{
+			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 			$aFiles = $this->oApiFilesManager->getFiles($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Pattern']);
 
 			$mResult = array(
 				'Items' => $aFiles,
 				'Quota' => $this->GetQuota($aArgs['UserId'])
 			);
+			return true;
 		}
 	}
 	
@@ -1207,8 +1212,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetFileInfo($UserId, $Type, $Path, $Name) {}
 	public function onAfterGetFileInfo($aArgs, &$mResult)
 	{
-		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
-		$mResult = $this->oApiFilesManager->getFileInfo($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
+		if ($this->checkStorageType($aArgs['Type']))
+		{
+			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
+			$mResult = $this->oApiFilesManager->getFileInfo($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
+			return true;
+		}
 	}
 
 	/**
@@ -1385,6 +1394,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($this->checkStorageType($aArgs['Type']))
 		{
 			$mResult = $this->oApiFilesManager->createFolder($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['FolderName']);
+			return true;
 		}
 	}
 
@@ -1535,21 +1545,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		if ($this->checkStorageType($aArgs['Type']))
 		{
-			$oResult = false;
+			$mResult = false;
 
 			foreach ($aArgs['Items'] as $oItem)
 			{
 				if (!empty($oItem['Name']))
 				{
-					$oResult = $this->oApiFilesManager->delete($sUUID, $aArgs['Type'], $oItem['Path'], $oItem['Name']);
-					if (!$oResult)
+					$mResult = $this->oApiFilesManager->delete($sUUID, $aArgs['Type'], $oItem['Path'], $oItem['Name']);
+					if (!$mResult)
 					{
 						break;
 					}
 				}
 			}
-			$mResult = $oResult;
-			return $oResult;
+			return true;
 		}
 	}
 
@@ -1624,13 +1633,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	}	
 	public function onAfterRename(&$aArgs, &$mResult)
 	{
-		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 		if ($this->checkStorageType($aArgs['Type']))
 		{
+			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 			$sNewName = \trim(\MailSo\Base\Utils::ClearFileName($aArgs['NewName']));
 
 			$sNewName = $this->oApiFilesManager->getNonExistentFileName($sUUID, $aArgs['Type'], $aArgs['Path'], $sNewName);
 			$mResult = $this->oApiFilesManager->rename($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $sNewName, $aArgs['IsLink']);
+			
+			return true;
 		}
 	}
 
@@ -1735,6 +1746,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					);
 				}
 			}
+			return true;
 		}
 	}
 
@@ -1813,10 +1825,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	}	
 	public function onAfterMove(&$aArgs, &$mResult)
 	{
-		$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
-
 		if ($this->checkStorageType($aArgs['FromType']))
 		{
+			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 			foreach ($aArgs['Files'] as $aItem)
 			{
 				$bFolderIntoItself = $aItem['IsFolder'] && $aArgs['ToPath'] === $aItem['FromPath'].'/'.$aItem['Name'];
@@ -1838,6 +1849,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 					);
 				}
 			}
+			
+			return true;
 		}
 	}
 	
@@ -2026,9 +2039,21 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aData = \Aurora\System\Api::DecodeKeyValues($sHash);
 				if (\is_array($aData) && 0 < \count($aData))
 				{
-					$oFileInfo = $this->oApiFilesManager->getFileInfo($sUUID, $aData['Type'], $aData['Path'], $aData['Name']);
-					$rFile = $this->oApiFilesManager->getFile($sUUID, $aData['Type'], $aData['Path'], $aData['Name']);
-
+					$oFileInfo = self::Decorator()->GetFileInfo($UserId, $aData['Type'], $aData['Path'], $aData['Name']);
+					
+					$aArgs = array(
+						'UserId' => $UserId,
+						'Type' => $aData['Type'],
+						'Path' => $aData['Path'],
+						'Name' => $aData['Name']
+					);
+					$rFile = false;
+					$this->broadcastEvent(
+						'GetFile', 
+						$aArgs,
+						$rFile
+					);						
+					
 					$sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
 
 					if (is_resource($rFile) && $this->oApiFileCache->putFile($sUUID, $sTempName, $rFile))
