@@ -11,10 +11,6 @@
         100,
         "int"
     ],
-    "Disabled": [
-        false,
-        "bool"
-    ],
     "EnableCorporate": [
         true,
         "bool"
