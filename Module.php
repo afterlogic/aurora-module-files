@@ -260,7 +260,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage.
 	 * @param string $Path Path to folder files are obtained from.
-	 * @param string $Name Name of file.
+	 * @param string $Id Name of file.
 	 * @param bool $IsThumb Inticates if thumb is required.
 	 * @param string|resource|bool $Result Is passed by reference.
 	 * @throws \Aurora\System\Exceptions\ApiException
@@ -272,7 +272,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
 			$iOffset = isset($aArgs['Offset']) ? $aArgs['Offset'] : 0;
 			$iChunkSizet = isset($aArgs['ChunkSize']) ? $aArgs['ChunkSize'] : 0;
-			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $iOffset, $iChunkSizet);
+			$Result = $this->oApiFilesManager->getFile($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Id'], $iOffset, $iChunkSizet);
 			
 			return true;
 		}
@@ -1207,15 +1207,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param int $UserId
 	 * @param string $Type
 	 * @param string $Path
-	 * @param string $Name
+	 * @param string $Id
 	 */
-	public function GetFileInfo($UserId, $Type, $Path, $Name) {}
+	public function GetFileInfo($UserId, $Type, $Path, $Id) {}
 	public function onAfterGetFileInfo($aArgs, &$mResult)
 	{
 		if ($this->checkStorageType($aArgs['Type']))
 		{
 			$sUUID = \Aurora\System\Api::getUserUUIDById($aArgs['UserId']);
-			$mResult = $this->oApiFilesManager->getFileInfo($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Name']);
+			$mResult = $this->oApiFilesManager->getFileInfo($sUUID, $aArgs['Type'], $aArgs['Path'], $aArgs['Id']);
 			return true;
 		}
 	}
@@ -2039,13 +2039,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aData = \Aurora\System\Api::DecodeKeyValues($sHash);
 				if (\is_array($aData) && 0 < \count($aData))
 				{
-					$oFileInfo = self::Decorator()->GetFileInfo($UserId, $aData['Type'], $aData['Path'], $aData['Name']);
+					$oFileInfo = self::Decorator()->GetFileInfo($UserId, $aData['Type'], $aData['Path'], $aData['Id']);
 					
 					$aArgs = array(
 						'UserId' => $UserId,
 						'Type' => $aData['Type'],
 						'Path' => $aData['Path'],
-						'Name' => $aData['Name']
+						'Name' => $aData['Name'],
+						'Id' => $aData['Id']
 					);
 					$rFile = false;
 					$this->broadcastEvent(
@@ -2138,12 +2139,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$Storage = $aFile['Storage'];
 				$Path = $aFile['Path'];
 				$Name = $aFile['Name'];
+				$Id = $aFile['Id'];
 						
 				$aArgs = array(
 					'UserId' => $UserId,
 					'Type' => $Storage,
 					'Path' => $Path,
 					'Name' => &$Name,
+					'Id' => $Id,
 					'IsThumb' => false,
 					'Offset' => 0,
 					'ChunkSize' => 0
