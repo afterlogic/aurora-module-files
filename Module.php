@@ -176,6 +176,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				'Type' => $sType,
 				'Path' => $sPath,
 				'Name' => &$sFileName,
+				'Id' => $sFileName,
 				'IsThumb' => $bThumbnail,
 				'Offset' => $iOffset,
 				'ChunkSize' => $iChunkSize
