@@ -383,9 +383,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @ignore
 	 * @param int $iUserId
 	 */
-	public function onAfterDeleteUser($aArgs, $iUserId)
+	public function onAfterDeleteUser($aArgs)
 	{
-		$this->oApiFilesManager->ClearFiles($iUserId);
+		$this->oApiFilesManager->ClearFiles($aArgs['UUID']);
 	}
 	/***** private functions *****/
 	
