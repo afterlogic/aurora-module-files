@@ -1470,6 +1470,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
+		if (substr($Link, 0, 11) === 'javascript:')
+		{
+			$Link = substr($Link, 11);
+		}
+		
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		if ($this->checkStorageType($Type))
 		{
@@ -2011,6 +2016,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		$mResult = false;
+		
+		if (substr($Url, 0, 11) === 'javascript:')
+		{
+			$Url = substr($Url, 11);
+		}
 		
 		$aArgs = array(
 			'Url' => $Url
