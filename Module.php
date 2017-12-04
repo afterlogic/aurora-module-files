@@ -495,7 +495,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {bool} Result.Result.EnableModule=false Indicates if Files module is enabled.
 	 * @apiSuccess {bool} Result.Result.EnableUploadSizeLimit=false Indicates if upload size limit is enabled.
 	 * @apiSuccess {int} Result.Result.UploadSizeLimitMb=0 Value of upload size limit in Mb.
-	 * @apiSuccess {bool} Result.Result.EnableCorporate=false Indicates if corporate storage is enabled.
 	 * @apiSuccess {int} Result.Result.UserSpaceLimitMb=0 Value of user space limit in Mb.
 	 * @apiSuccess {string} Result.Result.CustomTabTitle=&quot;&quot; Custom tab title.
 	 * @apiSuccess {string} [Result.Result.PublicHash=&quot;&quot;] Public hash.
@@ -506,7 +505,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetSettings',
-	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true,
+	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, 
 	 *		UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 * }
 	 * 
@@ -531,7 +530,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'EnableModule' => true,
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0,
-			'EnableCorporate' => $this->getConfig('EnableCorporate', false),
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
 			'CustomTabTitle' => $this->getConfig('CustomTabTitle', '')
 		);
@@ -568,14 +566,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **EnableUploadSizeLimit** *bool* Enable file upload size limit setting.<br>
 	 * &emsp; **UploadSizeLimitMb** *int* Upload file size limit setting in Mb.<br>
 	 * &emsp; **UserSpaceLimitMb** *int* User space limit setting in Mb.<br>
-	 * &emsp; **EnableCorporate** *bool* Enable corporate storage in Files.<br>
 	 * }
 	 * 
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
-	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, EnableCorporate: true,
+	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, 
 	 *		UserSpaceLimitMb: 10 }'
 	 * }
 	 * 
@@ -605,17 +602,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * 
 	 * @param bool $EnableUploadSizeLimit Enable file upload size limit setting.
 	 * @param int $UploadSizeLimitMb Upload file size limit setting in Mb.
-	 * @param bool $EnableCorporate Enable corporate storage in Files.
 	 * @param int $UserSpaceLimitMb User space limit setting in Mb.
 	 * @return bool
 	 */
-	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $EnableCorporate, $UserSpaceLimitMb)
+	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $UserSpaceLimitMb)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 		
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
-		$this->setConfig('EnableCorporate', $EnableCorporate);
 		$this->setConfig('UserSpaceLimitMb', $UserSpaceLimitMb);
 		$this->saveModuleConfig();
 		return true;

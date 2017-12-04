@@ -11,10 +11,6 @@
         100,
         "int"
     ],
-    "EnableCorporate": [
-        true,
-        "bool"
-    ],
     "UserSpaceLimitMb": [
         100,
         "int"
