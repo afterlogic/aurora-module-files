@@ -760,8 +760,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 							'Size' =>  (int) $iSize
 						);
 					}
+					else
+					{
+						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
+					}
 				}
 			}
+			else
+			{
+				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
+			}
+			
 		}
 		else
 		{
