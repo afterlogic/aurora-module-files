@@ -45,16 +45,16 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	/**
 	 * Checks if file exists. 
 	 * 
-	 * @param int $iUserId Account object. 
-	 * @param int $iType Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
-	 * @param string $sPath Path to the folder which contains the file, empty string means the file is in the root folder. 
-	 * @param string $sName Filename. 
+	 * @param int $UserId Account object. 
+	 * @param int $Type Storage type. Accepted values: **\Aurora\System\Enums\FileStorageType::Personal**, **\Aurora\System\Enums\FileStorageType::Corporate**, **\Aurora\System\Enums\FileStorageType::Shared**. 
+	 * @param string $Path Path to the folder which contains the file, empty string means the file is in the root folder. 
+	 * @param string $Name Filename. 
 	 * 
 	 * @return bool
 	 */
-	public function isFileExists($iUserId, $iType, $sPath, $sName)
+	public function IsFileExists($UserId, $Type, $Path, $Name)
 	{
-		return $this->oStorage->isFileExists($iUserId, $iType, $sPath, $sName);
+		return $this->oStorage->isFileExists($UserId, $Type, $Path, $Name);
 	}
 
 	/**
