@@ -200,34 +200,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 		}
 	}
-	
-	/**
-	 * Returns html title for specified URL.
-	 * @param string $sUrl
-	 * @return string
-	 */
-	protected function getHtmlTitle($sUrl)
-	{
-		$oCurl = curl_init();
-		\curl_setopt_array($oCurl, array(
-			CURLOPT_URL => $sUrl,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_ENCODING => '',
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_AUTOREFERER => true,
-			CURLOPT_SSL_VERIFYPEER => false, //required for https urls
-			CURLOPT_CONNECTTIMEOUT => 5,
-			CURLOPT_TIMEOUT => 5,
-			CURLOPT_MAXREDIRS => 5
-		));
-		$sContent = curl_exec($oCurl);
-		//$aInfo = curl_getinfo($oCurl);
-		curl_close($oCurl);
-
-		preg_match('/<title>(.*?)<\/title>/s', $sContent, $aTitle);
-		return isset($aTitle['1']) ? trim($aTitle['1']) : '';
-	}
-	
 	/***** private functions *****/
 	
 	/***** public functions *****/
