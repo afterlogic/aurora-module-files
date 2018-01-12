@@ -24,12 +24,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	/**
 	 *
-	 * @var \CApiFilesManager
-	 */
-	public $oApiFilesManager = null;
-
-	/**
-	 *
 	 * @var \CApiModuleDecorator
 	 */
 	protected $oMinModuleDecorator = null;
@@ -42,7 +36,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function init() 
 	{
-		$this->oApiFilesManager = new Manager($this);
 		$this->oApiFileCache = new \Aurora\System\Managers\Filecache();
 		
 		$this->AddEntries(
@@ -60,7 +53,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	*/
 	private function getMinModuleDecorator()
 	{
-		return $this->oApiFilesManager->getMinModuleDecorator();
+		return \Aurora\System\Api::GetModuleDecorator('Min');
 	}	
 	
 	/**
@@ -542,11 +535,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			if (is_array($UploadData))
 			{
-				if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && $this->isFileExists($sUUID, $Type, $Path, $UploadData['name']))
+				if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && self::Decorator()->IsFileExists($sUUID, $Type, $Path, $UploadData['name']))
 				{// It is forbidden to write first сhunk to the end of a existing file
 					$sError = \Aurora\System\Notifications::FileAlreadyExists;
 				}
-				else if (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !$this->isFileExists($sUUID, $Type, $Path, $UploadData['name']))
+				else if (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !self::Decorator()->IsFileExists($sUUID, $Type, $Path, $UploadData['name']))
 				{ // It is forbidden to write to the end of a nonexistent file
 					$sError = \Aurora\System\Notifications::FileNotFound;
 				}
@@ -1762,10 +1755,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Name
 	 */
 
-	public function isFileExists($iUserId, $iType, $sPath, $sName)
+	public function IsFileExists($iUserId, $iType, $sPath, $sName)
 	{
-		$sUUID = \Aurora\System\Api::getUserUUIDById($iUserId);
-		return $this->oApiFilesManager->isFileExists($sUUID, $iType, $sPath, $sName);
+		return true;
 	}
 	
 	/**
