@@ -483,6 +483,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to folder than should contain uploaded file.
 	 * @param array $UploadData Uploaded file information. Contains fields size, name, tmp_name.
+	 * @param bool $Overwrite Overwrite a file if it already exists.
+	 * @param int $RangeType The type of update we're doing.
+	 * *	0 - overwrite
+	 * *	1 - append
+     * *	2 - update based on a start byte
+     * *	3 - update based on an end byte
+     *;
+	 * @param int $Offset The start or end byte.
+	 * @param array $ExtendedProps Additional parameters.
 	 * @return array {
 	 *		*string* **Name** Original file name.
 	 *		*string* **TempName** Temporary file name.
