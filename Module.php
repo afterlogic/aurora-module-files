@@ -203,6 +203,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	/***** private functions *****/
 	
 	/***** public functions *****/
+	
+	/***** public functions might be called with web API *****/
 	/**
 	 * Uploads file from client side.
 	 * 
@@ -272,9 +274,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 	}
 	
-	/***** public functions *****/
-	
-	/***** public functions might be called with web API *****/
 	/**
 	 * @apiDefine Files Files Module
 	 * Main Files module. It provides PHP and Web APIs for managing files.
