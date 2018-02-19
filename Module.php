@@ -79,7 +79,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * 
 	 * @return bool
 	 */
-	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
+	protected function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
 	{
 		$bDownload = true;
 		$bThumbnail = false;
@@ -213,6 +213,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function UploadFileData()
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		$mResult = false;
 		$aPaths = \Aurora\System\Application::GetPaths();
 		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
@@ -901,7 +902,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *		*int* **Limit** Limit of space for user.
 	 * }
 	 */
-	public function GetQuota($UserId, $Type){}
+	public function GetQuota($UserId, $Type)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+	}
 
 	/**
 	 * @api {post} ?/Api/ GetFiles
@@ -971,7 +975,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function GetFiles($UserId, $Type, $Path, $Pattern){}
+	public function GetFiles($UserId, $Type, $Path, $Pattern)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+	}
 	
 	/**
 	 * Return content of a file.
@@ -983,6 +990,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetFileContent($UserId, $Type, $Path, $Name) 
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return null;
 	}
 	
@@ -994,7 +1002,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Path
 	 * @param string $Id
 	 */
-	public function GetFileInfo($UserId, $Type, $Path, $Id) {}
+	public function GetFileInfo($UserId, $Type, $Path, $Id) 
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+	}
 
 	/**
 	 * @api {post} ?/Api/ GetPublicFiles
@@ -1056,6 +1067,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetPublicFiles($Hash, $Path)
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		return array();
 	}	
 
@@ -1193,6 +1205,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function CreateLink($UserId, $Type, $Path, $Link, $Name)
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return false;
 	}
 
@@ -1545,6 +1558,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return false;
 	}	
 	
@@ -1610,6 +1624,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function DeletePublicLink($UserId, $Type, $Path, $Name)
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return false;
 	}
 
@@ -1651,6 +1666,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetFilesForUpload($UserId, $Hashes = array())
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		
 		$mResult = false;
@@ -1737,6 +1753,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function IsFileExists($iUserId, $iType, $sPath, $sName)
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return true;
 	}
 	
