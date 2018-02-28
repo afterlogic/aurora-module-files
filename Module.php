@@ -510,7 +510,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oApiFileCacheManager = new \Aurora\System\Managers\Filecache();
 
 		$sError = '';
-		$aResponse = array();
+		$mResponse = array();
 
 		if ($sUUID)
 		{
@@ -533,15 +533,23 @@ class Module extends \Aurora\System\Module\AbstractModule
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
 					}
 					
-					if ($Type === \Aurora\System\Enums\FileStorageType::Personal)
+					
+					$aArgs = [
+						'UserUUID' => $sUUID,
+						'Type' => $Type,
+						'Size' => $iSize
+					];
+					$mCheckFilesQuotaResult = true;
+					$this->broadcastEvent(
+							'CheckFilesQuota', 
+							$aArgs, 
+							$mCheckFilesQuotaResult
+					);
+					if (!$mCheckFilesQuotaResult)
 					{
-						$aQuota = self::Decorator()->GetQuota($sUUID, $Type);
-						if ($aQuota['Limit'] > 0 && $aQuota['Used'] + $iSize > $aQuota['Limit'])
-						{
-							throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
-						}
+						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
 					}
-
+					
 					$sUploadName = $UploadData['name'];
 					$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
@@ -569,18 +577,26 @@ class Module extends \Aurora\System\Module\AbstractModule
 							'ExtendedProps' => $ExtendedProps
 
 						);
+						$mResult = false;
 						$this->broadcastEvent(
 							'CreateFile',
 							$aArgs,
 							$mResult
 						);
-
-						$aResponse['File'] = array(
-							'Name' => $sUploadName,
-							'TempName' => $sSavedName,
-							'MimeType' => $sMimeType,
-							'Size' =>  (int) $iSize
-						);
+						
+						if ($mResult)
+						{
+							$mResponse['File'] = array(
+								'Name' => $sUploadName,
+								'TempName' => $sSavedName,
+								'MimeType' => $sMimeType,
+								'Size' =>  (int) $iSize
+							);
+						}
+						else
+						{
+							$mResponse = false;
+						}
 					}
 					else
 					{
@@ -601,10 +617,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (0 < strlen($sError))
 		{
-			$aResponse['Error'] = $sError;
+			$mResponse['Error'] = $sError;
 		}
 		
-		return $aResponse;
+		return $mResponse;
 	}
 
 	/**
