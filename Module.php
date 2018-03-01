@@ -1767,7 +1767,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Name
 	 */
 
-	public function IsFileExists($iUserId, $iType, $sPath, $sName)
+	public function IsFileExists($UserId, $Type, $Path, $Name)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return true;
