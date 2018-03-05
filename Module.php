@@ -506,7 +506,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
-		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserPublicIdById($UserId);
 		$oApiFileCacheManager = new \Aurora\System\Managers\Filecache();
 
 		$sError = '';
@@ -730,7 +730,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		$this->getRawFile(
-			\Aurora\System\Api::getUserUUIDById($UserId), 
+			\Aurora\System\Api::getUserPublicIdById($UserId), 
 			$Type, 
 			$Path, 
 			$Name, 
@@ -786,7 +786,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		// checkUserRoleIsAtLeast is called in getRawFile
 		return \base64_encode(
 			$this->getRawFile(
-				\Aurora\System\Api::getUserUUIDById($UserId), 
+				\Aurora\System\Api::getUserPublicIdById($UserId), 
 				$Type, 
 				$Path, 
 				$Name, 
@@ -1683,7 +1683,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetFilesForUpload($UserId, $Hashes = array())
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
+		$sUUID = \Aurora\System\Api::getUserPublicIdById($UserId);
 		
 		$mResult = false;
 		if (is_array($Hashes) && 0 < count($Hashes))
@@ -1815,7 +1815,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 				if (is_resource($mFileResource)) 
 				{
-					$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
+					$sUUID = \Aurora\System\Api::getUserPublicIdById($UserId);
 					try
 					{
 						$sTempName = md5($sUUID.$Storage.$Path.$Name);
