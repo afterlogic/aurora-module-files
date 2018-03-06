@@ -566,7 +566,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					if ($rData)
 					{
 						$aArgs = array(
-							'UserId' => $sUUID,
+							'UserId' => $UserId,
 							'Type' => $Type,
 							'Path' => $Path,
 							'Name' => $sUploadName,
