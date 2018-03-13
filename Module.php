@@ -44,6 +44,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				'download-file' => 'EntryDownloadFile'
 			)
 		);
+		$this->denyMethodsCallByWebApi(['getRawFile']);
 	}
 	
 	/**
@@ -79,7 +80,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * 
 	 * @return bool
 	 */
-	protected function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
+	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
 	{
 		$bDownload = true;
 		$bThumbnail = false;
