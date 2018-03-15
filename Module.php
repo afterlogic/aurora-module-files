@@ -508,7 +508,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$sUUID = \Aurora\System\Api::getUserPublicIdById($UserId);
-		$oApiFileCacheManager = new \Aurora\System\Managers\Filecache();
 
 		$sError = '';
 		$mResponse = array();
@@ -560,9 +559,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						$rData = $UploadData['tmp_name'];
 					}
-					else if ($oApiFileCacheManager->moveUploadedFile($sUUID, $sSavedName, $UploadData['tmp_name']))
+					else if ($this->oApiFileCache->moveUploadedFile($sUUID, $sSavedName, $UploadData['tmp_name'], '', $this->GetName()))
 					{
-						$rData = $oApiFileCacheManager->getFile($sUUID, $sSavedName);
+						$rData = $this->oApiFileCache->getFile($sUUID, $sSavedName, '', $this->GetName());
 					}
 					if ($rData)
 					{
@@ -1713,7 +1712,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					
 					$sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
 
-					if (is_resource($rFile) && $this->oApiFileCache->putFile($sUUID, $sTempName, $rFile))
+					if (is_resource($rFile) && $this->oApiFileCache->putFile($sUUID, $sTempName, $rFile, '', $this->GetName()))
 					{
 						$aItem = array(
 							'Name' => $oFileInfo->Name,
@@ -1820,16 +1819,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 					try
 					{
 						$sTempName = md5($sUUID.$Storage.$Path.$Name);
-						$oApiFileCache = new \Aurora\System\Managers\Filecache();
 
-						if (!$oApiFileCache->isFileExists($sUUID, $sTempName))
+						if (!$this->oApiFileCache->isFileExists($sUUID, $sTempName, '', $this->GetName()))
 						{
-							$oApiFileCache->putFile($sUUID, $sTempName, $mFileResource);
+							$this->oApiFileCache->putFile($sUUID, $sTempName, $mFileResource, '', $this->GetName());
 						}
 
-						if ($oApiFileCache->isFileExists($sUUID, $sTempName))
+						if ($this->oApiFileCache->isFileExists($sUUID, $sTempName, '', $this->GetName()))
 						{
-							$mResult[] = \Aurora\System\Utils::GetClientFileResponse($UserId, $Name, $sTempName, $oApiFileCache->fileSize($sUUID, $sTempName));
+							$mResult[] = \Aurora\System\Utils::GetClientFileResponse($UserId, $Name, $sTempName, $this->oApiFileCache->fileSize($sUUID, $sTempName, '', $this->GetName()));
 						}
 					}
 					catch (\Exception $oException)
