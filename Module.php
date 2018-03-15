@@ -1827,7 +1827,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 						if ($this->oApiFileCache->isFileExists($sUUID, $sTempName, '', $this->GetName()))
 						{
-							$mResult[] = \Aurora\System\Utils::GetClientFileResponse($UserId, $Name, $sTempName, $this->oApiFileCache->fileSize($sUUID, $sTempName, '', $this->GetName()));
+							$mResult[] = \Aurora\System\Utils::GetClientFileResponse(
+								$this->GetName(), $UserId, $Name, $sTempName, $this->oApiFileCache->fileSize($sUUID, $sTempName, '', $this->GetName())
+							);
 						}
 					}
 					catch (\Exception $oException)
