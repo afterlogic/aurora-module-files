@@ -1683,7 +1683,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetFilesForUpload($UserId, $Hashes = array())
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		$sUUID = \Aurora\System\Api::getUserPublicIdById($UserId);
+		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 		
 		$mResult = false;
 		if (is_array($Hashes) && 0 < count($Hashes))
@@ -1712,7 +1712,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					
 					$sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
 
-					if (is_resource($rFile) && $this->oApiFileCache->putFile($sUUID, $sTempName, $rFile, '', $this->GetName()))
+					if (is_resource($rFile) && $this->oApiFileCache->putFile($sUUID, $sTempName, $rFile))
 					{
 						$aItem = array(
 							'Name' => $oFileInfo->Name,
@@ -1815,20 +1815,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 				if (is_resource($mFileResource)) 
 				{
-					$sUUID = \Aurora\System\Api::getUserPublicIdById($UserId);
+					$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 					try
 					{
 						$sTempName = md5($sUUID.$Storage.$Path.$Name);
 
-						if (!$this->oApiFileCache->isFileExists($sUUID, $sTempName, '', $this->GetName()))
+						if (!$this->oApiFileCache->isFileExists($sUUID, $sTempName))
 						{
-							$this->oApiFileCache->putFile($sUUID, $sTempName, $mFileResource, '', $this->GetName());
+							$this->oApiFileCache->putFile($sUUID, $sTempName, $mFileResource);
 						}
 
-						if ($this->oApiFileCache->isFileExists($sUUID, $sTempName, '', $this->GetName()))
+						if ($this->oApiFileCache->isFileExists($sUUID, $sTempName))
 						{
 							$mResult[] = \Aurora\System\Utils::GetClientFileResponse(
-								$this->GetName(), $UserId, $Name, $sTempName, $this->oApiFileCache->fileSize($sUUID, $sTempName, '', $this->GetName())
+								null, $UserId, $Name, $sTempName, $this->oApiFileCache->fileSize($sUUID, $sTempName)
 							);
 						}
 					}
