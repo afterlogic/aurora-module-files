@@ -38,6 +38,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$this->oApiFileCache = new \Aurora\System\Managers\Filecache();
 		
+		$this->subscribeEvent('Files::GetFiles::after', array($this, 'onAfterGetFiles'), 1000);
 		$this->AddEntries(
 			array(
 				'upload' => 'UploadFileData',
@@ -921,6 +922,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetQuota($UserId, $Type)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		
+		return [
+			'Limit' => 0, 
+			'Used' => 0
+		];
 	}
 
 	/**
@@ -994,6 +1000,44 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetFiles($UserId, $Type, $Path, $Pattern)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		return [];
+	}
+	
+	/**
+	 * 
+	 * @param array $aArgs
+	 * @param mixed $mResult
+	 */
+	public function onAfterGetFiles($aArgs, &$mResult)
+	{
+		$aItems = [];
+		if (is_array($mResult))
+		{
+			foreach ($mResult as $oItem)
+			{
+				if ($oItem instanceof Classes\FileItem)
+				{
+					$aItems[] = $this->Decorator()->PopulateFileItem($oItem);
+				}
+			}
+		}
+		
+		$mResult = array(
+			'Items' => $aItems,
+			'Quota' => $this->Decorator()->GetQuota($aArgs['UserId'], $aArgs['Type'])
+		);
+		
+	}	
+	
+	/**
+	 * 
+	 * @param array $aItems
+	 */
+	public function PopulateFileItem($Item)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		
+		return $Item;
 	}
 	
 	/**
