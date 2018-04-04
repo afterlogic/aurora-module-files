@@ -127,6 +127,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($iUserId && $SharedHash !== null)
 			{
 				\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+				\Afterlogic\DAV\Server::setUser($iUserId);
 			}
 			else 
 			{
@@ -508,20 +509,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
-		$sUUID = \Aurora\System\Api::getUserPublicIdById($UserId);
+		$sUserPublicId = \Aurora\System\Api::getUserPublicIdById($UserId);
 
 		$sError = '';
 		$mResponse = array();
 
-		if ($sUUID)
+		if ($sUserPublicId)
 		{
 			if (is_array($UploadData))
 			{
-				if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && self::Decorator()->IsFileExists($sUUID, $Type, $Path, $UploadData['name']))
+				if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && self::Decorator()->IsFileExists($sUserPublicId, $Type, $Path, $UploadData['name']))
 				{// It is forbidden to write first сhunk to the end of a existing file
 					$sError = \Aurora\System\Notifications::FileAlreadyExists;
 				}
-				else if (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !self::Decorator()->IsFileExists($sUUID, $Type, $Path, $UploadData['name']))
+				else if (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !self::Decorator()->IsFileExists($sUserPublicId, $Type, $Path, $UploadData['name']))
 				{ // It is forbidden to write to the end of a nonexistent file
 					$sError = \Aurora\System\Notifications::FileNotFound;
 				}
@@ -536,7 +537,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					
 					
 					$aArgs = [
-						'UserUUID' => $sUUID,
+						'PublicId' => $sUserPublicId,
 						'Type' => $Type,
 						'Size' => $iSize
 					];
@@ -560,9 +561,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						$rData = $UploadData['tmp_name'];
 					}
-					else if ($this->oApiFileCache->moveUploadedFile($sUUID, $sSavedName, $UploadData['tmp_name'], '', $this->GetName()))
+					else if ($this->oApiFileCache->moveUploadedFile($sUserPublicId, $sSavedName, $UploadData['tmp_name'], '', $this->GetName()))
 					{
-						$rData = $this->oApiFileCache->getFile($sUUID, $sSavedName, '', $this->GetName());
+						$rData = $this->oApiFileCache->getFile($sUserPublicId, $sSavedName, '', $this->GetName());
 					}
 					if ($rData)
 					{
