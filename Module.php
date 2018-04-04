@@ -625,47 +625,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResponse;
 	}
 
-	/**
-	 * @api {post} ?/Api/ DownloadFile
-	 * @apiDescription Downloads file.
-	 * @apiName DownloadFile
-	 * @apiGroup Files
-	 * 
-	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
-	 * @apiHeaderExample {json} Header-Example:
-	 *	{
-	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
-	 *	}
-	 * 
-	 * @apiParam {string=Files} Module Module name
-	 * @apiParam {string=DownloadFile} Method Method name
-	 * @apiParam {string} Parameters JSON.stringified object <br>
-	 * {<br>
-	 * &emsp; **Type** *string* Storage type - personal, corporate.<br>
-	 * &emsp; **Path** *string* Path to folder contained file.<br>
-	 * &emsp; **Name** *string* File name.<br>
-	 * &emsp; **SharedHash** *string* Shared hash. *optional*<br>
-	 * }
-	 * 
-	 * @apiParamExample {json} Request-Example:
-	 * {
-	 *	Module: 'Files',
-	 *	Method: 'DownloadFile',
-	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
-	 * }
-	 * 
-	 * @apiSuccess {string} Result Content of the file with headers for download.
-	 */
-	
-	/**
-	 * Downloads file.
-	 * 
-	 * @param int $UserId User identifier.
-	 * @param string $Type Storage type - personal, corporate.
-	 * @param string $Path Path to folder contained file.
-	 * @param string $Name File name.
-	 * @return bool
-	 */
 	public function EntryDownloadFile()
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
@@ -1018,7 +977,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			{
 				if ($oItem instanceof Classes\FileItem)
 				{
-					$aItems[] = $this->Decorator()->PopulateFileItem($oItem);
+					$aItems[] = $this->Decorator()->PopulateFileItem($aArgs['UserId'], $oItem);
 				}
 			}
 		}
@@ -1034,7 +993,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * 
 	 * @param array $aItems
 	 */
-	public function PopulateFileItem($Item)
+	public function PopulateFileItem($UserId, $Item)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
@@ -1052,7 +1011,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetFileContent($UserId, $Type, $Path, $Name) 
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		return null;
+		// File content is obtained in subscribers methods
 	}
 	
 	/**
