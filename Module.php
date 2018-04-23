@@ -312,7 +312,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {bool} Result.Result.EnableModule=false Indicates if Files module is enabled.
 	 * @apiSuccess {bool} Result.Result.EnableUploadSizeLimit=false Indicates if upload size limit is enabled.
 	 * @apiSuccess {int} Result.Result.UploadSizeLimitMb=0 Value of upload size limit in Mb.
-	 * @apiSuccess {int} Result.Result.UserSpaceLimitMb=0 Value of user space limit in Mb.
 	 * @apiSuccess {string} Result.Result.CustomTabTitle=&quot;&quot; Custom tab title.
 	 * @apiSuccess {string} [Result.Result.PublicHash=&quot;&quot;] Public hash.
 	 * @apiSuccess {string} [Result.Result.PublicFolderName=&quot;&quot;] Public folder name.
@@ -323,7 +322,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	Module: 'Files',
 	 *	Method: 'GetSettings',
 	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, 
-	 *		UserSpaceLimitMb: 100, CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
+	 *		CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 * }
 	 * 
 	 * @apiSuccessExample {json} Error response example:
@@ -346,8 +345,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$aAppData = array(
 			'EnableModule' => true,
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
-			'UploadSizeLimitMb' => $this->getConfig('EnableUploadSizeLimit', false) ? $this->getConfig('UploadSizeLimitMb', 0) : 0,
-			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
+			'UploadSizeLimitMb' => $this->getConfig('UploadSizeLimitMb', 0),
 			'CustomTabTitle' => $this->getConfig('CustomTabTitle', '')
 		);
 		$sPublicHash = \Aurora\System\Application::GetPathItemByIndex(1);
@@ -382,15 +380,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {<br>
 	 * &emsp; **EnableUploadSizeLimit** *bool* Enable file upload size limit setting.<br>
 	 * &emsp; **UploadSizeLimitMb** *int* Upload file size limit setting in Mb.<br>
-	 * &emsp; **UserSpaceLimitMb** *int* User space limit setting in Mb.<br>
 	 * }
 	 * 
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
-	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, 
-	 *		UserSpaceLimitMb: 10 }'
+	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5 }'
 	 * }
 	 * 
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -419,18 +415,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * 
 	 * @param bool $EnableUploadSizeLimit Enable file upload size limit setting.
 	 * @param int $UploadSizeLimitMb Upload file size limit setting in Mb.
-	 * @param int $UserSpaceLimitMb User space limit setting in Mb.
 	 * @return bool
 	 */
-	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb, $UserSpaceLimitMb)
+	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 		
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
-		$this->setConfig('UserSpaceLimitMb', $UserSpaceLimitMb);
-		$this->saveModuleConfig();
-		return true;
+		return (bool) $this->saveModuleConfig();
 	}
 	
 		/**

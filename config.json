@@ -10,9 +10,5 @@
     "UploadSizeLimitMb": [
         100,
         "int"
-    ],
-    "UserSpaceLimitMb": [
-        100,
-        "int"
     ]
 }
