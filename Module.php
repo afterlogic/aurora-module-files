@@ -1291,6 +1291,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Delete($UserId, $Type, $Items)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		foreach ($Items as $aItem)
+		{
+			$oItem = new Classes\FileItem();
+			$oItem->Id = $aItem['Name'];
+			$oItem->Name = $aItem['Name'];
+			$oItem->TypeStr = $Type;
+			$oItem->Path = $aItem['Path'];
+			
+			\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aItem['Name']);
+		}
 	}
 
 	/**
@@ -1361,6 +1371,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		
+		$oItem = new Classes\FileItem();
+		$oItem->Id = $Name;
+		$oItem->Name = $Name;
+		$oItem->TypeStr = $Type;
+		$oItem->Path = $Path;
+
+		\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $Name);
 	}	
 
 	/**
@@ -1510,6 +1528,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		foreach ($Files as $aFile)
+		{
+			if (!$aFile['IsFolder'])
+			{
+				$oItem = new Classes\FileItem();
+				$oItem->Id = $aFile['Name'];
+				$oItem->Name = $aFile['Name'];
+				$oItem->TypeStr = $FromType;
+				$oItem->Path = $FromPath;
+			}
+			
+			\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aFile['Name']);
+		}
 	}	
 	
 	/**
