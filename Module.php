@@ -1366,6 +1366,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
+		if ($Name === '')
+		{
+			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
+		}
+		
 		$oItem = new Classes\FileItem();
 		$oItem->Id = $Name;
 		$oItem->Name = $Name;
@@ -1373,6 +1378,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oItem->Path = $Path;
 
 		\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $Name);
+		
+		// Actual renaming is proceeded in subscribed methods. Look for it by "Files::Rename::after"
 	}	
 
 	/**
