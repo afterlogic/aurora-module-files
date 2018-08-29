@@ -956,7 +956,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function GetFiles($UserId, $Type, $Path, $Pattern)
+	public function GetFiles($UserId, $Type, $Path, $Pattern, $PublicHash = null)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return [];
@@ -969,6 +969,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterGetFiles($aArgs, &$mResult)
 	{
+		
 		$aItems = [];
 		if (is_array($mResult))
 		{
@@ -1087,7 +1088,38 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetPublicFiles($Hash, $Path)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
-		return array();
+
+		$mResult = [];
+
+		$oMinDecorator =  $this->getMinModuleDecorator();
+		if ($oMinDecorator)
+		{
+			$mMin = $oMinDecorator->GetMinByHash($Hash);
+			if (!empty($mMin['__hash__']))
+			{
+				$sUserPublicId = $mMin['UserId'];
+				if ($sUserPublicId)
+				{
+					$oUser = \Aurora\System\Api::GetModuleDecorator('Core')->GetUserByPublicId($sUserPublicId);
+					if ($oUser)
+					{
+						$sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
+						$mPos = strpos($Path, $sMinPath);
+						if ($mPos === 0 || $Path === '')
+						{
+							if ($mPos !== 0)
+							{
+								$Path =  $sMinPath . $Path;
+							}
+							$Path = str_replace('.', '', $Path);
+							$mResult = $this->Decorator()->GetFiles($oUser->EntityId, $mMin['Type'], $Path, '', $Hash);
+						}
+					}
+				}
+			}
+		}
+		
+		return $mResult;
 	}	
 
 	/**
