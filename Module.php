@@ -39,14 +39,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$this->oApiFileCache = new \Aurora\System\Managers\Filecache();
 		
-		$this->subscribeEvent('Files::GetFiles::after', array($this, 'onAfterGetFiles'), 1000);
+		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
 		$this->AddEntries(
 			array(
 				'upload' => 'UploadFileData',
 				'download-file' => 'EntryDownloadFile'
 			)
 		);
-		$this->denyMethodsCallByWebApi(['getRawFile']);
+		$this->denyMethodsCallByWebApi(['getRawFile', 'GetItems']);
 	}
 	
 	/**
@@ -880,13 +880,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetQuota($UserId, $Type)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
 		return [
 			'Limit' => 0, 
 			'Used' => 0
 		];
 	}
+	
+	public function GetItems($UserId, $Type, $Path, $Pattern, $PublicHash = null)
+	{
+		return [];
+	}	
 
 	/**
 	 * @api {post} ?/Api/ GetFiles
@@ -956,10 +959,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function GetFiles($UserId, $Type, $Path, $Pattern, $PublicHash = null)
+	public function GetFiles($UserId, $Type, $Path, $Pattern)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		return [];
+		return [
+			'Items' => $this->Decorator()->GetItems($UserId, $Type, $Path, $Pattern),
+			'Quota' => $this->Decorator()->GetQuota($UserId, $Type)
+		];
 	}
 	
 	/**
@@ -967,9 +973,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param array $aArgs
 	 * @param mixed $mResult
 	 */
-	public function onAfterGetFiles($aArgs, &$mResult)
+	public function onAfterGetItems($aArgs, &$mResult)
 	{
-		
 		$aItems = [];
 		if (is_array($mResult))
 		{
@@ -980,13 +985,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$aItems[] = $this->Decorator()->PopulateFileItem($aArgs['UserId'], $oItem);
 				}
 			}
+			
+			$mResult = $aItems;
 		}
-		
-		$mResult = array(
-			'Items' => $aItems,
-			'Quota' => $this->Decorator()->GetQuota($aArgs['UserId'], $aArgs['Type'])
-		);
-		
 	}	
 	
 	/**
@@ -995,8 +996,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function PopulateFileItem($UserId, $Item)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
 		return $Item;
 	}
 	
@@ -1112,7 +1111,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 								$Path =  $sMinPath . $Path;
 							}
 							$Path = str_replace('.', '', $Path);
-							$mResult = $this->Decorator()->GetFiles($oUser->EntityId, $mMin['Type'], $Path, '', $Hash);
+							$mResult = [
+								'Items' => $this->Decorator()->GetItems($oUser->EntityId, $mMin['Type'], $Path, '', $Hash)
+							];
 						}
 					}
 				}
