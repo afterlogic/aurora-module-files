@@ -180,7 +180,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 						{
 							\Aurora\System\Managers\Response::verifyCacheByKey($sRawKey);
 						}
-						return \Aurora\System\Managers\Response::GetThumbResource($iUserId, $mResult, $sFileName);
+						return \Aurora\System\Managers\Response::GetThumbResource(
+							$iUserId, 
+							$mResult, 
+							$sFileName
+						);
 					} 
 					else if ($sContentType === 'text/html' && !$bDownload)
 					{
@@ -225,7 +229,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		$mResult = false;
 		$aPaths = \Aurora\System\Application::GetPaths();
-		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower($this->GetName()))
+		if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower(self::GetName()))
 		{
 			$sType = isset($aPaths[2]) ? strtolower($aPaths[2]) : 'personal';
 			$rData = fopen("php://input", "r");
@@ -560,9 +564,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						$rData = $UploadData['tmp_name'];
 					}
-					else if ($this->oApiFileCache->moveUploadedFile($sUserPublicId, $sSavedName, $UploadData['tmp_name'], '', $this->GetName()))
+					else if ($this->oApiFileCache->moveUploadedFile($sUserPublicId, $sSavedName, $UploadData['tmp_name'], '', self::GetName()))
 					{
-						$rData = $this->oApiFileCache->getFile($sUserPublicId, $sSavedName, '', $this->GetName());
+						$rData = $this->oApiFileCache->getFile($sUserPublicId, $sSavedName, '', self::GetName());
 					}
 					if ($rData)
 					{
