@@ -29,6 +29,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	protected $oMinModuleDecorator = null;
 
+	public function getFilecacheManager()
+	{
+		if ($this->oApiFileCache === null)
+		{
+			$this->oApiFileCache = new \Aurora\System\Managers\Filecache();
+		}
+
+		return $this->oApiFileCache;
+	}	
+
+
 	/***** private functions *****/
 	/**
 	 * Initializes Files Module.
@@ -37,8 +48,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function init() 
 	{
-		$this->oApiFileCache = new \Aurora\System\Managers\Filecache();
-		
 		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
 		$this->AddEntries(
 			array(
@@ -564,9 +573,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						$rData = $UploadData['tmp_name'];
 					}
-					else if ($this->oApiFileCache->moveUploadedFile($sUserPublicId, $sSavedName, $UploadData['tmp_name'], '', self::GetName()))
+					else if ($this->getFilecacheManager()->moveUploadedFile($sUserPublicId, $sSavedName, $UploadData['tmp_name'], '', self::GetName()))
 					{
-						$rData = $this->oApiFileCache->getFile($sUserPublicId, $sSavedName, '', self::GetName());
+						$rData = $this->getFilecacheManager()->getFile($sUserPublicId, $sSavedName, '', self::GetName());
 					}
 					if ($rData)
 					{
@@ -1791,7 +1800,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					
 					$sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
 
-					if (is_resource($rFile) && $this->oApiFileCache->putFile($sUUID, $sTempName, $rFile))
+					if (is_resource($rFile) && $this->getFilecacheManager()->putFile($sUUID, $sTempName, $rFile))
 					{
 						$aItem = array(
 							'Name' => $oFileInfo->Name,
@@ -1899,15 +1908,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						$sTempName = md5($sUUID.$Storage.$Path.$Name);
 
-						if (!$this->oApiFileCache->isFileExists($sUUID, $sTempName))
+						if (!$this->getFilecacheManager()->isFileExists($sUUID, $sTempName))
 						{
-							$this->oApiFileCache->putFile($sUUID, $sTempName, $mFileResource);
+							$this->getFilecacheManager()->putFile($sUUID, $sTempName, $mFileResource);
 						}
 
-						if ($this->oApiFileCache->isFileExists($sUUID, $sTempName))
+						if ($this->getFilecacheManager()->isFileExists($sUUID, $sTempName))
 						{
 							$mResult[] = \Aurora\System\Utils::GetClientFileResponse(
-								null, $UserId, $Name, $sTempName, $this->oApiFileCache->fileSize($sUUID, $sTempName)
+								null, $UserId, $Name, $sTempName, $this->getFilecacheManager()->fileSize($sUUID, $sTempName)
 							);
 						}
 					}
