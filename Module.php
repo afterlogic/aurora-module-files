@@ -1590,9 +1590,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oItem->Name = $aFile['Name'];
 				$oItem->TypeStr = $FromType;
 				$oItem->Path = $FromPath;
+
+				\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aFile['Name']);
 			}
-			
-			\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aFile['Name']);
 		}
 	}	
 	
