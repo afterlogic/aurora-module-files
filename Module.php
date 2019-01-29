@@ -647,7 +647,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$iChunkSize = (int) \Aurora\System\Application::GetPathItemByIndex(4, '');
 
 		$aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
-		
+
 		$iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
 		$sType = isset($aValues['Type']) ? $aValues['Type'] : '';
 		$sPath = isset($aValues['Path']) ? $aValues['Path'] : '';

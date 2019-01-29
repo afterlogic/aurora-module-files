@@ -85,7 +85,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'Id' => $this->Id, 
 			'Type' => $this->TypeStr,
 			'Path' => $this->Path,
-			'Name' => $this->Name
+			'Name' => $this->Id
 		);		
 		
 		if (isset($sPublicHash))
@@ -205,5 +205,10 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		}
 		
 		return $bResult;
+	}
+
+	public function GetActions()
+	{
+		return $this->Actions;
 	}
 }
