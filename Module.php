@@ -830,7 +830,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetStorages()
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		return array();
+		return [];
 	}
 	
 	/**
