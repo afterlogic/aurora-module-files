@@ -554,11 +554,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 						'Size' => $iSize
 					];
 					$mCheckFilesQuotaResult = true;
-					$this->broadcastEvent(
-							'CheckFilesQuota', 
-							$aArgs, 
-							$mCheckFilesQuotaResult
-					);
+
+					$mCheckFilesQuotaResult = self::Decorator()->CheckQuota($UserId, $Type, $iSize);
+
 					if (!$mCheckFilesQuotaResult)
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
@@ -898,6 +896,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'Used' => 0
 		];
 	}
+
+	public function CheckQuota($UserId, $Type, $Size)
+	{
+		return false;
+	}	
 	
 	public function GetItems($UserId, $Type, $Path, $Pattern, $PublicHash = null)
 	{
