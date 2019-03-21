@@ -832,6 +832,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	}
 	
 	/**
+	 * Returns submodules.
+	 */
+	public function GetSubModules()
+	{
+		return [];
+	}
+
+	/**
 	 * @api {post} ?/Api/ GetQuota
 	 * @apiDescription Returns used space and space limit for specified user.
 	 * @apiName GetQuota
@@ -1118,6 +1126,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$oUser = \Aurora\System\Api::GetModuleDecorator('Core')->GetUserByPublicId($sUserPublicId);
 					if ($oUser)
 					{
+						\Aurora\System\Api::setUserId($oUser->EntityId);
+
 						$sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
 						$mPos = strpos($Path, $sMinPath);
 						if ($mPos === 0 || $Path === '')
