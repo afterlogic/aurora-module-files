@@ -158,22 +158,42 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 			
-			$aArgs = array(
-				'UserId' => $iUserId,
-				'Type' => $sType,
-				'Path' => $sPath,
-				'Name' => &$sFileName,
-				'Id' => $sFileName,
-				'IsThumb' => $bThumbnail,
-				'Offset' => $iOffset,
-				'ChunkSize' => $iChunkSize
-			);
 			$mResult = false;
-			$this->broadcastEvent(
-				'GetFile', 
-				$aArgs,
-				$mResult
-			);			
+			if ($bThumbnail) 
+			{
+				$sRawKey = (string) \Aurora\System\Application::GetPathItemByIndex(1, '');
+				if (!empty($sRawKey))
+				{
+					\Aurora\System\Managers\Response::verifyCacheByKey($sRawKey);
+				}
+				$mResult = \Aurora\System\Managers\Response::GetThumbResourceCache($iUserId, $sFileName);
+				if ($mResult)
+				{
+					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
+					\Aurora\System\Managers\Response::OutputHeaders($bDownload, $sContentType, $sFileName);
+					echo $mResult;
+					exit();
+				}
+			}			
+
+			if (!$mResult)
+			{
+				$aArgs = array(
+					'UserId' => $iUserId,
+					'Type' => $sType,
+					'Path' => $sPath,
+					'Name' => &$sFileName,
+					'Id' => $sFileName,
+					'IsThumb' => $bThumbnail,
+					'Offset' => $iOffset,
+					'ChunkSize' => $iChunkSize
+				);
+				$this->broadcastEvent(
+					'GetFile', 
+					$aArgs,
+					$mResult
+				);		
+			}
 			
 			if (false !== $mResult) 
 			{
@@ -184,11 +204,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 			
 					if ($bThumbnail) 
 					{
-						$sRawKey = (string) \Aurora\System\Application::GetPathItemByIndex(1, '');
-						if (!empty($sRawKey))
-						{
-							\Aurora\System\Managers\Response::verifyCacheByKey($sRawKey);
-						}
 						return \Aurora\System\Managers\Response::GetThumbResource(
 							$iUserId, 
 							$mResult, 
