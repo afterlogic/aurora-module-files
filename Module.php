@@ -562,17 +562,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
 					}
 					
-					
-					$aArgs = [
-						'PublicId' => $sUserPublicId,
-						'Type' => $Type,
-						'Size' => $iSize
-					];
-					$mCheckFilesQuotaResult = true;
-
-					$mCheckFilesQuotaResult = self::Decorator()->CheckQuota($UserId, $Type, $iSize);
-
-					if (!$mCheckFilesQuotaResult)
+					if (!self::Decorator()->CheckQuota($sUserPublicId, $Type, $iSize))
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
 					}
