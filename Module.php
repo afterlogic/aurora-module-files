@@ -342,7 +342,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {string} Result.Module Module name.
 	 * @apiSuccess {string} Result.Method Method name.
 	 * @apiSuccess {mixed} Result.Result List of module settings in case of success, otherwise **false**.
-	 * @apiSuccess {bool} Result.Result.EnableModule=false Indicates if Files module is enabled.
 	 * @apiSuccess {bool} Result.Result.EnableUploadSizeLimit=false Indicates if upload size limit is enabled.
 	 * @apiSuccess {int} Result.Result.UploadSizeLimitMb=0 Value of upload size limit in Mb.
 	 * @apiSuccess {string} Result.Result.CustomTabTitle=&quot;&quot; Custom tab title.
@@ -354,7 +353,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetSettings',
-	 *	Result: { EnableModule: true, EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, 
+	 *	Result: { EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, 
 	 *		CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 * }
 	 * 
@@ -376,10 +375,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 		
 		$aAppData = array(
-			'EnableModule' => true,
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('UploadSizeLimitMb', 0),
-			'CustomTabTitle' => $this->getConfig('CustomTabTitle', '')
+			'CustomTabTitle' => $this->getConfig('CustomTabTitle', ''),
+			'Storages' => \Aurora\Modules\Files\Module::Decorator()->GetStorages()
 		);
 		$sPublicHash = \Aurora\System\Application::GetPathItemByIndex(1);
 		if (isset($sPublicHash))
