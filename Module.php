@@ -163,7 +163,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$mResult = false;
 			if ($bThumbnail) 
 			{
-				$sRawKey = (string) \Aurora\System\Application::GetPathItemByIndex(1, '');
+				$sRawKey = (string) \Aurora\System\Router::getItemByIndex(1, '');
 				if (!empty($sRawKey))
 				{
 					\Aurora\System\Managers\Response::verifyCacheByKey($sRawKey);
@@ -382,7 +382,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'CustomTabTitle' => $this->getConfig('CustomTabTitle', ''),
 			'Storages' => \Aurora\Modules\Files\Module::Decorator()->GetStorages()
 		);
-		$sPublicHash = \Aurora\System\Application::GetPathItemByIndex(1);
+		$sPublicHash = \Aurora\System\Router::getItemByIndex(1);
 		if (isset($sPublicHash))
 		{
 			$aAppData['PublicHash'] = $sPublicHash;
@@ -645,10 +645,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		
-		$sHash = (string) \Aurora\System\Application::GetPathItemByIndex(1, '');
-		$sAction = (string) \Aurora\System\Application::GetPathItemByIndex(2, '');
-		$iOffset = (int) \Aurora\System\Application::GetPathItemByIndex(3, '');
-		$iChunkSize = (int) \Aurora\System\Application::GetPathItemByIndex(4, '');
+		$sHash = (string) \Aurora\System\Router::getItemByIndex(1, '');
+		$sAction = (string) \Aurora\System\Router::getItemByIndex(2, '');
+		$iOffset = (int) \Aurora\System\Router::getItemByIndex(3, '');
+		$iChunkSize = (int) \Aurora\System\Router::getItemByIndex(4, '');
 
 		$aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
 
