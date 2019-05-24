@@ -10,5 +10,13 @@
     "UploadSizeLimitMb": [
         100,
         "int"
+    ],
+    "UserSpaceLimitMb": [
+        100,
+        "int"
+    ],
+    "TenantSpaceLimitMb": [
+    1000,
+    "int"
     ]
 }
