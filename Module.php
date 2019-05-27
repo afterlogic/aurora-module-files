@@ -51,6 +51,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function init() 
 	{
 		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
+		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'), 1000);
+		$this->subscribeEvent('Core::CreateTenant::after', array($this, 'onAfterCreateTenant'), 1000);
+
 		$this->AddEntries(
 			array(
 				'upload' => 'UploadFileData',
@@ -62,12 +65,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\Modules\Core\Classes\Tenant::extend(
 			self::GetName(), 
 			[
-				'TenantSpaceLimitInMb'	=> [
+				'TenantSpaceLimitMb'	=> [
 					'int', 
 					0, 
 					false
 				],
-				'UserSpaceLimitInMb'	=> [
+				'UserSpaceLimitMb'	=> [
 					'int', 
 					0, 
 					false
@@ -78,7 +81,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\Modules\Core\Classes\User::extend(
 			self::GetName(), 
 			[
-				'UserSpaceLimitInMb'	=> [
+				'UserSpaceLimitMb'	=> [
 					'int', 
 					0, 
 					false
@@ -438,15 +441,21 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($oTenant instanceof \Aurora\Modules\Core\Classes\Tenant)
 			{
 				$aResult = [
-					'TenantSpaceLimitMb' => $oTenant->{self::GetName() . '::TenantSpaceLimitInMb'},
-					'UserSpaceLimitMb' => $oTenant->{self::GetName() . '::UserSpaceLimitInMb'}
+					'TenantSpaceLimitMb' => $oTenant->{self::GetName() . '::TenantSpaceLimitMb'},
+					'UserSpaceLimitMb' => $oTenant->{self::GetName() . '::UserSpaceLimitMb'}
 				];
 			}
 		}
 		if ($EntityType === 'User')
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-			$aResult = [];
+			$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUser($EntityId);
+			if ($oUser instanceof \Aurora\Modules\Core\Classes\User)
+			{
+				$aResult = [
+					'UserSpaceLimitMb' => $oUser->{self::GetName() . '::UserSpaceLimitMb'}
+				];
+			}
 		}
 		
 		return $aResult;
@@ -1075,6 +1084,54 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$mResult = $aItems;
 		}
 	}	
+
+	/**
+	 * 
+	 * @param array $aArgs
+	 * @param mixed $mResult
+	 */
+	public function onAfterCreateUser($aArgs, &$mResult)
+	{
+		if ($mResult)
+		{
+			$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUser($mResult);
+			if ($oUser instanceof \Aurora\Modules\Core\Classes\User)
+			{
+				$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantById($oUser->IdTenant);
+				if ($oTenant instanceof \Aurora\Modules\Core\Classes\Tenant)
+				{
+					$UserSpaceLimitMb = $oTenant->{self::GetName() . '::UserSpaceLimitMb'};
+
+					$this->CheckAllocatedSpaceLimitForUsersInTenant($oTenant, $UserSpaceLimitMb);
+
+					$oUser->{self::GetName() . '::UserSpaceLimitMb'} = $UserSpaceLimitMb;
+					$oUser->saveAttribute(self::GetName() . '::UserSpaceLimitMb');
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param array $aArgs
+	 * @param mixed $mResult
+	 */
+	public function onAfterCreateTenant($aArgs, &$mResult)
+	{
+		if ($mResult)
+		{
+			$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantById($mResult);
+			if ($oTenant instanceof \Aurora\Modules\Core\Classes\Tenant)
+			{
+				$oTenant->{self::GetName() . '::UserSpaceLimitMb'} = $this->getConfig('UserSpaceLimitMb');
+				$oTenant->{self::GetName() . '::TenantSpaceLimitMb'} = $this->getConfig('TenantSpaceLimitMb');
+
+				$oTenant->saveAttribute(self::GetName() . '::UserSpaceLimitMb');
+				$oTenant->saveAttribute(self::GetName() . '::TenantSpaceLimitMb');
+			}
+		}
+
+	}
 	
 	/**
 	 * 
@@ -2011,6 +2068,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function UpdateSettingsForEntity($EntityType, $EntityId, $UserSpaceLimitMb, $TenantSpaceLimitMb)
 	{
 		$bResult = false;
+		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
+
 		if ($EntityType === '')
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
@@ -2022,17 +2081,38 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 			$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantById($EntityId);
-			if ($oTenant instanceof \Aurora\Modules\Core\Classes\Tenant)
+
+			if ($oTenant instanceof \Aurora\Modules\Core\Classes\Tenant && (($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oTenant->EntityId === $oAuthenticatedUser->IdTenant) ||
+				$oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin))
 			{
-				$oTenant->{self::GetName() . '::TenantSpaceLimitInMb'} = $TenantSpaceLimitMb;
-				$oTenant->{self::GetName() . '::UserSpaceLimitInMb'} = $UserSpaceLimitMb;
+				$oTenant->{self::GetName() . '::TenantSpaceLimitMb'} = $TenantSpaceLimitMb;
+				$oTenant->{self::GetName() . '::UserSpaceLimitMb'} = $UserSpaceLimitMb;
 
 				$bResult = \Aurora\Modules\Core\Module::Decorator()->UpdateTenantObject($oTenant);
 			}
 		}
 		if ($EntityType === 'User')
 		{
-			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
+			$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUser($EntityId);
+
+			if ($oUser instanceof \Aurora\Modules\Core\Classes\User&& (($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant) ||
+				$oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin))
+			{
+				$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantById($oUser->IdTenant);
+
+				$iTenantSpaceLimitMb = $oTenant->{self::GetName() . '::TenantSpaceLimitMb'};
+				$iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oUser->IdTenant);
+
+				if ($iAllocatedSpaceForUsersInTenant + $UserSpaceLimitMb > $iTenantSpaceLimitMb)
+				{
+					throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
+				}
+
+				$oUser->{self::GetName() . '::UserSpaceLimitMb'} = $UserSpaceLimitMb;
+
+				$bResult = \Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
+			}
 		}
 
 		return $bResult;
@@ -2051,7 +2131,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)
 		)
 		{
-			$oUser->{self::GetName() . '::UserSpaceLimitInMb'} = $Limit;
+			$oUser->{self::GetName() . '::UserSpaceLimitMb'} = $Limit;
 			$mResult = \Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
 		}
 
@@ -2071,11 +2151,41 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)
 		)
 		{
-			$oTenant->{self::GetName() . '::UserSpaceLimitInMb'} = $Limit;
+			$oTenant->{self::GetName() . '::UserSpaceLimitMb'} = $Limit;
 			$mResult = \Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oTenant);
 		}
 
 		return $mResult;
 	}
+
+	public function GetAllocatedSpaceForUsersInTenant($TenantId)
+	{
+		$iResult = 0;
+//		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
+		$aEntities = \Aurora\System\Managers\Eav::getInstance()->getEntities(
+			\Aurora\Modules\Core\Classes\User::class, 
+			['Files::UserSpaceLimitMb'], 
+			0, 
+			0, 
+			['IdTenant' => $TenantId]
+		);
+		foreach ($aEntities as $oEntity)
+		{
+			$iResult += $oEntity->{'Files::UserSpaceLimitMb'};
+		}
+
+		return $iResult;
+	}
+
+	public function CheckAllocatedSpaceLimitForUsersInTenant($oTenant, $UserSpaceLimitMb)
+	{
+		$iTenantSpaceLimitMb = $oTenant->{self::GetName() . '::TenantSpaceLimitMb'};
+		$iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oTenant->EntityId);
+
+		if ($iAllocatedSpaceForUsersInTenant + $UserSpaceLimitMb > $iTenantSpaceLimitMb)
+		{
+			throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
+		}
+	}	
 	/***** public functions might be called with web API *****/
 }
