@@ -2040,7 +2040,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$oTenant->{self::GetName() . '::TenantSpaceLimitMb'} = $TenantSpaceLimitMb;
 				}
-				if ($UserSpaceLimitMb <= $TenantSpaceLimitMb)
+				if ($UserSpaceLimitMb <= $TenantSpaceLimitMb || $TenantSpaceLimitMb === 0)
 				{
 					$oTenant->{self::GetName() . '::UserSpaceLimitMb'} = $UserSpaceLimitMb;
 				}
