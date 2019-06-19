@@ -65,12 +65,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 			[
 				'TenantSpaceLimitMb'	=> [
 					'int', 
-					0, 
+					$this->getConfig('TenantSpaceLimitMb'), 
 					false
 				],
 				'UserSpaceLimitMb'	=> [
 					'int', 
-					0, 
+					$this->getConfig('UserSpaceLimitMb'), 
 					false
 				]
 			]			
