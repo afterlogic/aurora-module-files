@@ -2093,7 +2093,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
 		$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUser($UserId);
 
-		if ($oUser instanceof \Aurora\Modules\Core\Classes\User && (
+		if ($oUser instanceof \Aurora\Modules\Core\Classes\User && $oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User && (
 			($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant) ||
 				$oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)
 		)
@@ -2113,7 +2113,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
 		$oTenant= \Aurora\Modules\Core\Module::Decorator()->GetTenantById($TenantId);
 
-		if ($oTenant instanceof \Aurora\Modules\Core\Classes\Tenent && (
+		if ($oTenant instanceof \Aurora\Modules\Core\Classes\Tenant && $oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User && (
 			($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oTenant->EntityId === $oAuthenticatedUser->IdTenant) ||
 				$oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)
 		)
