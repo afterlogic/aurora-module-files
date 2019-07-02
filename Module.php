@@ -409,10 +409,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('UploadSizeLimitMb', 0),
 			'CustomTabTitle' => $this->getConfig('CustomTabTitle', ''),
-			'Storages' => \Aurora\Modules\Files\Module::Decorator()->GetStorages(),
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
 			'TenantSpaceLimitMb' => $this->getConfig('TenantSpaceLimitMb', 0)
 		);
+		
+		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
+		if ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::NormalUser || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin)
+		{
+			$aAppData['Storages'] = \Aurora\Modules\Files\Module::Decorator()->GetStorages();
+		}
+		
 		$sPublicHash = \Aurora\System\Router::getItemByIndex(1);
 		if (isset($sPublicHash))
 		{
