@@ -416,7 +416,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
 		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User
 				&& ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::NormalUser
-				|| $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin))
+				|| $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin
+				|| $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin))
 		{
 			$aAppData['Storages'] = \Aurora\Modules\Files\Module::Decorator()->GetStorages();
 		}
