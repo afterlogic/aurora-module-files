@@ -51,6 +51,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function init() 
 	{
 		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
+		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'), 1000);
 
 		$this->AddEntries(
 			array(
@@ -1092,6 +1093,25 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$mResult = $aItems;
 		}
 	}	
+
+	/**
+	 * 
+	 * @param array $aArgs
+	 * @param mixed $mResult
+	 */
+	public function onAfterGetStorages($aArgs, &$mResult)
+	{
+		if (is_array($mResult))
+		{
+			\usort($mResult, function($aItem1, $aItem2) {
+
+				$aItem1['Order'] = isset($aItem1['Order']) ? $aItem1['Order'] : 1000;
+				$aItem2['Order'] = isset($aItem2['Order']) ? $aItem2['Order'] : 1000;
+
+				return ($aItem1['Order'] == $aItem2['Order']) ? 0 : ($aItem1['Order'] > $aItem2['Order'] ? +1 : -1);
+			});
+		}
+	}		
 	
 	/**
 	 * 
