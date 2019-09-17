@@ -620,11 +620,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			if (is_array($UploadData))
 			{
-				if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && self::Decorator()->IsFileExists($sUserPublicId, $Type, $Path, $UploadData['name']))
+				if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && self::Decorator()->IsFileExists($UserId, $Type, $Path, $UploadData['name']))
 				{// It is forbidden to write first сhunk to the end of a existing file
 					$sError = \Aurora\System\Notifications::FileAlreadyExists;
 				}
-				else if (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !self::Decorator()->IsFileExists($sUserPublicId, $Type, $Path, $UploadData['name']))
+				else if (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !self::Decorator()->IsFileExists($UserId, $Type, $Path, $UploadData['name']))
 				{ // It is forbidden to write to the end of a nonexistent file
 					$sError = \Aurora\System\Notifications::FileNotFound;
 				}
@@ -637,7 +637,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
 					}
 					
-					if (!self::Decorator()->CheckQuota($sUserPublicId, $Type, $iSize))
+					if (!self::Decorator()->CheckQuota($UserId, $Type, $iSize))
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
 					}
