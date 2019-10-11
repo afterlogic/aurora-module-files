@@ -1225,8 +1225,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$oUser = \Aurora\System\Api::GetModuleDecorator('Core')->GetUserByPublicId($sUserPublicId);
 					if ($oUser)
 					{
-						\Aurora\System\Api::setUserId($oUser->EntityId);
-
+						$bPrevState = \Aurora\System\Api::skipCheckUserRole(true);
 						$sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
 						$mPos = strpos($Path, $sMinPath);
 						if ($mPos === 0 || $Path === '')
@@ -1240,6 +1239,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 								'Items' => self::Decorator()->GetItems($oUser->EntityId, $mMin['Type'], $Path, '', $Hash)
 							];
 						}
+						\Aurora\System\Api::skipCheckUserRole($bPrevState);
 					}
 				}
 			}
