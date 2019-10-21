@@ -234,6 +234,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
 					\Aurora\System\Managers\Response::OutputHeaders($bDownload, $sContentType, $sFileName);
 			
+					\header('Cache-Control: no-cache', true);
+					
 					if ($bThumbnail) 
 					{
 						return \Aurora\System\Managers\Response::GetThumbResource(
