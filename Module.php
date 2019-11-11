@@ -52,6 +52,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
 		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'), 1000);
+		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'), 1000);
 
 		$this->AddEntries(
 			array(
@@ -72,7 +73,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				'UserSpaceLimitMb'	=> [
 					'int', 
 					$this->getConfig('UserSpaceLimitMb'), 
-					false
+					false,
+					true // can be inherit
 				]
 			]			
 		);		
@@ -1114,6 +1116,26 @@ class Module extends \Aurora\System\Module\AbstractModule
 			});
 		}
 	}		
+
+	/**
+	 * 
+	 * @param array $aArgs
+	 * @param mixed $mResult
+	 */
+	public function onAfterCreateUser($aArgs, &$mResult)
+	{
+		if ($mResult)
+		{
+/*			$oUser = \Aurora\Modules\Core\Module::getInstance()->GetUserUnchecked($mResult);
+			if ($oUser)
+			{
+				$oTenant = \Aurora\Modules\Core\Module::getInstance()->GetTenantUnchecked($oUser->IdTenant);
+				$oUser->{$this->GetName() . '::UserSpaceLimitMb'} = $oTenant->{$this->GetName() . '::UserSpaceLimitMb'};
+				$oUser->save();
+			}
+*/			
+		}
+	}
 	
 	/**
 	 * 
