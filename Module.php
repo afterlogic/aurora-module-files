@@ -671,7 +671,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 							'RangeType' => $RangeType,
 							'Offset' => $Offset,
 							'ExtendedProps' => $ExtendedProps
-
 						);
 						$mResult = false;
 						$this->broadcastEvent(
@@ -696,15 +695,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 					}
 					else
 					{
-						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
+//						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileErrorData);
+						throw new \Aurora\System\Exceptions\ApiException(816);
 					}
 				}
 			}
 			else
 			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
+				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 			}
-			
 		}
 		else
 		{

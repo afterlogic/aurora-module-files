@@ -137,28 +137,36 @@ class FileItem  extends \Aurora\System\AbstractContainer
 	
 	public function toResponseArray($aParameters = array())
 	{
-		$aResult = array(
-			'Id' => $this->Id,
-			'Type' => $this->TypeStr,
-			'Path' => $this->Path,
-			'FullPath' => $this->FullPath,
-			'Name' => $this->Name,
-			'Size' => $this->Size,
-			'IsFolder' => $this->IsFolder,
-			'IsLink' => $this->IsLink,
-			'LinkType' => $this->LinkType,
-			'LinkUrl' => $this->LinkUrl,
-			'LastModified' => $this->LastModified,
-			'ContentType' => $this->ContentType,
-			'OembedHtml' => $this->OembedHtml,
-			'Published' => $this->Published,
-			'Owner' => $this->Owner,
-			'Content' => $this->Content,
-			'IsExternal' => $this->IsExternal,
-			'Actions' => $this->Actions,
-			'Hash' => $this->getHash(),
-			'ExtendedProps' => $this->ExtendedProps
-		);		
+		$aArgs = [$this];
+		$aResult = [];
+
+		\Aurora\System\EventEmitter::getInstance()->emit(
+			'Files', 
+			'FileItemtoResponseArray', 
+			$aArgs, 
+			$aResult
+		);
+
+		$aResult['Id'] = $this->Id;
+		$aResult['Type'] = $this->TypeStr;
+		$aResult['Path'] = $this->Path;
+		$aResult['FullPath'] = $this->FullPath;
+		$aResult['Name'] = $this->Name;
+		$aResult['Size'] = $this->Size;
+		$aResult['IsFolder'] = $this->IsFolder;
+		$aResult['IsLink'] = $this->IsLink;
+		$aResult['LinkType'] = $this->LinkType;
+		$aResult['LinkUrl'] = $this->LinkUrl;
+		$aResult['LastModified'] = $this->LastModified;
+		$aResult['ContentType'] = $this->ContentType;
+		$aResult['OembedHtml'] = $this->OembedHtml;
+		$aResult['Published'] = $this->Published;
+		$aResult['Owner'] = $this->Owner;
+		$aResult['Content'] = $this->Content;
+		$aResult['IsExternal'] = $this->IsExternal;
+		$aResult['Actions'] = $this->Actions;
+		$aResult['Hash'] = $this->getHash();
+		$aResult['ExtendedProps'] = $this->ExtendedProps;
 		
 		if ($this->Thumb)
 		{
@@ -168,7 +176,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			}
 			$aResult['ThumbnailUrl'] = $this->ThumbnailUrl;
 		}
-		
+
 		return $aResult;
 	}
 	
