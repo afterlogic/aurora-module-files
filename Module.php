@@ -2178,13 +2178,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetAllocatedSpaceForUsersInTenant($TenantId)
 	{
 		$iResult = 0;
-		$aEntities = \Aurora\System\Managers\Eav::getInstance()->getEntities(
-			\Aurora\Modules\Core\Classes\User::class, 
-			['Files::UserSpaceLimitMb'], 
-			0, 
-			0, 
-			['IdTenant' => $TenantId]
-		);
+
+		$aEntities = (new \Aurora\System\EAV\Query(\Aurora\Modules\Core\Classes\User::class))
+			->select(['Files::UserSpaceLimitMb'])
+			->where(['IdTenant' => $TenantId])
+			->exec();
+
 		foreach ($aEntities as $oEntity)
 		{
 			$iResult += $oEntity->{'Files::UserSpaceLimitMb'};
