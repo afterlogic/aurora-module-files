@@ -53,6 +53,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
 		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'), 1000);
 		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'), 1000);
+		$this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'), 1000);
+		$this->subscribeEvent('Files::Move::after', array($this, 'onAfterMove'), 1000);
+
 
 		$this->AddEntries(
 			array(
@@ -1118,6 +1121,76 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	/**
 	 * 
+	 * @param int $iUserId
+	 * @param int $sType
+	 * @param string $sPath
+	 * @param string $sName
+	 * @param int $sSize
+	 * 
+	 * @return array
+	 */
+	private function generateMinArray($iUserId, $sType, $sPath, $sName, $sSize, $bIsFolder = false)
+	{
+		$aData = null;
+		if ($iUserId)
+		{
+			$aData = array(
+				'UserId' => $iUserId,
+				'Type' => $sType, 
+				'Path' => $sPath, 
+				'Name' => $sName,
+				'Size' => $sSize,
+				'IsFolder' => $bIsFolder
+			);
+		}
+
+		return $aData;
+	}	
+
+	protected function updateMinHash($iUserId, $sType, $sPath, $sName, $sNewType, $sNewPath, $sNewName)
+	{
+		$sUserPublicId = \Aurora\Api::getUserPublicIdById($iUserId);
+		$sID = \Aurora\Modules\Min\Module::generateHashId([$sUserPublicId, $sType, $sPath, $sName]);
+		$sNewID = \Aurora\Modules\Min\Module::generateHashId([$sUserPublicId, $sNewType, $sNewPath, $sNewName]);
+
+		$mData = $this->getMinModuleDecorator()->GetMinByID($sID);
+		
+		if ($mData)
+		{
+			$aData = $this->generateMinArray($sUserPublicId, $sNewType, $sNewPath, $sNewName, $mData['Size']);
+			if ($aData)
+			{
+				$this->getMinModuleDecorator()->UpdateMinByID($sID, $aData, $sNewID);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param array $aArgs
+	 * @param mixed $mResult
+	 */
+	public function onAfterRename($aArgs, &$mResult)
+	{
+		if ($mResult && isset($aArgs['UserId']))
+		{
+			$this->updateMinHash($aArgs['UserId'], $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $aArgs['Type'], $aArgs['Path'], $aArgs['NewName']);
+		}
+	}
+
+	public function onAfterMove($aArgs, &$mResult)
+	{
+		if ($mResult && isset($aArgs['Files']) && is_array($aArgs['Files']) && count($aArgs['Files']) > 0)
+		{
+			foreach ($aArgs['Files'] as $aFile)
+			{
+				$this->updateMinHash($aArgs['UserId'], $aFile['FromType'], $aFile['FromPath'], $aFile['Name'], $aArgs['ToType'], $aArgs['ToPath'], $aFile['Name']);
+			}
+		}
+	}
+
+	/**
+	 * 
 	 * @param array $aArgs
 	 * @param mixed $mResult
 	 */
@@ -1480,7 +1553,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oItem->Path = $aItem['Path'];
 			
 			self::Decorator()->DeletePublicLink($UserId, $Type, $aItem['Path'], $aItem['Name']);
-
 			\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aItem['Name']);
 		}
 	}
@@ -1566,7 +1638,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oItem->Path = $Path;
 
 		\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $Name);
-		
 		// Actual renaming is proceeded in subscribed methods. Look for it by "Files::Rename::after"
 	}	
 
