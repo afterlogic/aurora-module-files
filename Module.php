@@ -2253,7 +2253,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$aEntities = (new \Aurora\System\EAV\Query(\Aurora\Modules\Core\Classes\User::class))
 			->select(['Files::UserSpaceLimitMb'])
 			->where(['IdTenant' => $TenantId])
-			->exec();
+			;
 
 		foreach ($aEntities as $oEntity)
 		{
