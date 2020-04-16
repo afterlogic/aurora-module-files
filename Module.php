@@ -698,8 +698,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					}
 					else
 					{
-//						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileErrorData);
-						throw new \Aurora\System\Exceptions\ApiException(816);
+						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileErrorData);
 					}
 				}
 			}
