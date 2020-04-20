@@ -67,6 +67,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'IsExternal' => false,
 			'RealPath' => '',
 			'Actions' => array(),
+			'ETag' => '',
 			'ExtendedProps' => array()
 		));
 	}
@@ -131,6 +132,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'RealPath' => array('string'),
 			'Actions' => array('array'),
 			'Hash' => array('string'),
+			'ETag' => array('string'),
 			'ExtendedProps' => array('array')
 		);
 	}
@@ -166,6 +168,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		$aResult['IsExternal'] = $this->IsExternal;
 		$aResult['Actions'] = $this->Actions;
 		$aResult['Hash'] = $this->getHash();
+		$aResult['ETag'] = $this->ETag;
 		$aResult['ExtendedProps'] = $this->ExtendedProps;
 		
 		if ($this->Thumb)
