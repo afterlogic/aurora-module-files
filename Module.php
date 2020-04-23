@@ -9,7 +9,7 @@ namespace Aurora\Modules\Files;
 
 /**
  * Main Files module. It provides PHP and Web APIs for managing files.
- * 
+ *
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
  * @copyright Copyright (c) 2019, Afterlogic Corp.
@@ -19,10 +19,10 @@ namespace Aurora\Modules\Files;
 class Module extends \Aurora\System\Module\AbstractModule
 {
 	protected static $sStorageType = '';
-	
-	/* 
-	 * @var $oApiFileCache \Aurora\System\Managers\Filecache 
-	 */	
+
+	/*
+	 * @var $oApiFileCache \Aurora\System\Managers\Filecache
+	 */
 	public $oApiFileCache = null;
 
 	/**
@@ -39,16 +39,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 
 		return $this->oApiFileCache;
-	}	
+	}
 
 
 	/***** private functions *****/
 	/**
 	 * Initializes Files Module.
-	 * 
+	 *
 	 * @ignore
 	 */
-	public function init() 
+	public function init()
 	{
 		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
 		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'), 1000);
@@ -66,73 +66,73 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->denyMethodsCallByWebApi(['getRawFile', 'GetItems']);
 
 		\Aurora\Modules\Core\Classes\Tenant::extend(
-			self::GetName(), 
+			self::GetName(),
 			[
 				'TenantSpaceLimitMb'	=> [
-					'int', 
-					$this->getConfig('TenantSpaceLimitMb'), 
+					'int',
+					$this->getConfig('TenantSpaceLimitMb'),
 					false
 				],
 				'UserSpaceLimitMb'	=> [
-					'int', 
-					$this->getConfig('UserSpaceLimitMb'), 
+					'int',
+					$this->getConfig('UserSpaceLimitMb'),
 					false,
 					true // can be inherit
 				]
-			]			
-		);		
+			]
+		);
 
 		\Aurora\Modules\Core\Classes\User::extend(
-			self::GetName(), 
+			self::GetName(),
 			[
 				'UserSpaceLimitMb'	=> [
-					'int', 
-					0, 
+					'int',
+					0,
 					false
 				]
-			]			
-		);	
-		
+			]
+		);
+
 	}
-	
+
 	/**
 	* Returns Min module decorator.
-	* 
+	*
 	* @return \CApiModuleDecorator
 	*/
 	private function getMinModuleDecorator()
 	{
 		return \Aurora\System\Api::GetModuleDecorator('Min');
-	}	
-	
+	}
+
 	/**
 	 * Checks if storage type is personal or corporate.
-	 * 
+	 *
 	 * @param string $Type Storage type.
 	 * @return bool
 	 */
 	protected function checkStorageType($Type)
 	{
 		return $Type === static::$sStorageType;
-	}	
-	
+	}
+
 	/**
 	 * Downloads file, views file or makes thumbnail for file.
-	 * 
+	 *
 	 * @param int $iUserId User identifier.
 	 * @param string $sType Storage type - personal, corporate.
 	 * @param string $sPath Path to folder contained file.
 	 * @param string $sFileName File name.
 	 * @param string $SharedHash Indicates if file should be downloaded or viewed.
 	 * @param string $sAction Indicates if thumbnail should be created for file.
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
 	{
 		$bDownload = true;
 		$bThumbnail = false;
-		
+
 		switch ($sAction)
 		{
 			case 'view':
@@ -163,10 +163,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$iLength = $iChunkSize;
 			$iOffset = $iChunkSize * $iOffset;
 		}
-		
+
 		$oModuleDecorator = $this->getMinModuleDecorator();
 		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
-		
+
 		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
 
 		try
@@ -176,7 +176,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 				\Afterlogic\DAV\Server::setUser($iUserId);
 			}
-			else 
+			else
 			{
 				\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 				if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId())
@@ -190,13 +190,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 			echo 'Access denied';
 			exit();
 		}
-		
-		if (isset($sType, $sPath, $sFileName)) 
+
+		if (isset($sType, $sPath, $sFileName))
 		{
 			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
-			
+
 			$mResult = false;
-			if ($bThumbnail) 
+			if ($bThumbnail)
 			{
 				$sRawKey = (string) \Aurora\System\Router::getItemByIndex(1, '');
 				if (!empty($sRawKey))
@@ -211,7 +211,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					echo $mResult;
 					exit();
 				}
-			}			
+			}
 
 			if (!$mResult)
 			{
@@ -226,33 +226,33 @@ class Module extends \Aurora\System\Module\AbstractModule
 					'ChunkSize' => $iChunkSize
 				);
 				$this->broadcastEvent(
-					'GetFile', 
+					'GetFile',
 					$aArgs,
 					$mResult
-				);		
+				);
 			}
-			
-			if (false !== $mResult) 
+
+			if (false !== $mResult)
 			{
-				if (is_resource($mResult)) 
+				if (is_resource($mResult))
 				{
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
 					\Aurora\System\Managers\Response::OutputHeaders($bDownload, $sContentType, $sFileName);
-			
+
 					\header('Cache-Control: no-cache', true);
-					
-					if ($bThumbnail) 
+
+					if ($bThumbnail)
 					{
 						return \Aurora\System\Managers\Response::GetThumbResource(
-							$iUserId, 
-							$mResult, 
+							$iUserId,
+							$mResult,
 							$sFileName
 						);
-					} 
+					}
 					else if ($sContentType === 'text/html' && !$bDownload)
 					{
 						echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult, $iLength, $iOffset)));
-					} 
+					}
 					else if ($sContentType === 'text/plain')
 					{
 						echo(stream_get_contents($mResult, $iLength, $iOffset));
@@ -265,7 +265,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						\MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
 					}
-					
+
 					@fclose($mResult);
 				}
 				else
@@ -277,13 +277,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 	}
 	/***** private functions *****/
-	
+
 	/***** public functions *****/
-	
+
 	/***** public functions might be called with web API *****/
 	/**
 	 * Uploads file from client side.
-	 * 
+	 *
 	 * @return string "true" or "false"
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
@@ -298,14 +298,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$rData = fopen("php://input", "r");
 			$aFilePath = array_slice($aPaths, 3);
 			$sFilePath = urldecode(implode('/', $aFilePath));
-			
+
 			$bOverwrite = true;
 			if (strpos($sFilePath, '!') === 0)
 			{
 				$sFilePath = substr($sFilePath, 1);
 				$bOverwrite = false;
 			}
-			
+
 			$iUserId = \Aurora\System\Api::getAuthenticatedUserId(
 				\Aurora\System\Api::getAuthTokenFromHeaders()
 			);
@@ -320,18 +320,18 @@ class Module extends \Aurora\System\Module\AbstractModule
 						'Path' => dirname($sFilePath),
 						'Name' => basename($sFilePath),
 						'Data' => $rData,
-						'Overwrite' => $bOverwrite, 
-						'RangeType' => 0, 
+						'Overwrite' => $bOverwrite,
+						'RangeType' => 0,
 						'Offset' => 0,
 						'ExtendedProps' => array()
 					);
 					$this->broadcastEvent(
-						'CreateFile', 
+						'CreateFile',
 						$aArgs,
 						$mResult
-					);			
+					);
 				}
-				else 
+				else
 				{
 					$mResult = false;
 				}
@@ -345,38 +345,38 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			echo 'true';
 		}
-		else 
+		else
 		{
 			echo 'false';
 		}
 	}
-	
+
 	/**
 	 * @apiDefine Files Files Module
 	 * Main Files module. It provides PHP and Web APIs for managing files.
 	 */
-	
+
 	/**
 	 * @api {post} ?/Api/ GetSettings
 	 * @apiName GetSettings
 	 * @apiGroup Files
 	 * @apiDescription Obtains list of module settings for authenticated user.
-	 * 
+	 *
 	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetSettings} Method Method name
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetSettings'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name.
 	 * @apiSuccess {string} Result.Method Method name.
@@ -387,15 +387,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {string} [Result.Result.PublicHash=&quot;&quot;] Public hash.
 	 * @apiSuccess {string} [Result.Result.PublicFolderName=&quot;&quot;] Public folder name.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetSettings',
-	 *	Result: { EnableUploadSizeLimit: true, UploadSizeLimitMb: 5, 
+	 *	Result: { EnableUploadSizeLimit: true, UploadSizeLimitMb: 5,
 	 *		CustomTabTitle: "", PublicHash: "", PublicFolderName: "" }
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -406,13 +406,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	/**
 	 * Obtains list of module settings for authenticated user.
-	 * 
+	 *
 	 * @return array
 	 */
 	public function GetSettings()
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
-		
+
 		$aAppData = array(
 			'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
 			'UploadSizeLimitMb' => $this->getConfig('UploadSizeLimitMb', 0),
@@ -420,7 +420,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
 			'TenantSpaceLimitMb' => $this->getConfig('TenantSpaceLimitMb', 0)
 		);
-		
+
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
 		if ($oAuthenticatedUser instanceof \Aurora\Modules\Core\Classes\User
 				&& ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::NormalUser
@@ -429,7 +429,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$aAppData['Storages'] = \Aurora\Modules\Files\Module::Decorator()->GetStorages();
 		}
-		
+
 		$sPublicHash = \Aurora\System\Router::getItemByIndex(1);
 		if (isset($sPublicHash))
 		{
@@ -473,22 +473,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 				];
 			}
 		}
-		
+
 		return $aResult;
-	}	
-	
+	}
+
 	/**
 	 * @api {post} ?/Api/ UpdateSettings
 	 * @apiName UpdateSettings
 	 * @apiGroup Files
 	 * @apiDescription Updates module's settings - saves them to config.json file.
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=UpdateSettings} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -496,27 +496,27 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **EnableUploadSizeLimit** *bool* Enable file upload size limit setting.<br>
 	 * &emsp; **UploadSizeLimitMb** *int* Upload file size limit setting in Mb.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
 	 *	Parameters: '{ EnableUploadSizeLimit: true, UploadSizeLimitMb: 5 }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {bool} Result.Result Indicates if settings were updated successfully.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateSettings',
 	 *	Result: true
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -527,7 +527,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	/**
 	 * Updates module's settings - saves them to config.json file.
-	 * 
+	 *
 	 * @param bool $EnableUploadSizeLimit Enable file upload size limit setting.
 	 * @param int $UploadSizeLimitMb Upload file size limit setting in Mb.
 	 * @return bool
@@ -535,24 +535,24 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-		
+
 		$this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
 		$this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
 		return (bool) $this->saveModuleConfig();
 	}
-	
+
 		/**
 	 * @api {post} ?/Upload/ UploadFile
 	 * @apiDescription Uploads file from client side.
 	 * @apiName UploadFile
 	 * @apiGroup Files
-		 * 
+		 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=UploadFile} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -561,7 +561,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Path** *string* Path to folder than should contain uploaded file.<br>
 	 * &emsp; **FileData** *string* Uploaded file information. Contains fields size, name, tmp_name.<br>
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
@@ -572,7 +572,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {int} Result.Result.Size File size.
 	 * @apiSuccess {string} Result.Result.Hash Hash used for file download, file view or getting file thumbnail.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
@@ -580,7 +580,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	Result: { File: { Name: 'image.png', TempName: 'upload-post-6149f2cda5c58c6951658cce9f2b1378',
 	 *		MimeType: 'image/png', Size: 1813 } }
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -591,7 +591,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	/**
 	 * Uploads file from client side.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to folder than should contain uploaded file.
@@ -617,7 +617,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function UploadFile($UserId, $Type, $Path, $UploadData, $Overwrite = true, $RangeType = 0, $Offset = 0, $ExtendedProps = [])
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
+
 		$sUserPublicId = \Aurora\System\Api::getUserPublicIdById($UserId);
 
 		$sError = '';
@@ -643,12 +643,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
 					}
-					
+
 					if (!self::Decorator()->CheckQuota($UserId, $Type, $iSize))
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
 					}
-					
+
 					$sUploadName = $UploadData['name'];
 					$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
@@ -681,7 +681,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 							$aArgs,
 							$mResult
 						);
-						
+
 						if ($mResult)
 						{
 							$mResponse['File'] = array(
@@ -716,14 +716,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$mResponse['Error'] = $sError;
 		}
-		
+
 		return $mResponse;
 	}
 
 	public function EntryDownloadFile()
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
-		
+
 		$sHash = (string) \Aurora\System\Router::getItemByIndex(1, '');
 		$sAction = (string) \Aurora\System\Router::getItemByIndex(2, '');
 		$iOffset = (int) \Aurora\System\Router::getItemByIndex(3, '');
@@ -736,7 +736,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sPath = isset($aValues['Path']) ? $aValues['Path'] : '';
 		$sFileName = isset($aValues['Name']) ? $aValues['Name'] : '';
 		$sPublicHash = isset($aValues['PublicHash']) ? $aValues['PublicHash'] : null;
-		
+
 		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $sPublicHash, $sAction, $iOffset, $iChunkSize);
 	}
 
@@ -745,13 +745,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Views file.
 	 * @apiName ViewFile
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=ViewFile} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -761,20 +761,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Name** *string* File name.<br>
 	 * &emsp; **SharedHash** *string* Shared hash.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'ViewFile',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {string} Result Content of the file with headers for view.
 	 */
-	
+
 	/**
 	 * Views file.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
@@ -786,11 +786,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		// checkUserRoleIsAtLeast is called in getRawFile
 		$this->getRawFile(
-			\Aurora\System\Api::getUserPublicIdById($UserId), 
-			$Type, 
-			$Path, 
-			$Name, 
-			$SharedHash, 
+			\Aurora\System\Api::getUserPublicIdById($UserId),
+			$Type,
+			$Path,
+			$Name,
+			$SharedHash,
 			false
 		);
 	}
@@ -800,13 +800,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Makes thumbnail for file.
 	 * @apiName GetFileThumbnail
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} [Authorization] "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetFileThumbnail} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -816,20 +816,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Name** *string* File name.<br>
 	 * &emsp; **SharedHash** *string* Shared hash.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetFileThumbnail',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {string} Result Content of the file thumbnail with headers for view.
 	 */
-	
+
 	/**
 	 * Makes thumbnail for file.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Storage type - personal, corporate.
 	 * @param string $Path Path to folder contained file.
@@ -842,12 +842,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		// checkUserRoleIsAtLeast is called in getRawFile
 		return \base64_encode(
 			$this->getRawFile(
-				\Aurora\System\Api::getUserPublicIdById($UserId), 
-				$Type, 
-				$Path, 
-				$Name, 
-				$SharedHash, 
-				false, 
+				\Aurora\System\Api::getUserPublicIdById($UserId),
+				$Type,
+				$Path,
+				$Name,
+				$SharedHash,
+				false,
 				true
 			)
 		);
@@ -858,22 +858,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Returns storages available for logged in user.
 	 * @apiName GetStorages
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetStorages} Method Method name
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetStorages'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
@@ -882,7 +882,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {string} Result.Result.DisplayName Storage display name.
 	 * @apiSuccess {bool} Result.Result.IsExternal Indicates if storage external or not.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
@@ -891,7 +891,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *		{ Type: "corporate", DisplayName: "Corporate", IsExternal: false },
 	 *		{ Type: "google", IsExternal: true, DisplayName: "GoogleDrive" }]
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -900,10 +900,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	ErrorCode: 102
 	 * }
 	 */
-	
+
 	/**
 	 * Returns storages available for logged in user.
-	 * 
+	 *
 	 * @return array {
 	 *		*string* **Type** Storage type - personal, corporate.
 	 *		*string* **DisplayName** Storage display name.
@@ -915,7 +915,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return [];
 	}
-	
+
 	/**
 	 * Returns submodules.
 	 */
@@ -929,27 +929,27 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Returns used space and space limit for specified user.
 	 * @apiName GetQuota
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetQuota} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
 	 * {<br>
 	 * &emsp; **UserId** *int* User identifier.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'UpdateAccount',
 	 *	Parameters: '{ UserId: 123 }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
@@ -957,14 +957,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {int} Result.Result.Used Amount of space used by user.
 	 * @apiSuccess {int} Result.Result.Limit Limit of space for user.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetQuota',
 	 *	Result: { Used: 21921, Limit: 62914560 }
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -975,7 +975,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	/**
 	 * Returns used space and space limit for specified user.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @return array {
 	 *		*int* **Used** Amount of space used by user.
@@ -985,7 +985,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetQuota($UserId, $Type)
 	{
 		return [
-			'Limit' => 0, 
+			'Limit' => 0,
 			'Used' => 0
 		];
 	}
@@ -993,12 +993,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function CheckQuota($UserId, $Type, $Size)
 	{
 		return false;
-	}	
-	
+	}
+
 	public function GetItems($UserId, $Type, $Path, $Pattern, $PublicHash = null)
 	{
 		return [];
-	}	
+	}
 
 	/**
 	 * @api {post} ?/Api/ GetFiles
@@ -1011,7 +1011,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=GetFiles} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1020,14 +1020,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Path** *string* Path to folder files are obtained from.<br>
 	 * &emsp; **Pattern** *string* String for search files and folders with such string in name.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetFiles',
 	 *	Parameters: '{ Type: "personal", Path: "", Pattern: "" }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
@@ -1035,7 +1035,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {array} Result.Result.Items Array of files objects.
 	 * @apiSuccess {array} Result.Result.Quota Array of items with fields Used, Limit.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
@@ -1045,7 +1045,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * LastModified: 1475498855, ContentType: "image/png", Thumb: true, ThumbnailLink: "", OembedHtml: "",
 	 * Shared: false, Owner: "", Content: "", IsExternal: false }], Quota: { Used: 21921, Limit: 62914560 } }
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1054,10 +1054,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	ErrorCode: 102
 	 * }
 	 */
-	
+
 	/**
 	 * Returns file list and user quota information.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage.
 	 * @param string $Path Path to folder files are obtained from.
@@ -1076,9 +1076,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'Quota' => self::Decorator()->GetQuota($UserId, $Type)
 		];
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param array $aArgs
 	 * @param mixed $mResult
 	 */
@@ -1094,13 +1094,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$aItems[] = self::Decorator()->PopulateFileItem($aArgs['UserId'], $oItem);
 				}
 			}
-			
+
 			$mResult = $aItems;
 		}
-	}	
+	}
 
 	/**
-	 * 
+	 *
 	 * @param array $aArgs
 	 * @param mixed $mResult
 	 */
@@ -1116,16 +1116,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 				return ($aItem1['Order'] == $aItem2['Order']) ? 0 : ($aItem1['Order'] > $aItem2['Order'] ? +1 : -1);
 			});
 		}
-	}		
+	}
 
 	/**
-	 * 
+	 *
 	 * @param int $iUserId
 	 * @param int $sType
 	 * @param string $sPath
 	 * @param string $sName
 	 * @param int $sSize
-	 * 
+	 *
 	 * @return array
 	 */
 	private function generateMinArray($iUserId, $sType, $sPath, $sName, $sSize, $bIsFolder = false)
@@ -1135,8 +1135,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$aData = array(
 				'UserId' => $iUserId,
-				'Type' => $sType, 
-				'Path' => $sPath, 
+				'Type' => $sType,
+				'Path' => $sPath,
 				'Name' => $sName,
 				'Size' => $sSize,
 				'IsFolder' => $bIsFolder
@@ -1144,7 +1144,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 
 		return $aData;
-	}	
+	}
 
 	protected function updateMinHash($iUserId, $sType, $sPath, $sName, $sNewType, $sNewPath, $sNewName)
 	{
@@ -1153,7 +1153,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sNewID = \Aurora\Modules\Min\Module::generateHashId([$sUserPublicId, $sNewType, $sNewPath, $sNewName]);
 
 		$mData = $this->getMinModuleDecorator()->GetMinByID($sID);
-		
+
 		if ($mData)
 		{
 			$aData = $this->generateMinArray($sUserPublicId, $sNewType, $sNewPath, $sNewName, $mData['Size']);
@@ -1165,7 +1165,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	}
 
 	/**
-	 * 
+	 *
 	 * @param array $aArgs
 	 * @param mixed $mResult
 	 */
@@ -1189,7 +1189,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	}
 
 	/**
-	 * 
+	 *
 	 * @param array $aArgs
 	 * @param mixed $mResult
 	 */
@@ -1204,42 +1204,42 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oUser->{$this->GetName() . '::UserSpaceLimitMb'} = $oTenant->{$this->GetName() . '::UserSpaceLimitMb'};
 				$oUser->save();
 			}
-*/			
+*/
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param array $aItems
 	 */
 	public function PopulateFileItem($UserId, $Item)
 	{
 		return $Item;
 	}
-	
+
 	/**
 	 * Return content of a file.
-	 * 
+	 *
 	 * @param int $UserId
 	 * @param string $Type
 	 * @param string $Path
 	 * @param string $Name
 	 */
-	public function GetFileContent($UserId, $Type, $Path, $Name) 
+	public function GetFileContent($UserId, $Type, $Path, $Name)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		// File content is obtained in subscribers methods
 	}
-	
+
 	/**
 	 * Return information about file. Subscribers of "Files::GetFileInfo::after" event are used for collecting information.
-	 * 
+	 *
 	 * @param int $UserId
 	 * @param string $Type
 	 * @param string $Path
 	 * @param string $Id
 	 */
-	public function GetFileInfo($UserId, $Type, $Path, $Id) 
+	public function GetFileInfo($UserId, $Type, $Path, $Id)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
@@ -1256,21 +1256,21 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Hash** *string* Hash to identify the list of files to return. Containes information about user identifier, type of storage, path to public folder, name of public folder.<br>
 	 * &emsp; **Path** *string* Path to folder contained files to return.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'GetPublicFiles',
 	 *	Parameters: '{ Hash: "hash_value", Path: "" }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {mixed} Result.Result Object in case of success, otherwise **false**.
 	 * @apiSuccess {array} Result.Result.Items Array of files objects.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
@@ -1281,7 +1281,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * Thumb: true, ThumbnailLink: "", OembedHtml: "", Shared: false, Owner: "62a6d548-892e-11e6-be21-0cc47a041d39",
 	 * Content: "", IsExternal: false }] }
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1293,7 +1293,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	/**
 	 * Returns list of public files.
-	 * 
+	 *
 	 * @param string $Hash Hash to identify the list of files to return. Containes information about user identifier, type of storage, path to public folder, name of public folder.
 	 * @param string $Path Path to folder contained files to return.
 	 * @return array {
@@ -1339,22 +1339,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 				}
 			}
 		}
-		
+
 		return $mResult;
-	}	
+	}
 
 	/**
 	 * @api {post} ?/Api/ CreateFolder
 	 * @apiDescription Creates folder.
 	 * @apiName CreateFolder
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreateFolder} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1363,27 +1363,27 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Path** *string* Path to new folder.<br>
 	 * &emsp; **FolderName** *string* New folder name.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreateFolder',
 	 *	Parameters: '{ Type: "personal", Path: "", FolderName: "new_folder" }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {bool} Result.Result Indicates if folder was created successfully.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreateFolder',
 	 *	Result: true
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1392,10 +1392,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	ErrorCode: 102
 	 * }
 	 */
-	
+
 	/**
 	 * Creates folder.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to new folder.
@@ -1413,13 +1413,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Creates link.
 	 * @apiName CreateLink
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreateLink} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1429,14 +1429,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Link** *string* Link value.<br>
 	 * &emsp; **Name** *string* Link name.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreateLink',
 	 *	Parameters: '{ Type: "personal", Path: "", Link: "link_value", Name: "name_value" }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
@@ -1446,7 +1446,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiSuccess {string} Result.Result.Link Link URL.
 	 * @apiSuccess {string} Result.Result.Name Link name.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code.
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
@@ -1454,7 +1454,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	Result: { Type: "personal", Path: "", Link: "https://www.youtube.com/watch?v=1WPn4NdQnlg&t=1124s",
 	 *		Name: "Endless Numbers counting 90 to 100 - Learn 123 Numbers for Kids" }
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1463,10 +1463,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	ErrorCode: 102
 	 * }
 	 */
-	
+
 	/**
 	 * Creates link.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to new link.
@@ -1486,13 +1486,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Deletes files and folder specified with list.
 	 * @apiName Delete
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Delete} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1500,7 +1500,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
 	 * &emsp; **Items** *array* Array of items to delete.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
@@ -1508,20 +1508,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	Parameters: '{ Type: "personal", Items: [{ "Path": "", "Name": "2.png" },
 	 *		{ "Path": "", "Name": "logo.png" }] }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {bool} Result.Result Indicates if files and (or) folders were deleted successfully.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Delete',
 	 *	Result: true
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1530,10 +1530,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	ErrorCode: 102
 	 * }
 	 */
-	
+
 	/**
 	 * Deletes files and folder specified with list.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param array $Items Array of items to delete.
@@ -1550,7 +1550,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oItem->Name = $aItem['Name'];
 			$oItem->TypeStr = $Type;
 			$oItem->Path = $aItem['Path'];
-			
+
 			self::Decorator()->DeletePublicLink($UserId, $Type, $aItem['Path'], $aItem['Name']);
 			\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aItem['Name']);
 		}
@@ -1561,13 +1561,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @apiDescription Renames folder, file or link.
 	 * @apiName Rename
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Rename} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1578,7 +1578,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **NewName** *string* New name of the item.<br>
 	 * &emsp; **IsLink** *bool* Indicates if the item is link or not.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
@@ -1586,20 +1586,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "old_name.png", NewName: "new_name.png",
 	 *		IsLink: false }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {bool} Result.Result Indicates if file or folder was renamed successfully.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Rename',
 	 *	Result: true
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1608,10 +1608,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	ErrorCode: 102
 	 * }
 	 */
-	
+
 	/**
 	 * Renames folder, file or link.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to item to rename.
@@ -1624,12 +1624,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
+
 		if ($Name === '')
 		{
 			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
 		}
-		
+
 		$oItem = new Classes\FileItem();
 		$oItem->Id = $Name;
 		$oItem->Name = $Name;
@@ -1638,20 +1638,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $Name);
 		// Actual renaming is proceeded in subscribed methods. Look for it by "Files::Rename::after"
-	}	
+	}
 
 	/**
 	 * @api {post} ?/Api/ Copy
 	 * @apiDescription Copies files and/or folders from one folder to another.
 	 * @apiName Copy
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Copy} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1662,7 +1662,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **ToPath** *string* Folder items will be copied to.<br>
 	 * &emsp; **Files** *array* List of items to copy<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
@@ -1670,20 +1670,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	Parameters: '{ FromType: "personal", ToType: "corporate", FromPath: "", ToPath: "",
 	 * Files: [{ Name: "logo.png", IsFolder: false }, { Name: "details.png", IsFolder: false }] }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {bool} Result.Result Indicates if files and (or) folders were copied successfully.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Copy',
 	 *	Result: true
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1693,10 +1693,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	}]
 	 * }
 	 */
-	
+
 	/**
 	 * Copies files and/or folders from one folder to another.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $FromType storage type of folder items will be copied from.
 	 * @param string $ToType storage type of folder items will be copied to.
@@ -1713,20 +1713,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return null;
-	}	
+	}
 
 	/**
 	 * @api {post} ?/Api/ Move
 	 * @apiDescription Moves files and/or folders from one folder to another.
 	 * @apiName Move
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=Move} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1737,7 +1737,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **ToPath** *string* Folder items will be moved to.<br>
 	 * &emsp; **Files** *array* List of items to move<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
@@ -1746,20 +1746,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *		Files: [{ "Name": "logo.png", "IsFolder": false },
 	 *		{ "Name": "details.png", "IsFolder": false }] }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {bool} Result.Result Indicates if files and (or) folders were moved successfully.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'Move',
 	 *	Result: true
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1768,10 +1768,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *	ErrorCode: 102
 	 * }
 	 */
-	
+
 	/**
 	 * Moves files and/or folders from one folder to another.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $FromType storage type of folder items will be moved from.
 	 * @param string $ToType storage type of folder items will be moved to.
@@ -1801,20 +1801,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 				\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aFile['Name']);
 			}
 		}
-	}	
-	
+	}
+
 	/**
 	 * @api {post} ?/Api/ CreatePublicLink
 	 * @apiDescription Creates public link for file or folder.
 	 * @apiName CreatePublicLink
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=CreatePublicLink} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1825,27 +1825,27 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Size** *int* Size of the file.<br>
 	 * &emsp; **IsFolder** *bool* Indicates if the item is folder or not.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreatePublicLink',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png", Size: 100, "IsFolder": false }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {mixed} Result.Result Public link to the item in case of success, otherwise **false**.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'CreatePublicLink',
 	 *	Result: 'AppUrl/?/files-pub/shared_item_hash/list'
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1857,7 +1857,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	/**
 	 * Creates public link for file or folder.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage contains the item.
 	 * @param string $Path Path to the item.
@@ -1871,20 +1871,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return false;
-	}	
-	
+	}
+
 	/**
 	 * @api {post} ?/Api/ DeletePublicLink
 	 * @apiDescription Deletes public link from file or folder.
 	 * @apiName DeletePublicLink
 	 * @apiGroup Files
-	 * 
+	 *
 	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
 	 * @apiHeaderExample {json} Header-Example:
 	 *	{
 	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
 	 *	}
-	 * 
+	 *
 	 * @apiParam {string=Files} Module Module name
 	 * @apiParam {string=DeletePublicLink} Method Method name
 	 * @apiParam {string} Parameters JSON.stringified object <br>
@@ -1893,27 +1893,27 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * &emsp; **Path** *string* Path to the item.<br>
 	 * &emsp; **Name** *string* Name of the item.<br>
 	 * }
-	 * 
+	 *
 	 * @apiParamExample {json} Request-Example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'DeletePublicLink',
 	 *	Parameters: '{ Type: "personal", Path: "", Name: "image.png" }'
 	 * }
-	 * 
+	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
 	 * @apiSuccess {string} Result.Module Module name
 	 * @apiSuccess {string} Result.Method Method name
 	 * @apiSuccess {bool} Result.Result Indicated if public link was deleted successfully.
 	 * @apiSuccess {int} [Result.ErrorCode] Error code
-	 * 
+	 *
 	 * @apiSuccessExample {json} Success response example:
 	 * {
 	 *	Module: 'Files',
 	 *	Method: 'DeletePublicLink',
 	 *	Result: true
 	 * }
-	 * 
+	 *
 	 * @apiSuccessExample {json} Error response example:
 	 * {
 	 *	Module: 'Files',
@@ -1925,7 +1925,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	/**
 	 * Deletes public link from file or folder.
-	 * 
+	 *
 	 * @param int $UserId User identifier.
 	 * @param string $Type Type of storage contains the item.
 	 * @param string $Path Path to the item.
@@ -1941,7 +1941,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	/**
 	 * Checks URL and returns information about it.
-	 * 
+	 *
 	 * @param string $Url URL to check.
 	 * @return array|bool {
 	 *		Name
@@ -1954,24 +1954,24 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		$mResult = false;
-		
+
 		if (substr($Url, 0, 11) === 'javascript:')
 		{
 			$Url = substr($Url, 11);
 		}
-		
+
 		$aArgs = array(
 			'Url' => $Url
 		);
 		$this->broadcastEvent(
-			'CheckUrl', 
+			'CheckUrl',
 			$aArgs,
 			$mResult
 		);
-		
+
 		return $mResult;
-	}	
-	
+	}
+
 	/**
 	 * @return array
 	 */
@@ -1979,7 +1979,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-		
+
 		$mResult = false;
 		if (is_array($Hashes) && 0 < count($Hashes))
 		{
@@ -1990,7 +1990,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if (\is_array($aData) && 0 < \count($aData))
 				{
 					$oFileInfo = self::Decorator()->GetFileInfo($UserId, $aData['Type'], $aData['Path'], $aData['Id']);
-					
+
 					$aArgs = array(
 						'UserId' => $UserId,
 						'Type' => $aData['Type'],
@@ -2000,11 +2000,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 					);
 					$rFile = false;
 					$this->broadcastEvent(
-						'GetFile', 
+						'GetFile',
 						$aArgs,
 						$rFile
-					);						
-					
+					);
+
 					$sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
 
 					if (is_resource($rFile) && $this->getFilecacheManager()->putFile($sUUID, $sTempName, $rFile))
@@ -2024,7 +2024,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 							'Name' => $aItem['Name'],
 							'TempName' => $sTempName
 						));
-						
+
 						$aActions = array(
 							'view' => array(
 								'url' => '?file-cache/' . $aItem['NewHash'] .'/view'
@@ -2067,9 +2067,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return true;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param type $UserId
 	 * @param type $Storage
 	 * @param type $Path
@@ -2090,7 +2090,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$Path = $aFile['Path'];
 				$Name = $aFile['Name'];
 				$Id = $aFile['Id'];
-						
+
 				$aArgs = array(
 					'UserId' => $UserId,
 					'Type' => $Storage,
@@ -2103,12 +2103,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 				);
 				$mFileResource = false;
 				$this->broadcastEvent(
-					'GetFile', 
+					'GetFile',
 					$aArgs,
 					$mFileResource
-				);			
+				);
 
-				if (is_resource($mFileResource)) 
+				if (is_resource($mFileResource))
 				{
 					$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 					try
@@ -2134,9 +2134,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				}
 			}
 		}
-		
-		return $mResult;		
-	}	
+
+		return $mResult;
+	}
 
 	public function UpdateSettingsForEntity($EntityType, $EntityId, $UserSpaceLimitMb, $TenantSpaceLimitMb)
 	{
@@ -2224,7 +2224,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		return $mResult;
 	}
-	
+
 	public function UpdateTenantSpaceLimit($TenantId, $Limit)
 	{
 		$mResult = false;
@@ -2271,6 +2271,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
 		}
-	}	
+	}
 	/***** public functions might be called with web API *****/
 }
