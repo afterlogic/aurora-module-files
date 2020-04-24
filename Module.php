@@ -203,7 +203,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					\Aurora\System\Managers\Response::verifyCacheByKey($sRawKey);
 				}
-				$mResult = \Aurora\System\Managers\Response::GetThumbResourceCache($iUserId, $sFileName);
+				$mResult = \Aurora\System\Managers\Thumb::GetResourceCache($iUserId, $sFileName);
 				if ($mResult)
 				{
 					$sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
@@ -243,7 +243,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 					if ($bThumbnail)
 					{
-						return \Aurora\System\Managers\Response::GetThumbResource(
+						return \Aurora\System\Managers\Thumb::GetResource(
 							$iUserId,
 							$mResult,
 							$sFileName
