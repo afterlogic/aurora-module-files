@@ -63,7 +63,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				'download-file' => 'EntryDownloadFile'
 			)
 		);
-		$this->denyMethodsCallByWebApi(['getRawFile', 'GetItems']);
+		$this->denyMethodsCallByWebApi(['getRawFile', 'getRawFileData', 'GetItems']);
 
 		\Aurora\Modules\Core\Classes\Tenant::extend(
 			self::GetName(),
@@ -114,6 +114,107 @@ class Module extends \Aurora\System\Module\AbstractModule
 	protected function checkStorageType($Type)
 	{
 		return $Type === static::$sStorageType;
+	}
+
+	public function getRawFileData($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
+	{
+		$bDownload = true;
+		$bThumbnail = false;
+		$mResult = false;
+
+		switch ($sAction)
+		{
+			case 'view':
+				$bDownload = false;
+				$bThumbnail = false;
+			break;
+			case 'thumb':
+				$bDownload = false;
+				$bThumbnail = true;
+			break;
+			case 'download':
+				$bDownload = true;
+				$bThumbnail = false;
+
+			break;
+			default:
+				$bDownload = true;
+				$bThumbnail = false;
+			break;
+		}
+		if (!$bDownload || $iChunkSize == 0)
+		{
+			$iLength = -1;
+			$iOffset = -1;
+		}
+		else
+		{
+			$iLength = $iChunkSize;
+			$iOffset = $iChunkSize * $iOffset;
+		}
+
+		$oModuleDecorator = $this->getMinModuleDecorator();
+		$mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
+
+		$iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
+
+		try
+		{
+			if ($iUserId && $SharedHash !== null)
+			{
+				\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+				\Afterlogic\DAV\Server::setUser($iUserId);
+			}
+			else
+			{
+				\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+				if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId())
+				{
+					throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::AccessDenied);
+				}
+			}
+		}
+		catch (\Aurora\System\Exceptions\ApiException $oEx)
+		{
+			echo 'Access denied';
+			exit();
+		}
+
+		if (isset($sType, $sPath, $sFileName))
+		{
+			$sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
+
+			$mResult = false;
+			if ($bThumbnail)
+			{
+				$sRawKey = (string) \Aurora\System\Router::getItemByIndex(1, '');
+				if (!empty($sRawKey))
+				{
+					\Aurora\System\Managers\Response::verifyCacheByKey($sRawKey);
+				}
+				$mResult = \Aurora\System\Managers\Thumb::GetResourceCache($iUserId, $sFileName);
+			}
+			if (!$mResult)
+			{
+				$aArgs = array(
+					'UserId' => $iUserId,
+					'Type' => $sType,
+					'Path' => $sPath,
+					'Name' => &$sFileName,
+					'Id' => $sFileName,
+					'IsThumb' => $bThumbnail,
+					'Offset' => $iOffset,
+					'ChunkSize' => $iChunkSize
+				);
+				$this->broadcastEvent(
+					'GetFile',
+					$aArgs,
+					$mResult
+				);
+			}
+		}
+
+		return $mResult;
 	}
 
 	/**
