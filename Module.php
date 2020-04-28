@@ -1653,7 +1653,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oItem->Path = $aItem['Path'];
 
 			self::Decorator()->DeletePublicLink($UserId, $Type, $aItem['Path'], $aItem['Name']);
-			\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aItem['Name']);
+			\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $aItem['Name']);
 		}
 	}
 
