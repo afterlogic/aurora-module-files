@@ -1737,7 +1737,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oItem->TypeStr = $Type;
 		$oItem->Path = $Path;
 
-		\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $Name);
+		\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $Name);
 		// Actual renaming is proceeded in subscribed methods. Look for it by "Files::Rename::after"
 	}
 
@@ -1899,7 +1899,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oItem->TypeStr = $FromType;
 				$oItem->Path = $FromPath;
 
-				\Aurora\System\Managers\Response::RemoveThumbFromCache($UserId, $oItem->getHash(), $aFile['Name']);
+				\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $aFile['Name']);
 			}
 		}
 	}
