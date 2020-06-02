@@ -2378,18 +2378,18 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * Update ExtendedProps
 	 *
 	 * @param int $UserId
-	 * @param string $StorageType Type of storage contains the item.
+	 * @param string $Type Type of storage contains the item.
 	 * @param string $Path Path to the item.
 	 * @param string $Name Name of the item.
 	 * @param array $ExtendedProps
 	 * @return bool
 	 */
 
-	public function UpdateExtendedProps($UserId, $StorageType, $Path, $Name, $ExtendedProps)
+	public function UpdateExtendedProps($UserId, $Type, $Path, $Name, $ExtendedProps)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
-		return true;
+		return false;
 		// Actual updating is preceded in subscribed methods. Look for it by "Files::UpdateExtendedProps::after"
 	}
 	/***** public functions might be called with web API *****/
