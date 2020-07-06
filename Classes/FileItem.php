@@ -11,7 +11,7 @@ namespace Aurora\Modules\Files\Classes;
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
  * @copyright Copyright (c) 2019, Afterlogic Corp.
- * 
+ *
  * @property string $Id
  * @property int $Type
  * @property string $TypeStr
@@ -35,7 +35,7 @@ namespace Aurora\Modules\Files\Classes;
  * @property string $RealPath
  * @property array $Actions
  * @property string $Hash
- * 
+ *
  * @package Classes
  * @subpackage FileStorage
  */
@@ -71,27 +71,28 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'ExtendedProps' => array()
 		));
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param string $sPublicHash
 	 * @return type
 	 */
 	public function getHash($sPublicHash = null)
 	{
 		$aResult = array(
-			'UserId' => \Aurora\System\Api::getAuthenticatedUserId(), 
-			'Id' => $this->Id, 
+			'UserId' => \Aurora\System\Api::getAuthenticatedUserId(),
+			'Id' => $this->Id,
 			'Type' => $this->TypeStr,
 			'Path' => $this->Path,
-			'Name' => $this->Id
-		);		
-		
+			'Name' => $this->Id,
+			'FileName' => $this->Name
+		);
+
 		if (isset($sPublicHash))
 		{
 			$aResult['PublicHash'] = $sPublicHash;
 		}
-		
+
 		return \Aurora\System\Api::EncodeKeyValues($aResult);
 	}
 
@@ -126,7 +127,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'ThumbnailUrl' => array('string'),
 			'OembedHtml' => array('string'),
 			'Published' => array('bool'),
-			'Owner' => array('string'),		
+			'Owner' => array('string'),
 			'Content' => array('string'),
 			'IsExternal' => array('bool'),
 			'RealPath' => array('string'),
@@ -136,16 +137,16 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'ExtendedProps' => array('array')
 		);
 	}
-	
+
 	public function toResponseArray($aParameters = array())
 	{
 		$aArgs = [$this];
 		$aResult = [];
 
 		\Aurora\System\EventEmitter::getInstance()->emit(
-			'Files', 
-			'FileItemtoResponseArray', 
-			$aArgs, 
+			'Files',
+			'FileItemtoResponseArray',
+			$aArgs,
 			$aResult
 		);
 
@@ -170,7 +171,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		$aResult['Hash'] = $this->getHash();
 		$aResult['ETag'] = $this->ETag;
 		$aResult['ExtendedProps'] = $this->ExtendedProps;
-		
+
 		if ($this->Thumb)
 		{
 			if (empty($this->ThumbnailUrl) && $this->GetActionUrl('download'))
@@ -182,7 +183,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 
 		return $aResult;
 	}
-	
+
 	public function UnshiftAction($aAction)
 	{
 		$sKey = key($aAction);
@@ -191,11 +192,11 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		{
 			unset($aActions[$sKey]);
 		}
-		
+
 		$aActions = \array_merge($aAction, $aActions);
 		$this->Actions = $aActions;
 	}
-	
+
 	public function AddAction($aAction)
 	{
 		$sKey = key($aAction);
@@ -203,7 +204,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		$aActions[$sKey] = $aAction[$sKey];
 		$this->Actions = $aActions;
 	}
-	
+
 	public function GetActionUrl($sAction)
 	{
 		$bResult = false;
@@ -212,7 +213,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		{
 			$bResult = $aActions[$sAction]['url'];
 		}
-		
+
 		return $bResult;
 	}
 

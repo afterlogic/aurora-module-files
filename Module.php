@@ -826,7 +826,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		// checkUserRoleIsAtLeast is called in getRawFile
 
 		$sHash = (string) \Aurora\System\Router::getItemByIndex(1, '');
-		$sAction = (string) \Aurora\System\Router::getItemByIndex(2, '');
+		$sAction = (string) \Aurora\System\Router::getItemByIndex(2, 'download');
 		$iOffset = (int) \Aurora\System\Router::getItemByIndex(3, '');
 		$iChunkSize = (int) \Aurora\System\Router::getItemByIndex(4, '');
 
