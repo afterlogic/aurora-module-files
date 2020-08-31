@@ -660,7 +660,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * {<br>
 	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
 	 * &emsp; **Path** *string* Path to folder than should contain uploaded file.<br>
-	 * &emsp; **FileData** *string* Uploaded file information. Contains fields size, name, tmp_name.<br>
+	 * &emsp; **UploadData** *string* Uploaded file information. Contains fields size, name, tmp_name.<br>
+	 * &emsp; **SubPatha** *string* Relative path to subfolder where file should be uploaded.<br>
 	 * }
 	 *
 	 * @apiSuccess {object[]} Result Array of response objects.
@@ -697,6 +698,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Type Type of storage - personal, corporate.
 	 * @param string $Path Path to folder than should contain uploaded file.
 	 * @param array $UploadData Uploaded file information. Contains fields size, name, tmp_name.
+	 * @param string $SubPath Relative path to subfolder where file should be uploaded.
 	 * @param bool $Overwrite Overwrite a file if it already exists.
 	 * @param int $RangeType The type of update we're doing.
 	 * *	0 - overwrite
@@ -715,7 +717,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function UploadFile($UserId, $Type, $Path, $UploadData, $Overwrite = true, $RangeType = 0, $Offset = 0, $ExtendedProps = [])
+	public function UploadFile($UserId, $Type, $Path, $UploadData, $SubPath = '', $Overwrite = true, $RangeType = 0, $Offset = 0, $ExtendedProps = [])
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
@@ -749,6 +751,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
 					}
+					
+					if ($SubPath !== '')
+					{
+						try {
+							self::Decorator()->CreateFolder($UserId, $Type, $Path, $SubPath);
+						}
+						catch (\Exception $oException) {}
+					}
 
 					$sUploadName = $UploadData['name'];
 					$sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
@@ -768,7 +778,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 						$aArgs = array(
 							'UserId' => $UserId,
 							'Type' => $Type,
-							'Path' => $Path,
+							'Path' => $SubPath === '' ? $Path : $Path . '/' . $SubPath,
 							'Name' => $sUploadName,
 							'Data' => $rData,
 							'Overwrite' => $Overwrite,
