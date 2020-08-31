@@ -752,12 +752,18 @@ class Module extends \Aurora\System\Module\AbstractModule
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
 					}
 					
-					if ($SubPath !== '')
+					if ($SubPath !== '' && !self::Decorator()->IsFileExists($UserId, $Type, $Path, $SubPath))
 					{
 						try {
 							self::Decorator()->CreateFolder($UserId, $Type, $Path, $SubPath);
 						}
-						catch (\Exception $oException) {}
+						catch (\Exception $oException) {
+							// Cannot catch here \Sabre\DAV\Exception\Conflict
+							// Parallel uplod of files with creation of a subfolder may cause the conflict
+							if ($oException->getMessage() !== 'Can\'t create a directory') {
+								throw $oException;
+							}
+						}
 					}
 
 					$sUploadName = $UploadData['name'];
