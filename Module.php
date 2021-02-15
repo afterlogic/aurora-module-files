@@ -2281,13 +2281,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$oTenant->{self::GetName() . '::TenantSpaceLimitMb'} = $TenantSpaceLimitMb;
 				}
-				if ($UserSpaceLimitMb <= $TenantSpaceLimitMb || $TenantSpaceLimitMb === 0)
+				if (is_int($UserSpaceLimitMb))
 				{
-					$oTenant->{self::GetName() . '::UserSpaceLimitMb'} = $UserSpaceLimitMb;
-				}
-				else
-				{
-					throw new \Aurora\System\Exceptions\ApiException(1, null, 'User space limit must be less then tenant space limit');
+					if ($UserSpaceLimitMb <= $TenantSpaceLimitMb || $TenantSpaceLimitMb === 0)
+					{
+						$oTenant->{self::GetName() . '::UserSpaceLimitMb'} = $UserSpaceLimitMb;
+					}
+					else
+					{
+						throw new \Aurora\System\Exceptions\ApiException(1, null, 'User space limit must be less then tenant space limit');
+					}
 				}
 
 				$bResult = \Aurora\Modules\Core\Module::Decorator()->UpdateTenantObject($oTenant);
@@ -2307,8 +2310,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 				$iTenantSpaceLimitMb = $oTenant->{self::GetName() . '::TenantSpaceLimitMb'};
 				$iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oUser->IdTenant);
-
-				if ($iAllocatedSpaceForUsersInTenant + $UserSpaceLimitMb > $iTenantSpaceLimitMb)
+				if (($iAllocatedSpaceForUsersInTenant - $oUser->{self::GetName() . '::UserSpaceLimitMb'}) + $UserSpaceLimitMb > $iTenantSpaceLimitMb)
 				{
 					throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
 				}
@@ -2375,7 +2377,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		foreach ($aEntities as $aEntity)
 		{
-			$iResult += (int) $aEntity['Files::UserSpaceLimitMb'];
+			if (isset($aEntity['Files::UserSpaceLimitMb']))
+			{
+				$iResult += (int) $aEntity['Files::UserSpaceLimitMb'];
+			}
 		}
 
 		return $iResult;
