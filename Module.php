@@ -751,7 +751,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
 					}
-					
+
 					if ($SubPath !== '' && !self::Decorator()->IsFileExists($UserId, $Type, $Path, $SubPath))
 					{
 						try {
@@ -2178,11 +2178,23 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Path
 	 * @param string $Name
 	 */
-
 	public function IsFileExists($UserId, $Type, $Path, $Name)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return true;
+	}
+
+	/**
+	 *
+	 * @param int $UserId
+	 * @param string $Type
+	 * @param string $Path
+	 * @param string $Name
+	 */
+	public function GetNonExistentFileName($UserId, $Type, $Path, $Name)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		return $Name;
 	}
 
 	/**
