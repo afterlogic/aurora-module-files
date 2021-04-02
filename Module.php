@@ -288,7 +288,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 		catch (\Aurora\System\Exceptions\ApiException $oEx)
 		{
-			echo(\Aurora\System\Managers\Response::GetJsonFromObject('Json', \Aurora\System\Managers\Response::FalseResponse(__METHOD__, 403, 'Access denied')));
+//			echo(\Aurora\System\Managers\Response::GetJsonFromObject('Json', \Aurora\System\Managers\Response::FalseResponse(__METHOD__, 403, 'Access denied')));
+			$this->oHttp->StatusHeader(403);
 			exit;
 		}
 
@@ -371,7 +372,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				}
 				else
 				{
-					echo(\Aurora\System\Managers\Response::GetJsonFromObject('Json', \Aurora\System\Managers\Response::FalseResponse(__METHOD__, 403, 'Not Found')));
+//					echo(\Aurora\System\Managers\Response::GetJsonFromObject('Json', \Aurora\System\Managers\Response::FalseResponse(__METHOD__, 403, 'Not Found')));
+					$this->oHttp->StatusHeader(404);
 					exit;
 				}
 			}
