@@ -2429,5 +2429,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return false;
 		// Actual updating is preceded in subscribed methods. Look for it by "Files::UpdateExtendedProps::after"
 	}
+
+	public function GetExtendedProps($UserId, $Type, $Path, $Name)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		return false;
+		// Actual updating is preceded in subscribed methods. Look for it by "Files::GetExtendedProps::after"
+	}
 	/***** public functions might be called with web API *****/
 }
