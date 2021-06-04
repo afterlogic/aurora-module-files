@@ -56,6 +56,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'), 1000);
 		$this->subscribeEvent('Files::Move::after', array($this, 'onAfterMove'), 1000);
 
+		$this->subscribeEvent('Core::getInheritedAttributes', array($this, 'onGetInheritedAttributes'), 1000);
 
 		$this->AddEntries(
 			array(
@@ -81,18 +82,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 				]
 			]
 		);
+	}
 
-		\Aurora\Modules\Core\Classes\User::extend(
-			self::GetName(),
-			[
-				'UserSpaceLimitMb'	=> [
-					'int',
-					0,
-					false
-				]
-			]
-		);
-
+	public function onGetInheritedAttributes(&$aArgs, &$aResult)
+	{
+		$aResult = ['Files::UserSpaceLimitMb'];
 	}
 
 	/**
