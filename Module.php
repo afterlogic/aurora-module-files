@@ -73,7 +73,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function onGetInheritedAttributes(&$aArgs, &$aResult)
 	{
-		$aResult = ['Files::UserSpaceLimitMb'];
+		if (isset($aArgs['ClassName']) && $aArgs['ClassName'] === User::class) {
+			$aResult[] = 'Files::UserSpaceLimitMb';
+		}
 	}
 
 	/**
