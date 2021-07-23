@@ -1299,14 +1299,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		if ($mResult)
 		{
-/*			$oUser = \Aurora\Modules\Core\Module::getInstance()->GetUserUnchecked($mResult);
+			$oUser = \Aurora\Modules\Core\Module::getInstance()->GetUserUnchecked($mResult);
 			if ($oUser)
 			{
 				$oTenant = \Aurora\Modules\Core\Module::getInstance()->GetTenantUnchecked($oUser->IdTenant);
-				$oUser->{$this->GetName() . '::UserSpaceLimitMb'} = $oTenant->{$this->GetName() . '::UserSpaceLimitMb'};
+				$oUser->setExtendedProp($this->GetName() . '::UserSpaceLimitMb', $oTenant->{$this->GetName() . '::UserSpaceLimitMb'});
 				$oUser->save();
 			}
-*/
+
 		}
 	}
 
