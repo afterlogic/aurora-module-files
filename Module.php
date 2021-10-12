@@ -245,6 +245,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
 	{
+		// SVG files should not be viewed because they may contain JS
+		if ($sAction !== 'download' && strtolower(pathinfo($sFileName, PATHINFO_EXTENSION)) === 'svg')
+		{
+			$this->oHttp->StatusHeader(403);
+			exit();
+		}
+		
 		$bDownload = true;
 		$bThumbnail = false;
 
