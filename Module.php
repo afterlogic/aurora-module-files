@@ -45,6 +45,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $this->oApiFileCache;
 	}
 
+	/**
+	 *
+	 * @return \Aurora\Modules\Files\Module
+	 */
+	public static function Decorator()
+	{
+		return parent::Decorator();
+	}
+
 
 	/***** private functions *****/
 	/**
@@ -54,7 +63,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function init()
 	{
-		$this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 1000);
 		$this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'), 1000);
 		$this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'), 1000);
 		$this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'), 1000);
@@ -1137,7 +1145,32 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function GetItems($UserId, $Type, $Path, $Pattern, $PublicHash = null)
 	{
-		return [];
+		$aArgs = [
+			'UserId' => $UserId,
+			'Type' => $Type,
+			'Path' => $Path,
+			'Pattern' => $Pattern,
+			'PublicHash' => $PublicHash
+		];
+		$mResult = [];
+		
+		$this->broadcastEvent('GetItems', $aArgs, $mResult);
+
+		$aItems = [];
+		if (is_array($mResult))
+		{
+			foreach ($mResult as $oItem)
+			{
+				if ($oItem instanceof Classes\FileItem)
+				{
+					$aItems[] = self::Decorator()->PopulateFileItem($aArgs['UserId'], $oItem);
+				}
+			}
+
+			$mResult = $aItems;
+		}
+
+		return $aItems;
 	}
 
 	/**
@@ -1215,28 +1248,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'Items' => self::Decorator()->GetItems($UserId, $Type, $Path, $Pattern),
 			'Quota' => self::Decorator()->GetQuota($UserId, $Type)
 		];
-	}
-
-	/**
-	 *
-	 * @param array $aArgs
-	 * @param mixed $mResult
-	 */
-	public function onAfterGetItems($aArgs, &$mResult)
-	{
-		$aItems = [];
-		if (is_array($mResult))
-		{
-			foreach ($mResult as $oItem)
-			{
-				if ($oItem instanceof Classes\FileItem)
-				{
-					$aItems[] = self::Decorator()->PopulateFileItem($aArgs['UserId'], $oItem);
-				}
-			}
-
-			$mResult = $aItems;
-		}
 	}
 
 	/**
@@ -1355,6 +1366,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function PopulateFileItem($UserId, $Item)
 	{
 		return $Item;
+	}
+
+		/**
+	 *
+	 * @param array $aItems
+	 */
+	public function PopulateFileItems($UserId, $Items)
+	{
+		return $Items;
 	}
 
 	/**

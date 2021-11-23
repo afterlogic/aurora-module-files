@@ -68,7 +68,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'RealPath' => '',
 			'Actions' => array(),
 			'ETag' => '',
-			'ExtendedProps' => array()
+			'ExtendedProps' => array(),
+			'Shared' => false
 		));
 	}
 
@@ -134,7 +135,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'Actions' => array('array'),
 			'Hash' => array('string'),
 			'ETag' => array('string'),
-			'ExtendedProps' => array('array')
+			'ExtendedProps' => array('array'),
+			'Shared' => array('bool')
 		);
 	}
 
@@ -171,6 +173,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		$aResult['Hash'] = $this->getHash();
 		$aResult['ETag'] = $this->ETag;
 		$aResult['ExtendedProps'] = $this->ExtendedProps;
+		$aResult['Shared'] = $this->Shared;
 
 		if ($this->Thumb)
 		{
