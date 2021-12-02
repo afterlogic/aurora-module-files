@@ -251,7 +251,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 *
 	 * @return bool
 	 */
-	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
+	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0, $bShared = false)
 	{
 		// SVG files should not be viewed because they may contain JS
 		if ($sAction !== 'download' && strtolower(pathinfo($sFileName, PATHINFO_EXTENSION)) === 'svg')
@@ -354,7 +354,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 					'Id' => $sFileName,
 					'IsThumb' => $bThumbnail,
 					'Offset' => $iOffset,
-					'ChunkSize' => $iChunkSize
+					'ChunkSize' => $iChunkSize,
+					'Shared' => $bShared
 				);
 				$this->broadcastEvent(
 					'GetFile',
@@ -884,8 +885,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sPath = isset($aValues['Path']) ? $aValues['Path'] : '';
 		$sFileName = isset($aValues['Name']) ? $aValues['Name'] : '';
 		$sPublicHash = isset($aValues['PublicHash']) ? $aValues['PublicHash'] : null;
+		$bShared = isset($aValues['Shared']) ? $aValues['Shared'] : null;
 
-		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $sPublicHash, $sAction, $iOffset, $iChunkSize);
+		$this->getRawFile($iUserId, $sType, $sPath, $sFileName, $sPublicHash, $sAction, $iOffset, $iChunkSize, $bShared);
 	}
 
 	/**
@@ -1143,14 +1145,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return false;
 	}
 
-	public function GetItems($UserId, $Type, $Path, $Pattern, $PublicHash = null)
+	public function GetItems($UserId, $Type, $Path, $Pattern, $PublicHash = null, $Shared = false)
 	{
 		$aArgs = [
 			'UserId' => $UserId,
 			'Type' => $Type,
 			'Path' => $Path,
 			'Pattern' => $Pattern,
-			'PublicHash' => $PublicHash
+			'PublicHash' => $PublicHash,
+			'Shared' => $Shared
 		];
 		$mResult = [];
 		
@@ -1241,11 +1244,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * }
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function GetFiles($UserId, $Type, $Path, $Pattern)
+	public function GetFiles($UserId, $Type, $Path, $Pattern, $Shared = false)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return [
-			'Items' => self::Decorator()->GetItems($UserId, $Type, $Path, $Pattern),
+			'Items' => self::Decorator()->GetItems($UserId, $Type, $Path, $Pattern, null, $Shared),
 			'Quota' => self::Decorator()->GetQuota($UserId, $Type)
 		];
 	}

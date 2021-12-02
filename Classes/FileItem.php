@@ -86,7 +86,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'Type' => $this->TypeStr,
 			'Path' => $this->Path,
 			'Name' => $this->Id,
-			'FileName' => $this->Name
+			'FileName' => $this->Name,
+			'Shared' => $this->Shared
 		);
 
 		if (isset($sPublicHash))
