@@ -1401,6 +1401,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Type
 	 * @param string $Path
 	 * @param string $Id
+	 * @return \Aurora\Modules\Files\Classes\FileInfo
 	 */
 	public function GetFileInfo($UserId, $Type, $Path, $Id)
 	{
