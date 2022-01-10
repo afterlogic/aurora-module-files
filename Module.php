@@ -105,6 +105,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				]
 			]
 		);
+		$this->aErrors = [
+			Enums\ErrorCodes::NotFound	=> $this->i18N('INFO_NOTFOUND')
+		];
 	}
 
 	public function onGetInheritedAttributes(&$aArgs, &$aResult)
