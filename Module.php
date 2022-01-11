@@ -106,7 +106,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 			]
 		);
 		$this->aErrors = [
-			Enums\ErrorCodes::NotFound	=> $this->i18N('INFO_NOTFOUND')
+			Enums\ErrorCodes::NotFound	=> $this->i18N('INFO_NOTFOUND'),
+			Enums\ErrorCodes::NotPermitted	=> $this->i18N('INFO_NOTPERMITTED'),
 		];
 	}
 

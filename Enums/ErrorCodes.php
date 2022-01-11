@@ -15,11 +15,13 @@ namespace Aurora\Modules\Files\Enums;
 class ErrorCodes
 {
 	const NotFound = 4001;
+	const NotPermitted = 4002;
 
 	/**
 	 * @var array
 	 */
 	protected $aConsts = [
 		'NotFound' => self::NotFound,
+		'NotPermitted' => self::NotPermitted
 	];
 }
