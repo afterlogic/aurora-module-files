@@ -16,12 +16,14 @@ class ErrorCodes
 {
 	const NotFound = 4001;
 	const NotPermitted = 4002;
+	const AlreadeExists = 4003;
 
 	/**
 	 * @var array
 	 */
 	protected $aConsts = [
 		'NotFound' => self::NotFound,
-		'NotPermitted' => self::NotPermitted
+		'NotPermitted' => self::NotPermitted,
+		'AlreadeExists' => self::AlreadeExists
 	];
 }
