@@ -17,8 +17,13 @@ namespace Aurora\Modules\Files;
  * @package Modules
  */
 
+use Afterlogic\DAV\Constants;
+use Afterlogic\DAV\Server;
+use Aurora\Api;
 use \Aurora\Modules\Core\Models\User;
 use \Aurora\Modules\Core\Models\Tenant;
+use Aurora\Modules\Files\Enums\ErrorCodes;
+use Aurora\System\Exceptions\ApiException;
 
 class Module extends \Aurora\System\Module\AbstractModule
 {
@@ -109,6 +114,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			Enums\ErrorCodes::NotFound	=> $this->i18N('INFO_NOTFOUND'),
 			Enums\ErrorCodes::NotPermitted	=> $this->i18N('INFO_NOTPERMITTED'),
 			Enums\ErrorCodes::AlreadeExists	=> $this->i18N('ERROR_ITEM_ALREADY_EXISTS'),
+			Enums\ErrorCodes::CantDeleteSharedItem	=> $this->i18N('ERROR_CANNOT_DELETE_SHARED_ITEM'),
 		];
 	}
 
@@ -1712,8 +1718,107 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Delete($UserId, $Type, $Items)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		
 		foreach ($Items as $aItem)
 		{
+			try {
+				$oNode = Server::getNodeForPath(Constants::FILESTORAGE_PATH_ROOT . '/' . $Type . '/' . $aItem['Path'] . '/' . $aItem['Name']);
+			} catch (\Exception $oEx) {
+				Api::LogException($oEx);
+				throw new ApiException(ErrorCodes::NotFound);
+			}
+
+			if ($oNode instanceof \Afterlogic\DAV\FS\Shared\File || $oNode instanceof \Afterlogic\DAV\FS\Shared\Directory) {
+				throw new ApiException(ErrorCodes::CantDeleteSharedItem);
+			}
+
+			$oItem = new Classes\FileItem();
+			$oItem->Id = $aItem['Name'];
+			$oItem->Name = $aItem['Name'];
+			$oItem->TypeStr = $Type;
+			$oItem->Path = $aItem['Path'];
+
+			self::Decorator()->DeletePublicLink($UserId, $Type, $aItem['Path'], $aItem['Name']);
+			\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $aItem['Name']);
+		}
+	}
+
+
+		/**
+	 * @api {post} ?/Api/ LeaveShare
+	 * @apiDescription leave shared files and folder specified with list.
+	 * @apiName LeaveShare
+	 * @apiGroup Files
+	 *
+	 * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+	 * @apiHeaderExample {json} Header-Example:
+	 *	{
+	 *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+	 *	}
+	 *
+	 * @apiParam {string=Files} Module Module name
+	 * @apiParam {string=LeaveShare} Method Method name
+	 * @apiParam {string} Parameters JSON.stringified object <br>
+	 * {<br>
+	 * &emsp; **Type** *string* Type of storage - personal, corporate.<br>
+	 * &emsp; **Items** *array* Array of items to leave share.<br>
+	 * }
+	 *
+	 * @apiParamExample {json} Request-Example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'LeaveShare',
+	 *	Parameters: '{ Type: "personal", Items: [{ "Path": "", "Name": "2.png" },
+	 *		{ "Path": "", "Name": "logo.png" }] }'
+	 * }
+	 *
+	 * @apiSuccess {object[]} Result Array of response objects.
+	 * @apiSuccess {string} Result.Module Module name
+	 * @apiSuccess {string} Result.Method Method name
+	 * @apiSuccess {bool} Result.Result Indicates if files and (or) folders were leave share successfully.
+	 * @apiSuccess {int} [Result.ErrorCode] Error code
+	 *
+	 * @apiSuccessExample {json} Success response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'LeaveShare',
+	 *	Result: true
+	 * }
+	 *
+	 * @apiSuccessExample {json} Error response example:
+	 * {
+	 *	Module: 'Files',
+	 *	Method: 'LeaveShare',
+	 *	Result: false,
+	 *	ErrorCode: 102
+	 * }
+	 */
+
+	/**
+	 * Leave shared files and folder specified with list.
+	 *
+	 * @param int $UserId User identifier.
+	 * @param string $Type Type of storage - personal, corporate.
+	 * @param array $Items Array of items to leave.
+	 * @return bool
+	 * @throws \Aurora\System\Exceptions\ApiException
+	 */
+	public function LeaveShare($UserId, $Type, $Items)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		foreach ($Items as $aItem)
+		{
+			try {
+				$oNode = Server::getNodeForPath(Constants::FILESTORAGE_PATH_ROOT . $Type . '/' . $aItem['Path'] . '/' . $aItem['Name']);
+			} catch (\Exception $oEx) {
+				Api::LogException($oEx);
+				throw new ApiException(ErrorCodes::NotFound);
+			}
+
+			if (!($oNode instanceof \Afterlogic\DAV\FS\Shared\File || $oNode instanceof \Afterlogic\DAV\FS\Shared\Directory)) {
+				throw new ApiException(ErrorCodes::CantDeleteSharedItem);
+			}
+
 			$oItem = new Classes\FileItem();
 			$oItem->Id = $aItem['Name'];
 			$oItem->Name = $aItem['Name'];

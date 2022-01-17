@@ -17,6 +17,7 @@ class ErrorCodes
 	const NotFound = 4001;
 	const NotPermitted = 4002;
 	const AlreadeExists = 4003;
+	const CantDeleteSharedItem = 4004;
 
 	/**
 	 * @var array
@@ -24,6 +25,7 @@ class ErrorCodes
 	protected $aConsts = [
 		'NotFound' => self::NotFound,
 		'NotPermitted' => self::NotPermitted,
-		'AlreadeExists' => self::AlreadeExists
+		'AlreadeExists' => self::AlreadeExists,
+		'CantDeleteSharedItem' => self::CantDeleteSharedItem
 	];
 }
