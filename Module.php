@@ -23,6 +23,7 @@ use Aurora\Api;
 use \Aurora\Modules\Core\Models\User;
 use \Aurora\Modules\Core\Models\Tenant;
 use Aurora\Modules\Files\Enums\ErrorCodes;
+use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
 
 class Module extends \Aurora\System\Module\AbstractModule
@@ -1805,11 +1806,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function LeaveShare($UserId, $Type, $Items)
 	{
+		$aArgs = [
+			'UserId' => $UserId, 
+			'Type' => $Type, 
+			'Items' => $Items
+		];
+		EventEmitter::getInstance()->emit('Files', 'Delete::before', $aArgs);
+		
+		$UserId = $aArgs['UserId'];
+		$Type = $aArgs['Type'];
+		$Items = $aArgs['Items'];
+		
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		foreach ($Items as $aItem)
 		{
 			try {
-				$oNode = Server::getNodeForPath(Constants::FILESTORAGE_PATH_ROOT . $Type . '/' . $aItem['Path'] . '/' . $aItem['Name']);
+				$oNode = Server::getNodeForPath(Constants::FILESTORAGE_PATH_ROOT . '/' . $Type . '/' . $aItem['Path'] . '/' . $aItem['Name']);
 			} catch (\Exception $oEx) {
 				Api::LogException($oEx);
 				throw new ApiException(ErrorCodes::NotFound);
@@ -1828,6 +1840,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 			self::Decorator()->DeletePublicLink($UserId, $Type, $aItem['Path'], $aItem['Name']);
 			\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $aItem['Name']);
 		}
+
+		$aArgs = [
+			'UserId' => $UserId, 
+			'Type' => $Type, 
+			'Items' => $Items
+		];
+		$mResult = false;
+
+		EventEmitter::getInstance()->emit('Files', 'Delete::after', $aArgs, $mResult);
+
+		return $mResult;
 	}
 
 	/**
