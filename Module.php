@@ -2598,5 +2598,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return false;
 		// Actual updating is preceded in subscribed methods. Look for it by "Files::GetExtendedProps::after"
 	}
+
+	public function GetAccessInfoForPath($UserId, $Type, $Path) {
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		// Actual updating is preceded in subscribed methods. Look for it by "Files::GetInfoForPath::after"
+		return false;
+	}
 	/***** public functions might be called with web API *****/
 }
