@@ -1730,7 +1730,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 
 			if ($oNode instanceof \Afterlogic\DAV\FS\Shared\File || $oNode instanceof \Afterlogic\DAV\FS\Shared\Directory) {
-				throw new ApiException(ErrorCodes::CantDeleteSharedItem);
+				if (!$oNode->isInherited()) {
+					throw new ApiException(ErrorCodes::CantDeleteSharedItem);
+				}
 			}
 
 			$oItem = new Classes\FileItem();
