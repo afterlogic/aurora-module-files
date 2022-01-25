@@ -2503,10 +2503,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($oUser->IdTenant);
 
 				$iTenantSpaceLimitMb = $oTenant->{self::GetName() . '::TenantSpaceLimitMb'};
-				$iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oUser->IdTenant);
-				if (($iAllocatedSpaceForUsersInTenant - $oUser->{self::GetName() . '::UserSpaceLimitMb'}) + $UserSpaceLimitMb > $iTenantSpaceLimitMb)
-				{
-					throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
+				if ($iTenantSpaceLimitMb > 0) {
+					$iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oUser->IdTenant);
+					$iNewAllocatedSpaceForUsersInTenant = $iAllocatedSpaceForUsersInTenant - $oUser->{self::GetName() . '::UserSpaceLimitMb'} + $UserSpaceLimitMb;
+					if ($iNewAllocatedSpaceForUsersInTenant > $iTenantSpaceLimitMb) {
+						throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
+					}
 				}
 
 				$oUser->setExtendedProp(self::GetName() . '::UserSpaceLimitMb', $UserSpaceLimitMb);
