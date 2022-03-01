@@ -69,7 +69,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'Actions' => array(),
 			'ETag' => '',
 			'ExtendedProps' => array(),
-			'Shared' => false
+			'Shared' => false,
+			'GroupId' => null
 		));
 	}
 
@@ -87,7 +88,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'Path' => $this->Path,
 			'Name' => $this->Id,
 			'FileName' => $this->Name,
-			'Shared' => $this->Shared
+			'Shared' => $this->Shared,
+			'GroupId' => $this->GroupId
 		);
 
 		if (isset($sPublicHash))
@@ -137,7 +139,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'Hash' => array('string'),
 			'ETag' => array('string'),
 			'ExtendedProps' => array('array'),
-			'Shared' => array('bool')
+			'Shared' => array('bool'),
+			'GroupId' => array('int')
 		);
 	}
 
@@ -175,6 +178,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		$aResult['ETag'] = $this->ETag;
 		$aResult['ExtendedProps'] = $this->ExtendedProps;
 		$aResult['Shared'] = $this->Shared;
+		$aResult['GroupId'] = $this->GroupId;
 
 		if ($this->Thumb)
 		{
