@@ -2373,7 +2373,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Path
 	 * @param string $Name
 	 */
-	public function GetNonExistentFileName($UserId, $Type, $Path, $Name)
+	public function GetNonExistentFileName($UserId, $Type, $Path, $Name, $WithoutGroup = false)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		return $Name;
