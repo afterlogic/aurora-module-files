@@ -2595,9 +2595,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 		// Actual updating is preceded in subscribed methods. Look for it by "Files::UpdateExtendedProps::after"
 	}
 
-	public function GetExtendedProps($UserId, $Type, $Path, $Name)
+	public function GetExtendedProps($UserId = null, $Type = null, $Path = null, $Name = null)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		if ($UserId === null || $Type === null || $Path === null || $Name === null)
+		{
+			throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
+		}
 
 		return false;
 		// Actual updating is preceded in subscribed methods. Look for it by "Files::GetExtendedProps::after"
