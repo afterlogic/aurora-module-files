@@ -1820,10 +1820,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$Items = $aArgs['Items'];
 		
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		$aNodes = [];
 		foreach ($Items as $aItem)
 		{
 			try {
 				$oNode = Server::getNodeForPath(Constants::FILESTORAGE_PATH_ROOT . '/' . $Type . '/' . $aItem['Path'] . '/' . $aItem['Name']);
+				$aItems[] = $oNode;
 			} catch (\Exception $oEx) {
 				Api::LogException($oEx);
 				throw new ApiException(ErrorCodes::NotFound);
@@ -1846,11 +1848,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$aArgs = [
 			'UserId' => $UserId, 
 			'Type' => $Type, 
-			'Items' => $Items
+			'Items' => $aItems
 		];
 		$mResult = false;
 
-		EventEmitter::getInstance()->emit('Files', 'Delete::after', $aArgs, $mResult);
+		EventEmitter::getInstance()->emit('Files', 'LeaveShare', $aArgs, $mResult);
 
 		return $mResult;
 	}
