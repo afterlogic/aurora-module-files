@@ -70,7 +70,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'ETag' => '',
 			'ExtendedProps' => array(),
 			'Shared' => false,
-			'GroupId' => null
+			'GroupId' => null,
+			'Initiator' => null
 		));
 	}
 
@@ -140,7 +141,8 @@ class FileItem  extends \Aurora\System\AbstractContainer
 			'ETag' => array('string'),
 			'ExtendedProps' => array('array'),
 			'Shared' => array('bool'),
-			'GroupId' => array('int')
+			'GroupId' => array('int'),
+			'Initiator' => array('string'),
 		);
 	}
 
@@ -179,6 +181,7 @@ class FileItem  extends \Aurora\System\AbstractContainer
 		$aResult['ExtendedProps'] = $this->ExtendedProps;
 		$aResult['Shared'] = $this->Shared;
 		$aResult['GroupId'] = $this->GroupId;
+		$aResult['Initiator'] = $this->Initiator;
 
 		if ($this->Thumb)
 		{
