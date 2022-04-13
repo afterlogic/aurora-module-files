@@ -1729,6 +1729,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 				throw new ApiException(ErrorCodes::NotFound);
 			}
 
+			if (!$oNode) {
+				throw new ApiException(ErrorCodes::NotFound);
+			}
+
 			if ($oNode instanceof \Afterlogic\DAV\FS\Shared\File || $oNode instanceof \Afterlogic\DAV\FS\Shared\Directory) {
 				if (!$oNode->isInherited()) {
 					throw new ApiException(ErrorCodes::CantDeleteSharedItem);
