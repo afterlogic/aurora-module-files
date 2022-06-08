@@ -1,42 +1,42 @@
 {
-  "Disabled": [
-    false,
-    "bool"
-  ],
-  "Disabled_Description": [
-    "",
-    "string"
-  ],
-  "EnableUploadSizeLimit": [
-    true,
-    "bool"
-  ],
-  "EnableUploadSizeLimit_Description": [
-    "",
-    "string"
-  ],
-  "UploadSizeLimitMb": [
-    100,
-    "int"
-  ],
-  "UploadSizeLimitMb_Description": [
-    "",
-    "string"
-  ],
-  "UserSpaceLimitMb": [
-    100,
-    "int"
-  ],
-  "UserSpaceLimitMb_Description": [
-    "",
-    "string"
-  ],
-  "TenantSpaceLimitMb": [
-    1000,
-    "int"
-  ],
-  "TenantSpaceLimitMb_Description": [
-    "",
-    "string"
-  ]
+	"Disabled": [
+		false,
+		"bool"
+	],
+	"Disabled_Description": [
+		"",
+		"string"
+	],
+	"EnableUploadSizeLimit": [
+		true,
+		"bool"
+	],
+	"EnableUploadSizeLimit_Description": [
+		"",
+		"string"
+	],
+	"UploadSizeLimitMb": [
+		100,
+		"int"
+	],
+	"UploadSizeLimitMb_Description": [
+		"",
+		"string"
+	],
+	"UserSpaceLimitMb": [
+		100,
+		"int"
+	],
+	"UserSpaceLimitMb_Description": [
+		"",
+		"string"
+	],
+	"TenantSpaceLimitMb": [
+		1000,
+		"int"
+	],
+	"TenantSpaceLimitMb_Description": [
+		"",
+		"string"
+	]
 }
