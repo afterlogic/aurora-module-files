@@ -4,7 +4,7 @@
 		"bool"
 	],
 	"Disabled_Description": [
-		"",
+		"Setting to true disables the module",
 		"string"
 	],
 	"EnableUploadSizeLimit": [
@@ -12,7 +12,7 @@
 		"bool"
 	],
 	"EnableUploadSizeLimit_Description": [
-		"",
+		"If true, upload file size limit is set",
 		"string"
 	],
 	"UploadSizeLimitMb": [
@@ -20,7 +20,7 @@
 		"int"
 	],
 	"UploadSizeLimitMb_Description": [
-		"",
+		"Upload file size limit value, in Mbytes",
 		"string"
 	],
 	"UserSpaceLimitMb": [
@@ -28,7 +28,7 @@
 		"int"
 	],
 	"UserSpaceLimitMb_Description": [
-		"",
+		"Default filestorage disk space quota for new user accounts created",
 		"string"
 	],
 	"TenantSpaceLimitMb": [
@@ -36,7 +36,7 @@
 		"int"
 	],
 	"TenantSpaceLimitMb_Description": [
-		"",
+		"With multitenancy enabled, default tenant space quota; with multitenancy disabled, total disk space quota for the installation",
 		"string"
 	]
 }
