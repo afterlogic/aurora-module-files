@@ -18,6 +18,8 @@ class ErrorCodes
 	const NotPermitted = 4002;
 	const AlreadeExists = 4003;
 	const CantDeleteSharedItem = 4004;
+	const CannotCopyOrMoveItemToItself = 4005;
+	const NotPossibleToMoveSharedFileToCorporateStorage = 4006;
 
 	/**
 	 * @var array
@@ -26,6 +28,8 @@ class ErrorCodes
 		'NotFound' => self::NotFound,
 		'NotPermitted' => self::NotPermitted,
 		'AlreadeExists' => self::AlreadeExists,
-		'CantDeleteSharedItem' => self::CantDeleteSharedItem
+		'CantDeleteSharedItem' => self::CantDeleteSharedItem,
+		'CannotCopyOrMoveItemToItself' => self::CannotCopyOrMoveItemToItself,
+		'NotPossibleToMoveSharedFileToCorporateStorage' => self::NotPossibleToMoveSharedFileToCorporateStorage,
 	];
 }

@@ -116,6 +116,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 			Enums\ErrorCodes::NotPermitted	=> $this->i18N('INFO_NOTPERMITTED'),
 			Enums\ErrorCodes::AlreadeExists	=> $this->i18N('ERROR_ITEM_ALREADY_EXISTS'),
 			Enums\ErrorCodes::CantDeleteSharedItem	=> $this->i18N('ERROR_CANNOT_DELETE_SHARED_ITEM'),
+			Enums\ErrorCodes::CannotCopyOrMoveItemToItself	=> $this->i18N('ERROR_CANNOT_COPY_OR_MOVE_ITEM_TO_ITSELF'),
+			Enums\ErrorCodes::NotPossibleToMoveSharedFileToCorporateStorage => $this->i18N('ERROR_NOT_POSSIBLE_TO_MOVE_SHARED_FILE_OR_DIR_TO_CORPORATE_STORAGE'),
 		];
 	}
 
