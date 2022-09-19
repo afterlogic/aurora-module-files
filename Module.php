@@ -2408,7 +2408,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$Storage = $aFile['Storage'];
 				$Path = $aFile['Path'];
 				$Name = $aFile['Name'];
-				$Id = $aFile['Id'];
+				$Id = $aFile['Name'];
 
 				$aArgs = array(
 					'UserId' => $UserId,
