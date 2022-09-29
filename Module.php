@@ -1721,39 +1721,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Delete($UserId, $Type, $Items)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
-		foreach ($Items as $aItem)
-		{
-			try {
-				$oNode = Server::getNodeForPath(Constants::FILESTORAGE_PATH_ROOT . '/' . $Type . '/' . $aItem['Path'] . '/' . $aItem['Name']);
-			} catch (\Exception $oEx) {
-				Api::LogException($oEx);
-				throw new ApiException(ErrorCodes::NotFound);
-			}
-
-			if (!$oNode) {
-				throw new ApiException(ErrorCodes::NotFound);
-			}
-
-			if ($oNode instanceof \Afterlogic\DAV\FS\Shared\File || $oNode instanceof \Afterlogic\DAV\FS\Shared\Directory) {
-				if (!$oNode->isInherited()) {
-					throw new ApiException(ErrorCodes::CantDeleteSharedItem);
-				}
-			}
-
-			$oItem = new Classes\FileItem();
-			$oItem->Id = $aItem['Name'];
-			$oItem->Name = $aItem['Name'];
-			$oItem->TypeStr = $Type;
-			$oItem->Path = $aItem['Path'];
-
-			self::Decorator()->DeletePublicLink($UserId, $Type, $aItem['Path'], $aItem['Name']);
-			\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $aItem['Name']);
-		}
 	}
 
-
-		/**
+	/**
 	 * @api {post} ?/Api/ LeaveShare
 	 * @apiDescription leave shared files and folder specified with list.
 	 * @apiName LeaveShare
