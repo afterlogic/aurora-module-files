@@ -84,33 +84,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		);
 		$this->denyMethodsCallByWebApi(['getRawFile', 'getRawFileData', 'GetItems']);
 
-		\Aurora\Modules\Core\Classes\Tenant::extend(
-			self::GetName(),
-			[
-				'TenantSpaceLimitMb'	=> [
-					'int',
-					$this->getConfig('TenantSpaceLimitMb'),
-					false
-				],
-				'UserSpaceLimitMb'	=> [
-					'int',
-					$this->getConfig('UserSpaceLimitMb'),
-					false,
-					true // can be inherit
-				]
-			]
-		);
-
-		\Aurora\Modules\Core\Classes\User::extend(
-			self::GetName(),
-			[
-				'UserSpaceLimitMb'	=> [
-					'int',
-					0,
-					false
-				]
-			]
-		);
 		$this->aErrors = [
 			Enums\ErrorCodes::NotFound	=> $this->i18N('INFO_NOTFOUND'),
 			Enums\ErrorCodes::NotPermitted	=> $this->i18N('INFO_NOTPERMITTED'),
