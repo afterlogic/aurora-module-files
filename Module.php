@@ -236,7 +236,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $SharedHash Indicates if file should be downloaded or viewed.
 	 * @param string $sAction Indicates if thumbnail should be created for file.
 	 *
-	 * @return bool
+	 * @return void
 	 */
 	public function getRawFile($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0, $bShared = false)
 	{
@@ -404,7 +404,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	/**
 	 * Uploads file from client side.
 	 *
-	 * @return string "true" or "false"
+	 * echo string "true" or "false"
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
 	public function UploadFileData()
@@ -917,7 +917,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param string $Path Path to folder contained file.
 	 * @param string $Name File name.
 	 * @param string $SharedHash Shared hash.
-	 * @return bool
+	 * @return void
 	 */
 	public function ViewFile($UserId, $Type, $Path, $Name, $SharedHash)
 	{
@@ -1393,6 +1393,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function GetFileInfo($UserId, $Type, $Path, $Id)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		return null;
 	}
 
 	/**
@@ -1557,6 +1559,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function CreateFolder($UserId, $Type, $Path, $FolderName)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		return false;
 	}
 
 	/**
@@ -1694,6 +1698,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function Delete($UserId, $Type, $Items)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		return false;
 	}
 
 	/**
@@ -1888,6 +1894,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $Name);
 		// Actual renaming is proceeded in subscribed methods. Look for it by "Files::Rename::after"
+
+		return false;
 	}
 
 	/**
@@ -2051,6 +2059,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				\Aurora\System\Managers\Thumb::RemoveFromCache($UserId, $oItem->getHash(), $aFile['Name']);
 			}
 		}
+
+		return false;
 	}
 
 	/**
