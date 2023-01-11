@@ -976,18 +976,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function GetFileThumbnail($UserId, $Type, $Path, $Name, $SharedHash)
 	{
+		return false;
 		// checkUserRoleIsAtLeast is called in getRawFile
-		return \base64_encode(
-			$this->getRawFile(
-				\Aurora\System\Api::getUserPublicIdById($UserId),
-				$Type,
-				$Path,
-				$Name,
-				$SharedHash,
-				false,
-				true
-			)
-		);
+		// return \base64_encode(
+		// 	$this->getRawFile(
+		// 		\Aurora\System\Api::getUserPublicIdById($UserId),
+		// 		$Type,
+		// 		$Path,
+		// 		$Name,
+		// 		$SharedHash,
+		// 		false,
+		// 		true
+		// 	)
+		// );
 	}
 
 	/**
