@@ -14,22 +14,22 @@ namespace Aurora\Modules\Files\Enums;
  */
 class ErrorCodes
 {
-	const NotFound = 4001;
-	const NotPermitted = 4002;
-	const AlreadeExists = 4003;
-	const CantDeleteSharedItem = 4004;
-	const CannotCopyOrMoveItemToItself = 4005;
-	const NotPossibleToMoveSharedFileToCorporateStorage = 4006;
+    public const NotFound = 4001;
+    public const NotPermitted = 4002;
+    public const AlreadeExists = 4003;
+    public const CantDeleteSharedItem = 4004;
+    public const CannotCopyOrMoveItemToItself = 4005;
+    public const NotPossibleToMoveSharedFileToCorporateStorage = 4006;
 
-	/**
-	 * @var array
-	 */
-	protected $aConsts = [
-		'NotFound' => self::NotFound,
-		'NotPermitted' => self::NotPermitted,
-		'AlreadeExists' => self::AlreadeExists,
-		'CantDeleteSharedItem' => self::CantDeleteSharedItem,
-		'CannotCopyOrMoveItemToItself' => self::CannotCopyOrMoveItemToItself,
-		'NotPossibleToMoveSharedFileToCorporateStorage' => self::NotPossibleToMoveSharedFileToCorporateStorage,
-	];
+    /**
+     * @var array
+     */
+    protected $aConsts = [
+        'NotFound' => self::NotFound,
+        'NotPermitted' => self::NotPermitted,
+        'AlreadeExists' => self::AlreadeExists,
+        'CantDeleteSharedItem' => self::CantDeleteSharedItem,
+        'CannotCopyOrMoveItemToItself' => self::CannotCopyOrMoveItemToItself,
+        'NotPossibleToMoveSharedFileToCorporateStorage' => self::NotPossibleToMoveSharedFileToCorporateStorage,
+    ];
 }
