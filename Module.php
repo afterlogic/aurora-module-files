@@ -511,7 +511,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         $aResult = [];
         if ($EntityType === 'Tenant') {
             \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-            $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($EntityId);
+            $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($EntityId);
             if ($oTenant instanceof Tenant) {
                 $aResult = [
                     'TenantSpaceLimitMb' => $oTenant->{self::GetName() . '::TenantSpaceLimitMb'},
@@ -522,7 +522,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
         if ($EntityType === 'User') {
             \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-            $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserUnchecked($EntityId);
+            $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserWithoutRoleCheck($EntityId);
             if ($oUser instanceof User) {
                 $aResult = [
                     'UserSpaceLimitMb' => $oUser->{self::GetName() . '::UserSpaceLimitMb'},
@@ -1238,9 +1238,9 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function onAfterCreateUser($aArgs, &$mResult)
     {
         if ($mResult) {
-            $oUser = \Aurora\Modules\Core\Module::getInstance()->GetUserUnchecked($mResult);
+            $oUser = \Aurora\Modules\Core\Module::getInstance()->GetUserWithoutRoleCheck($mResult);
             if ($oUser) {
-                $oTenant = \Aurora\Modules\Core\Module::getInstance()->GetTenantUnchecked($oUser->IdTenant);
+                $oTenant = \Aurora\Modules\Core\Module::getInstance()->GetTenantWithoutRoleCheck($oUser->IdTenant);
                 $oUser->setExtendedProp($this->GetName() . '::UserSpaceLimitMb', $oTenant->{$this->GetName() . '::UserSpaceLimitMb'});
                 $oUser->save();
             }
@@ -2299,7 +2299,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
         if ($EntityType === 'Tenant') {
             \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-            $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($EntityId);
+            $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($EntityId);
 
             if ($oTenant instanceof Tenant
                     && $oAuthenticatedUser instanceof User
@@ -2321,13 +2321,13 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
         if ($EntityType === 'User') {
             \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-            $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserUnchecked($EntityId);
+            $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserWithoutRoleCheck($EntityId);
 
             if ($oUser instanceof \Aurora\Modules\Core\Models\User
                     && $oAuthenticatedUser instanceof \Aurora\Modules\Core\Models\User
                     && (($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant)
                     || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)) {
-                $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($oUser->IdTenant);
+                $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($oUser->IdTenant);
 
                 $iTenantSpaceLimitMb = $oTenant->{self::GetName() . '::TenantSpaceLimitMb'};
                 if ($iTenantSpaceLimitMb > 0) {
@@ -2353,7 +2353,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-        $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserUnchecked($UserId);
+        $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserWithoutRoleCheck($UserId);
 
         if ($oUser instanceof \Aurora\Modules\Core\Models\User && $oAuthenticatedUser instanceof \Aurora\Modules\Core\Models\User && (
             ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant) ||
@@ -2373,7 +2373,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-        $oTenant= \Aurora\Modules\Core\Module::Decorator()->GetTenantUnchecked($TenantId);
+        $oTenant= \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($TenantId);
 
         if ($oTenant instanceof Tenant && $oAuthenticatedUser instanceof User && (
             ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oTenant->Id === $oAuthenticatedUser->IdTenant) ||
