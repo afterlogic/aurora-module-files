@@ -35,6 +35,11 @@ namespace Aurora\Modules\Files\Classes;
  * @property string $RealPath
  * @property array $Actions
  * @property string $Hash
+ * @property int $GroupId
+ * @property bool $Published
+ * @property string $ETag
+ * @property array $ExtendedProps
+ * @property string $Initiator
  *
  * @package Classes
  * @subpackage FileStorage
@@ -78,7 +83,7 @@ class FileItem extends \Aurora\System\AbstractContainer
     /**
      *
      * @param string $sPublicHash
-     * @return type
+     * @return string
      */
     public function getHash($sPublicHash = null)
     {

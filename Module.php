@@ -22,6 +22,7 @@ use Afterlogic\DAV\Server;
 use Aurora\Api;
 use Aurora\Modules\Core\Models\User;
 use Aurora\Modules\Core\Models\Tenant;
+use Aurora\Modules\Core\Module as CoreModule;
 use Aurora\Modules\Files\Enums\ErrorCodes;
 use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
@@ -37,7 +38,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     /**
      *
-     * @var \CApiModuleDecorator
+     * @var \Aurora\Modules\Min\Module
      */
     protected $oMinModuleDecorator = null;
 
@@ -106,7 +107,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     /**
     * Returns Min module decorator.
     *
-    * @return \CApiModuleDecorator
+    * @return \Aurora\Modules\Min\Module
     */
     private function getMinModuleDecorator()
     {
@@ -281,8 +282,8 @@ class Module extends \Aurora\System\Module\AbstractModule
             exit;
         }
 
-        if (isset($sType, $sPath, $sFileName)) {
-            $sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
+        if ($sType && $sPath) {
+            $sContentType = ($sFileName === '') ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 
             $mResult = false;
             if ($bThumbnail) {
@@ -1249,16 +1250,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     /**
      *
-     * @param array $aItems
+     * @param array $UserId
+     * @param mixed $Item
+     * 
+     * @return mixed
      */
     public function PopulateFileItem($UserId, $Item)
     {
         return $Item;
     }
 
-        /**
-     *
-     * @param array $aItems
+    /**
+     * 
+     * @param int $UserId
+     * @param mixed $Items
+     * 
+     * @return mixed
      */
     public function PopulateFileItems($UserId, $Items)
     {
@@ -1286,7 +1293,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $Type
      * @param string $Path
      * @param string $Id
-     * @return \Aurora\Modules\Files\Classes\FileInfo
+     * @return \Aurora\Modules\Files\Classes\FileItem
      */
     public function GetFileInfo($UserId, $Type, $Path, $Id)
     {
@@ -1365,7 +1372,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             if (!empty($mMin['__hash__'])) {
                 $sUserPublicId = $mMin['UserId'];
                 if ($sUserPublicId) {
-                    $oUser = \Aurora\System\Api::GetModuleDecorator('Core')->GetUserByPublicId($sUserPublicId);
+                    $oUser = CoreModule::Decorator()->GetUserByPublicId($sUserPublicId);
                     if ($oUser) {
                         $bPrevState = \Aurora\System\Api::skipCheckUserRole(true);
                         $sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
@@ -1668,6 +1675,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
         $aNodes = [];
+        $aItems = [];
         foreach ($Items as $aItem) {
             try {
                 $oNode = Server::getNodeForPath(Constants::FILESTORAGE_PATH_ROOT . '/' . $Type . '/' . $aItem['Path'] . '/' . $aItem['Name']);
@@ -2222,10 +2230,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     /**
      *
-     * @param type $UserId
-     * @param type $Storage
-     * @param type $Path
-     * @param type $Name
+     * @param int $UserId
+     * @param array $Files
      */
     public function SaveFilesAsTempFiles($UserId, $Files)
     {
