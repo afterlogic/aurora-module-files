@@ -1252,7 +1252,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      *
      * @param array $UserId
      * @param mixed $Item
-     * 
+     *
      * @return mixed
      */
     public function PopulateFileItem($UserId, $Item)
@@ -1261,10 +1261,10 @@ class Module extends \Aurora\System\Module\AbstractModule
     }
 
     /**
-     * 
+     *
      * @param int $UserId
      * @param mixed $Items
-     * 
+     *
      * @return mixed
      */
     public function PopulateFileItems($UserId, $Items)
