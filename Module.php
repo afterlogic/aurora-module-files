@@ -485,13 +485,14 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetSettings()
     {
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+        $oSettings = $this->GetModuleSettings();
 
         $aAppData = array(
-            'EnableUploadSizeLimit' => $this->getConfig('EnableUploadSizeLimit', false),
-            'UploadSizeLimitMb' => $this->getConfig('UploadSizeLimitMb', 0),
-            'CustomTabTitle' => $this->getConfig('CustomTabTitle', ''),
-            'UserSpaceLimitMb' => $this->getConfig('UserSpaceLimitMb', 0),
-            'TenantSpaceLimitMb' => $this->getConfig('TenantSpaceLimitMb', 0)
+            'EnableUploadSizeLimit' => $oSettings->EnableUploadSizeLimit,
+            'UploadSizeLimitMb' => $oSettings->UploadSizeLimitMb,
+            'CustomTabTitle' => $oSettings->CustomTabTitle,
+            'UserSpaceLimitMb' => $oSettings->UserSpaceLimitMb,
+            'TenantSpaceLimitMb' => $oSettings->TenantSpaceLimitMb
         );
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
@@ -699,7 +700,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     $sError = \Aurora\System\Notifications::FileNotFound;
                 } else {
                     $iSize = (int) $UploadData['size'];
-                    $iUploadSizeLimitMb = $this->getConfig('UploadSizeLimitMb', 0);
+                    $iUploadSizeLimitMb = $this->GetModuleSettings()->UploadSizeLimitMb;
                     if ($iUploadSizeLimitMb > 0 && $iSize/(1024*1024) > $iUploadSizeLimitMb) {
                         throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
                     }

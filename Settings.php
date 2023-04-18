@@ -15,6 +15,7 @@ use Aurora\System\SettingsProperty;
  * @property int $UploadSizeLimitMb
  * @property int $UserSpaceLimitMb
  * @property int $TenantSpaceLimitMb
+ * @property string $CustomTabTitle
  */
 
 class Settings extends \Aurora\System\Module\Settings
@@ -51,6 +52,12 @@ class Settings extends \Aurora\System\Module\Settings
                 "int",
                 null,
                 "With multitenancy enabled, default tenant space quota; with multitenancy disabled, total disk space quota for the installation",
+            ),
+            "CustomTabTitle" => new SettingsProperty(
+                "",
+                "string",
+                null,
+                "The value will be used as the tab title in the web UI",
             ),
         ];
     }
