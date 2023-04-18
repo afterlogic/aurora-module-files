@@ -282,7 +282,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             exit;
         }
 
-        if ($sType && $sPath) {
+        if ($sType) {
             $sContentType = ($sFileName === '') ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
 
             $mResult = false;
