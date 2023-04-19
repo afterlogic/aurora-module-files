@@ -7,16 +7,6 @@
 
 namespace Aurora\Modules\Files;
 
-/**
- * Main Files module. It provides PHP and Web APIs for managing files.
- *
- * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
- * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
- * @copyright Copyright (c) 2023, Afterlogic Corp.
- *
- * @package Modules
- */
-
 use Afterlogic\DAV\Constants;
 use Afterlogic\DAV\Server;
 use Aurora\Api;
@@ -27,6 +17,17 @@ use Aurora\Modules\Files\Enums\ErrorCodes;
 use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
 
+/**
+ * Main Files module. It provides PHP and Web APIs for managing files.
+ *
+ * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
+ * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
+ * @copyright Copyright (c) 2023, Afterlogic Corp.
+ *
+ * @property Settings $oModuleSettings
+ *
+ * @package Modules
+ */
 class Module extends \Aurora\System\Module\AbstractModule
 {
     protected static $sStorageType = '';
@@ -485,14 +486,13 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetSettings()
     {
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
-        $oSettings = $this->getModuleSettings();
 
         $aAppData = array(
-            'EnableUploadSizeLimit' => $oSettings->EnableUploadSizeLimit,
-            'UploadSizeLimitMb' => $oSettings->UploadSizeLimitMb,
-            'CustomTabTitle' => $oSettings->CustomTabTitle,
-            'UserSpaceLimitMb' => $oSettings->UserSpaceLimitMb,
-            'TenantSpaceLimitMb' => $oSettings->TenantSpaceLimitMb
+            'EnableUploadSizeLimit' => $this->oModuleSettings->EnableUploadSizeLimit,
+            'UploadSizeLimitMb' => $this->oModuleSettings->UploadSizeLimitMb,
+            'CustomTabTitle' => $this->oModuleSettings->CustomTabTitle,
+            'UserSpaceLimitMb' => $this->oModuleSettings->UserSpaceLimitMb,
+            'TenantSpaceLimitMb' => $this->oModuleSettings->TenantSpaceLimitMb
         );
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
@@ -700,7 +700,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     $sError = \Aurora\System\Notifications::FileNotFound;
                 } else {
                     $iSize = (int) $UploadData['size'];
-                    $iUploadSizeLimitMb = $this->getModuleSettings()->UploadSizeLimitMb;
+                    $iUploadSizeLimitMb = $this->oModuleSettings->UploadSizeLimitMb;
                     if ($iUploadSizeLimitMb > 0 && $iSize/(1024*1024) > $iUploadSizeLimitMb) {
                         throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
                     }
