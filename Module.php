@@ -64,7 +64,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      *
      * @return Settings
      */
-    protected function GetModuleSettings()
+    public function getModuleSettings()
     {
         return $this->oModuleSettings;
     }
@@ -485,7 +485,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetSettings()
     {
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
-        $oSettings = $this->GetModuleSettings();
+        $oSettings = $this->getModuleSettings();
 
         $aAppData = array(
             'EnableUploadSizeLimit' => $oSettings->EnableUploadSizeLimit,
@@ -700,7 +700,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     $sError = \Aurora\System\Notifications::FileNotFound;
                 } else {
                     $iSize = (int) $UploadData['size'];
-                    $iUploadSizeLimitMb = $this->GetModuleSettings()->UploadSizeLimitMb;
+                    $iUploadSizeLimitMb = $this->getModuleSettings()->UploadSizeLimitMb;
                     if ($iUploadSizeLimitMb > 0 && $iSize/(1024*1024) > $iUploadSizeLimitMb) {
                         throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
                     }
