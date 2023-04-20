@@ -53,8 +53,15 @@ class Module extends \Aurora\System\Module\AbstractModule
     }
 
     /**
-     *
-     * @return \Aurora\Modules\Files\Module
+     * @return Module
+     */
+    public static function getInstance()
+    {
+        return parent::getInstance();
+    }
+
+    /**
+     * @return Module
      */
     public static function Decorator()
     {
@@ -62,7 +69,6 @@ class Module extends \Aurora\System\Module\AbstractModule
     }
 
     /**
-     *
      * @return Settings
      */
     public function getModuleSettings()
