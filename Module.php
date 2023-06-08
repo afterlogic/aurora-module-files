@@ -531,8 +531,8 @@ class Module extends \Aurora\System\Module\AbstractModule
             $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($EntityId);
             if ($oTenant instanceof Tenant) {
                 $aResult = [
-                    'TenantSpaceLimitMb' => $oTenant->{self::GetName() . '::TenantSpaceLimitMb'},
-                    'UserSpaceLimitMb' => $oTenant->{self::GetName() . '::UserSpaceLimitMb'},
+                    'TenantSpaceLimitMb' => $oTenant->getExtendedProp(self::GetName() . '::TenantSpaceLimitMb'),
+                    'UserSpaceLimitMb' => $oTenant->getExtendedProp(self::GetName() . '::UserSpaceLimitMb'),
                     'AllocatedSpace' => $this->GetAllocatedSpaceForUsersInTenant($oTenant->Id)
                 ];
             }
@@ -542,7 +542,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserWithoutRoleCheck($EntityId);
             if ($oUser instanceof User) {
                 $aResult = [
-                    'UserSpaceLimitMb' => $oUser->{self::GetName() . '::UserSpaceLimitMb'},
+                    'UserSpaceLimitMb' => $oUser->getExtendedProp(self::GetName() . '::UserSpaceLimitMb'),
                 ];
             }
         }
@@ -1258,7 +1258,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             $oUser = \Aurora\Modules\Core\Module::getInstance()->GetUserWithoutRoleCheck($mResult);
             if ($oUser) {
                 $oTenant = \Aurora\Modules\Core\Module::getInstance()->GetTenantWithoutRoleCheck($oUser->IdTenant);
-                $oUser->setExtendedProp($this->GetName() . '::UserSpaceLimitMb', $oTenant->{$this->GetName() . '::UserSpaceLimitMb'});
+                $oUser->setExtendedProp($this->GetName() . '::UserSpaceLimitMb', $oTenant->getExtendedProp($this->GetName() . '::UserSpaceLimitMb'));
                 $oUser->save();
             }
         }
@@ -2351,10 +2351,10 @@ class Module extends \Aurora\System\Module\AbstractModule
                     || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)) {
                 $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($oUser->IdTenant);
 
-                $iTenantSpaceLimitMb = $oTenant->{self::GetName() . '::TenantSpaceLimitMb'};
+                $iTenantSpaceLimitMb = $oTenant->getExtendedProp(self::GetName() . '::TenantSpaceLimitMb');
                 if ($iTenantSpaceLimitMb > 0) {
                     $iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oUser->IdTenant);
-                    $iNewAllocatedSpaceForUsersInTenant = $iAllocatedSpaceForUsersInTenant - $oUser->{self::GetName() . '::UserSpaceLimitMb'} + $UserSpaceLimitMb;
+                    $iNewAllocatedSpaceForUsersInTenant = $iAllocatedSpaceForUsersInTenant - $oUser->getExtendedProp(self::GetName() . '::UserSpaceLimitMb') + $UserSpaceLimitMb;
                     if ($iNewAllocatedSpaceForUsersInTenant > $iTenantSpaceLimitMb) {
                         throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
                     }
@@ -2416,7 +2416,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function CheckAllocatedSpaceLimitForUsersInTenant($oTenant, $UserSpaceLimitMb)
     {
-        $iTenantSpaceLimitMb = $oTenant->{self::GetName() . '::TenantSpaceLimitMb'};
+        $iTenantSpaceLimitMb = $oTenant->getExtendedProp(self::GetName() . '::TenantSpaceLimitMb');
         $iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oTenant->Id);
 
         if ($iTenantSpaceLimitMb > 0 && $iAllocatedSpaceForUsersInTenant + $UserSpaceLimitMb > $iTenantSpaceLimitMb) {
