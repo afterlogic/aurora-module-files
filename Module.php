@@ -1210,7 +1210,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $aData;
     }
 
-    protected function updateMinHash($iUserId, $sType, $sPath, $sName, $sNewType, $sNewPath, $sNewName)
+    protected function updateMinHash($iUserId, $sType, $sPath, $sName, $sNewType, $sNewPath, $sNewName, $bIsFolder)
     {
         $sUserPublicId = \Aurora\Api::getUserPublicIdById($iUserId);
         $sID = \Aurora\Modules\Min\Module::generateHashId([$sUserPublicId, $sType, $sPath, $sName]);
@@ -1219,7 +1219,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         $mData = $this->getMinModuleDecorator()->GetMinByID($sID);
 
         if ($mData) {
-            $aData = $this->generateMinArray($sUserPublicId, $sNewType, $sNewPath, $sNewName, $mData['Size']);
+            $aData = $this->generateMinArray($sUserPublicId, $sNewType, $sNewPath, $sNewName, $mData['Size'], $bIsFolder);
             if ($aData) {
                 $this->getMinModuleDecorator()->UpdateMinByID($sID, $aData, $sNewID);
             }
@@ -1234,7 +1234,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function onAfterRename($aArgs, &$mResult)
     {
         if ($mResult && isset($aArgs['UserId'])) {
-            $this->updateMinHash($aArgs['UserId'], $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $aArgs['Type'], $aArgs['Path'], $aArgs['NewName']);
+            $this->updateMinHash($aArgs['UserId'], $aArgs['Type'], $aArgs['Path'], $aArgs['Name'], $aArgs['Type'], $aArgs['Path'], $aArgs['NewName'], $aArgs['IsFolder']);
         }
     }
 
@@ -1242,7 +1242,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         if ($mResult && isset($aArgs['Files']) && is_array($aArgs['Files']) && count($aArgs['Files']) > 0) {
             foreach ($aArgs['Files'] as $aFile) {
-                $this->updateMinHash($aArgs['UserId'], $aFile['FromType'], $aFile['FromPath'], $aFile['Name'], $aArgs['ToType'], $aArgs['ToPath'], $aFile['Name']);
+                $this->updateMinHash($aArgs['UserId'], $aFile['FromType'], $aFile['FromPath'], $aFile['Name'], $aArgs['ToType'], $aArgs['ToPath'], $aFile['NewName'], $aArgs['IsFolder']);
             }
         }
     }
