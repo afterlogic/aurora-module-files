@@ -1242,7 +1242,16 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         if ($mResult && isset($aArgs['Files']) && is_array($aArgs['Files']) && count($aArgs['Files']) > 0) {
             foreach ($aArgs['Files'] as $aFile) {
-                $this->updateMinHash($aArgs['UserId'], $aFile['FromType'], $aFile['FromPath'], $aFile['Name'], $aArgs['ToType'], $aArgs['ToPath'], $aFile['NewName'], $aArgs['IsFolder']);
+                $this->updateMinHash(
+                    $aArgs['UserId'],
+                    $aFile['FromType'],
+                    $aFile['FromPath'],
+                    $aFile['Name'],
+                    $aArgs['ToType'],
+                    $aArgs['ToPath'],
+                    $aFile['NewName'],
+                    $aFile['IsFolder']
+                );
             }
         }
     }
@@ -1959,7 +1968,6 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
     {
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-
         foreach ($Files as $aFile) {
             if (!$aFile['IsFolder']) {
                 $oItem = new Classes\FileItem();
