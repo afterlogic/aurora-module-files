@@ -90,8 +90,6 @@ class Module extends \Aurora\System\Module\AbstractModule
         $this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'), 1000);
         $this->subscribeEvent('Files::Move::after', array($this, 'onAfterMove'), 1000);
 
-        $this->subscribeEvent('Core::getInheritedAttributes', array($this, 'onGetInheritedAttributes'), 1000);
-
         $this->AddEntries(
             array(
                 'upload' => 'UploadFileData',
@@ -108,18 +106,11 @@ class Module extends \Aurora\System\Module\AbstractModule
             Enums\ErrorCodes::CannotCopyOrMoveItemToItself	=> $this->i18N('ERROR_CANNOT_COPY_OR_MOVE_ITEM_TO_ITSELF'),
             Enums\ErrorCodes::NotPossibleToMoveSharedFileToCorporateStorage => $this->i18N('ERROR_NOT_POSSIBLE_TO_MOVE_SHARED_FILE_OR_DIR_TO_CORPORATE_STORAGE'),
         ];
-    }
 
-    public function onGetInheritedAttributes(&$aArgs, &$aResult)
-    {
-        if (isset($aArgs['ClassName']) && ($aArgs['ClassName'] === User::class || $aArgs['ClassName'] === Tenant::class)) {
-            $aResult[] = 'Files::UserSpaceLimitMb';
-            if ($aArgs['ClassName'] === Tenant::class) {
-                $aResult[] = 'Files::TenantSpaceLimitMb';
-            }
-        }
+        User::addInheritedAttributes(['Files::UserSpaceLimitMb']);
+        Tenant::addInheritedAttributes(['Files::TenantSpaceLimitMb']);
     }
-
+    
     /**
     * Returns Min module decorator.
     *
