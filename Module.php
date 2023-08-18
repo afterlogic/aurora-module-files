@@ -14,6 +14,7 @@ use Aurora\Modules\Core\Models\User;
 use Aurora\Modules\Core\Models\Tenant;
 use Aurora\Modules\Core\Module as CoreModule;
 use Aurora\Modules\Files\Enums\ErrorCodes;
+use Aurora\System\Classes\InheritedAttributes;
 use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
 
@@ -107,8 +108,8 @@ class Module extends \Aurora\System\Module\AbstractModule
             Enums\ErrorCodes::NotPossibleToMoveSharedFileToCorporateStorage => $this->i18N('ERROR_NOT_POSSIBLE_TO_MOVE_SHARED_FILE_OR_DIR_TO_CORPORATE_STORAGE'),
         ];
 
-        User::addInheritedAttributes(['Files::UserSpaceLimitMb']);
-        Tenant::addInheritedAttributes(['Files::TenantSpaceLimitMb']);
+        InheritedAttributes::addAttributes(User::class, ['Files::UserSpaceLimitMb']);
+        InheritedAttributes::addAttributes(Tenant::class, ['Files::UserSpaceLimitMb', 'Files::TenantSpaceLimitMb']);
     }
     
     /**
