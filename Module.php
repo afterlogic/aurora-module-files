@@ -111,7 +111,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         InheritedAttributes::addAttributes(User::class, ['Files::UserSpaceLimitMb']);
         InheritedAttributes::addAttributes(Tenant::class, ['Files::UserSpaceLimitMb', 'Files::TenantSpaceLimitMb']);
     }
-    
+
     /**
     * Returns Min module decorator.
     *
@@ -606,12 +606,12 @@ class Module extends \Aurora\System\Module\AbstractModule
         return (bool) $this->saveModuleConfig();
     }
 
-        /**
+    /**
      * @api {post} ?/Upload/ UploadFile
      * @apiDescription Uploads file from client side.
      * @apiName UploadFile
      * @apiGroup Files
-         *
+     *
      * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
      * @apiHeaderExample {json} Header-Example:
      *	{
@@ -699,7 +699,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                 } else {
                     $iSize = (int) $UploadData['size'];
                     $iUploadSizeLimitMb = $this->oModuleSettings->UploadSizeLimitMb;
-                    if ($iUploadSizeLimitMb > 0 && $iSize/(1024*1024) > $iUploadSizeLimitMb) {
+                    if ($iUploadSizeLimitMb > 0 && $iSize / (1024 * 1024) > $iUploadSizeLimitMb) {
                         throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
                     }
 
@@ -722,7 +722,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     $sUploadName = $UploadData['name'];
                     $sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
-                    $sSavedName = 'upload-post-'.md5($UploadData['name'].$UploadData['tmp_name']);
+                    $sSavedName = 'upload-post-' . md5($UploadData['name'] . $UploadData['tmp_name']);
                     $rData = false;
                     if (\is_resource($UploadData['tmp_name'])) {
                         $rData = $UploadData['tmp_name'];
@@ -2173,7 +2173,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                         $rFile
                     );
 
-                    $sTempName = md5('Files/Tmp/'.$aData['Type'].$aData['Path'].$aData['Name'].microtime(true).rand(1000, 9999));
+                    $sTempName = md5('Files/Tmp/' . $aData['Type'] . $aData['Path'] . $aData['Name'] . microtime(true) . rand(1000, 9999));
 
                     if (is_resource($rFile) && $this->getFilecacheManager()->putFile($sUUID, $sTempName, $rFile)) {
                         $aItem = array(
@@ -2194,7 +2194,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
                         $aActions = array(
                             'view' => array(
-                                'url' => '?file-cache/' . $aItem['NewHash'] .'/view'
+                                'url' => '?file-cache/' . $aItem['NewHash'] . '/view'
                             ),
                             'download' => array(
                                 'url' => '?file-cache/' . $aItem['NewHash']
@@ -2283,7 +2283,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                 if (is_resource($mFileResource)) {
                     $sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
                     try {
-                        $sTempName = md5($sUUID.$Storage.$Path.$Name);
+                        $sTempName = md5($sUUID . $Storage . $Path . $Name);
 
                         if (!$this->getFilecacheManager()->isFileExists($sUUID, $sTempName)) {
                             $this->getFilecacheManager()->putFile($sUUID, $sTempName, $mFileResource);
@@ -2395,7 +2395,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-        $oTenant= \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($TenantId);
+        $oTenant = \Aurora\Modules\Core\Module::Decorator()->GetTenantWithoutRoleCheck($TenantId);
 
         if ($oTenant instanceof Tenant && $oAuthenticatedUser instanceof User && (
             ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oTenant->Id === $oAuthenticatedUser->IdTenant) ||
