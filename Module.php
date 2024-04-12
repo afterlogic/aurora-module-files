@@ -329,6 +329,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
             if (false !== $mResult) {
                 if (is_resource($mResult)) {
+                    $sFileName = \trim($sFileName, DIRECTORY_SEPARATOR);
                     $sContentType = \MailSo\Base\Utils::MimeContentType($sFileName);
                     \Aurora\System\Managers\Response::OutputHeaders($bDownload, $sContentType, $sFileName);
 
