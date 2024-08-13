@@ -98,7 +98,7 @@ class FileItem
         return \Aurora\System\Api::EncodeKeyValues($aResult);
     }
 
-    public function toResponseArray($aParameters = array())
+    public function toResponseArray($aParameters = [])
     {
         $aArgs = [$this];
         $aResult = [];
