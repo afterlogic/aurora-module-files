@@ -44,41 +44,34 @@ namespace Aurora\Modules\Files\Classes;
  * @package Classes
  * @subpackage FileStorage
  */
-class FileItem extends \Aurora\System\AbstractContainer
+class FileItem
 {
-    public function __construct()
-    {
-        parent::__construct(get_class($this));
-
-        $this->SetDefaults(array(
-            'Id' => '',
-            'TypeStr' => \Aurora\System\Enums\FileStorageType::Personal,
-            'Path' => '',
-            'FullPath' => '',
-            'Name' => '',
-            'Size' => 0,
-            'IsFolder' => false,
-            'IsLink' => false,
-            'LinkType' => '',
-            'LinkUrl' => '',
-            'LastModified' => 0,
-            'ContentType' => '',
-            'Thumb' => false,
-            'ThumbnailUrl' => '',
-            'OembedHtml' => '',
-            'Published' => false,
-            'Owner' => '',
-            'Content' => '',
-            'IsExternal' => false,
-            'RealPath' => '',
-            'Actions' => array(),
-            'ETag' => '',
-            'ExtendedProps' => array(),
-            'Shared' => false,
-            'GroupId' => null,
-            'Initiator' => null
-        ));
-    }
+    public $Id = '';
+    public $TypeStr = \Aurora\System\Enums\FileStorageType::Personal;
+    public $Path = '';
+    public $FullPath = '';
+    public $Name = '';
+    public $Size = 0;
+    public $IsFolder = false;
+    public $IsLink = false;
+    public $LinkType = '';
+    public $LinkUrl = '';
+    public $LastModified = 0;
+    public $ContentType = '';
+    public $Thumb = false;
+    public $ThumbnailUrl = '';
+    public $OembedHtml = '';
+    public $Published = false;
+    public $Owner = '';
+    public $Content = '';
+    public $IsExternal = false;
+    public $RealPath = '';
+    public $Actions = [];
+    public $ETag = '';
+    public $ExtendedProps = [];
+    public $Shared = false;
+    public $GroupId = null;
+    public $Initiator = null;
 
     /**
      *
@@ -87,7 +80,7 @@ class FileItem extends \Aurora\System\AbstractContainer
      */
     public function getHash($sPublicHash = null)
     {
-        $aResult = array(
+        $aResult = [
             'UserId' => \Aurora\System\Api::getAuthenticatedUserId(),
             'Id' => $this->Id,
             'Type' => $this->TypeStr,
@@ -96,58 +89,13 @@ class FileItem extends \Aurora\System\AbstractContainer
             'FileName' => $this->Name,
             'Shared' => $this->Shared,
             'GroupId' => $this->GroupId
-        );
+        ];
 
         if (isset($sPublicHash)) {
             $aResult['PublicHash'] = $sPublicHash;
         }
 
         return \Aurora\System\Api::EncodeKeyValues($aResult);
-    }
-
-    /**
-     * @return array
-     */
-    public function getMap()
-    {
-        return self::getStaticMap();
-    }
-
-    /**
-     * @return array
-     */
-    public static function getStaticMap()
-    {
-        return array(
-            'Id' => array('string'),
-            'Type' => array('int'),
-            'TypeStr' => array('string'),
-            'FullPath' => array('string'),
-            'Path' => array('string'),
-            'Name' => array('string'),
-            'Size' => array('int'),
-            'IsFolder' => array('bool'),
-            'IsLink' => array('bool'),
-            'LinkType' => array('string'),
-            'LinkUrl' => array('string'),
-            'LastModified' => array('int'),
-            'ContentType' => array('string'),
-            'Thumb' => array('bool'),
-            'ThumbnailUrl' => array('string'),
-            'OembedHtml' => array('string'),
-            'Published' => array('bool'),
-            'Owner' => array('string'),
-            'Content' => array('string'),
-            'IsExternal' => array('bool'),
-            'RealPath' => array('string'),
-            'Actions' => array('array'),
-            'Hash' => array('string'),
-            'ETag' => array('string'),
-            'ExtendedProps' => array('array'),
-            'Shared' => array('bool'),
-            'GroupId' => array('int'),
-            'Initiator' => array('string'),
-        );
     }
 
     public function toResponseArray($aParameters = array())
