@@ -132,8 +132,8 @@ class FileItem
         $aResult['ETag'] = $this->ETag;
         $aResult['ExtendedProps'] = $this->ExtendedProps;
         $aResult['Shared'] = $this->Shared;
-        $aResult['GroupId'] = $this->GroupId;
-        $aResult['Initiator'] = $this->Initiator;
+        $aResult['GroupId'] = $this->GroupId === null ? 0 : $this->GroupId;
+        $aResult['Initiator'] = $this->Initiator === null ? '' : $this->Initiator;
 
         if ($this->Thumb) {
             if (empty($this->ThumbnailUrl) && $this->GetActionUrl('download')) {
