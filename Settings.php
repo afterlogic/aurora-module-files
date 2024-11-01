@@ -39,7 +39,7 @@ class Settings extends \Aurora\System\Module\Settings
                 100,
                 "int",
                 null,
-                "Upload file size limit value, in Mbytes",
+                "Upload file size limit value, in Mbytes. Additionally to the value supplied here, the actual limitation is affected by PHP configuration values post_max_size and upload_max_filesize - the smallest of these 3 values is applied. Note that webserver may add its own limitations, client_max_body_size in Nginx for example.",
             ),
             "UserSpaceLimitMb" => new SettingsProperty(
                 100,
