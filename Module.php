@@ -492,7 +492,6 @@ class Module extends \Aurora\System\Module\AbstractModule
         $aAppData = array(
             'EnableUploadSizeLimit' => $this->oModuleSettings->EnableUploadSizeLimit,
             'UploadSizeLimitMb' => min([$iPostMaxSize, $iUploadMaxFilesize, $this->oModuleSettings->UploadSizeLimitMb]),
-            'CustomTabTitle' => $this->oModuleSettings->CustomTabTitle,
             'UserSpaceLimitMb' => $this->oModuleSettings->UserSpaceLimitMb,
             'TenantSpaceLimitMb' => $this->oModuleSettings->TenantSpaceLimitMb
         );
