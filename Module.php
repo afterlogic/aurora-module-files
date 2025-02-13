@@ -2341,7 +2341,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     }
                 }
 
-                $bResult = \Aurora\Modules\Core\Module::Decorator()->UpdateTenantObject($oTenant);
+                $bResult = CoreModule::getInstance()->getTenantsManager()->updateTenant($oTenant);
             }
         }
         if ($EntityType === 'User') {
