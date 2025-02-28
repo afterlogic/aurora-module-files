@@ -2414,7 +2414,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function GetAllocatedSpaceForUsersInTenant($TenantId)
     {
-        return User::where('IdTenant', $TenantId)->sum('Properties->Files::UserSpaceLimitMb');
+        return User::where('IdTenant', $TenantId)->sum('Properties->' . 'PersonalFiles::UsedSpace') / 1048576;
     }
 
     public function CheckAllocatedSpaceLimitForUsersInTenant($oTenant, $UserSpaceLimitMb)
