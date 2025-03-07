@@ -17,6 +17,7 @@ use Aurora\Modules\Files\Enums\ErrorCodes;
 use Aurora\System\Classes\InheritedAttributes;
 use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
+use Aurora\System\Utils;
 
 /**
  * Main Files module. It provides PHP and Web APIs for managing files.
@@ -486,8 +487,8 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 
-        $iPostMaxSize = (int) ini_get('post_max_size');
-        $iUploadMaxFilesize = (int) ini_get('upload_max_filesize');
+        $iPostMaxSize = Utils::getSizeFromIni('post_max_size') / 1024 / 1024;
+        $iUploadMaxFilesize = Utils::getSizeFromIni('upload_max_filesize') / 1024 / 1024;
 
         $aAppData = array(
             'EnableUploadSizeLimit' => $this->oModuleSettings->EnableUploadSizeLimit,
