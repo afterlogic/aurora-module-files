@@ -487,12 +487,12 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
 
-        $iPostMaxSize = Utils::getSizeFromIni('post_max_size') / 1024 / 1024;
-        $iUploadMaxFilesize = Utils::getSizeFromIni('upload_max_filesize') / 1024 / 1024;
+        $iPostMaxSizeMb = Utils::getSizeFromIni('post_max_size') / 1024 / 1024;
+        $iUploadMaxFilesizeMb = Utils::getSizeFromIni('upload_max_filesize') / 1024 / 1024;
 
         $aAppData = array(
             'EnableUploadSizeLimit' => $this->oModuleSettings->EnableUploadSizeLimit,
-            'UploadSizeLimitMb' => min([$iPostMaxSize, $iUploadMaxFilesize, $this->oModuleSettings->UploadSizeLimitMb]),
+            'UploadSizeLimitMb' => min([$iPostMaxSizeMb, $iUploadMaxFilesizeMb, $this->oModuleSettings->UploadSizeLimitMb]),
             'UserSpaceLimitMb' => $this->oModuleSettings->UserSpaceLimitMb,
             'TenantSpaceLimitMb' => $this->oModuleSettings->TenantSpaceLimitMb
         );
@@ -2415,7 +2415,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function GetAllocatedSpaceForUsersInTenant($TenantId)
     {
-        return User::where('IdTenant', $TenantId)->sum('Properties->' . 'PersonalFiles::UsedSpace') / 1048576;
+        return User::where('IdTenant', $TenantId)->sum('Properties->' . 'PersonalFiles::UsedSpace') / 1024 / 1024;
     }
 
     public function CheckAllocatedSpaceLimitForUsersInTenant($oTenant, $UserSpaceLimitMb)
