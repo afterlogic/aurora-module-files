@@ -346,10 +346,14 @@ class Module extends \Aurora\System\Module\AbstractModule
                         echo(\MailSo\Base\HtmlUtils::ClearHtmlSimple(stream_get_contents($mResult, $iLength, $iOffset)));
                     } elseif ($sContentType === 'text/plain') {
                         echo(stream_get_contents($mResult, $iLength, $iOffset));
-                    } elseif ($iLength > -1 && $iOffset > -1) {
-                        \MailSo\Base\Utils::GetFilePart($mResult, $iLength, $iOffset);
                     } else {
-                        \MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
+                        $aMetaData = stream_get_meta_data($mResult);
+                        $isSeekable = isset($aMetaData['seekable']) ? $aMetaData['seekable'] : false;
+                        if ($iLength > -1 && $iOffset > -1 && $isSeekable) {
+                            \MailSo\Base\Utils::GetFilePart($mResult, $iLength, $iOffset);
+                        } else {
+                            \MailSo\Base\Utils::FpassthruWithTimeLimitReset($mResult);
+                        }
                     }
 
                     @fclose($mResult);
