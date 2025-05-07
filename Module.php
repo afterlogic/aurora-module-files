@@ -87,6 +87,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function init()
     {
+        $this->subscribeEvent('Files::GetItems', array($this, 'onGetItems'));
         $this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'), 1000);
         $this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'), 1000);
         $this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'), 1000);
@@ -1270,6 +1271,32 @@ class Module extends \Aurora\System\Module\AbstractModule
                 $oUser->setExtendedProp($this->GetName() . '::UserSpaceLimitMb', $oTenant->getExtendedProp($this->GetName() . '::UserSpaceLimitMb'));
                 $oUser->save();
             }
+        }
+    }
+
+    /**
+     * @ignore
+     * @param array $aArgs Arguments of event.
+     * @param mixed $mResult Is passed by reference.
+     */
+    public function onGetItems($aArgs, &$mResult)
+    {
+        if ($aArgs['Type'] === 'favorites') {
+            $UserId = $aArgs['UserId'];
+            Api::CheckAccess($UserId);
+
+            $sUserPiblicId = Api::getUserPublicIdById($UserId);
+
+            $favorites = $this->GetFavorites($UserId);
+            foreach ($favorites as $favorite) {
+                list($sPath, $sName) = \Sabre\Uri\split($favorite['FullPath']);
+                $files[] = \Aurora\Modules\PersonalFiles\Module::getInstance()->getManager()->getFileInfo($sUserPiblicId, $favorite['Type'], $sPath, $sName);
+            }
+
+            $mResult = array_merge(
+                $mResult,
+                $files
+            );
         }
     }
 
@@ -2469,6 +2496,76 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         // Actual updating is preceded in subscribed methods. Look for it by "Files::GetInfoForPath::after"
         return false;
+    }
+
+    /**
+     * Summary of AddToFavorites
+     * @param int $UserId
+     * @param string $Type
+     * @param array $Items
+     * @return bool
+     */
+    public function AddToFavorites($UserId, $Items)
+    {
+        $mResult = false;
+        $sPublicUserId = Api::getUserPublicIdById($UserId);
+        $insert = [];
+        foreach ($Items as $aItem) {
+            $oItem = Server::getNodeForPath('files/' . $aItem['Type'] . $aItem['Path'] . '/' . $aItem['Name'], $sPublicUserId);
+            if ($oItem) {
+                $insert[] = [
+                    'IdUser' => $UserId,
+                    'Type' => $aItem['Type'],
+                    'FullPath' => $aItem['Path'] . '/' . $aItem['Name'],
+                    'DisplayName' => $aItem['Name']
+                ];
+            }
+        }
+
+        if (count($insert) > 0) {
+            $mResult = Models\FavoriteFile::insert($insert);
+        }
+
+        return $mResult;
+    }
+
+    /**
+     * Summary of RemoveFromFavorites
+     * @param int $UserId
+     * @param string $Type
+     * @param array $Items
+     * @return void
+     */
+    public function RemoveFromFavorites($UserId, $Items)
+    {
+        $mResult = false;
+        $sPublicUserId = Api::getUserPublicIdById($UserId);
+        $where = [];
+        foreach ($Items as $aItem) {
+            $oItem = Server::getNodeForPath('files/' . $aItem['Type'] . $aItem['Path'] . '/' . $aItem['Name'], $sPublicUserId);
+            if ($oItem) {
+                $where[] = [
+                    'IdUser' => $UserId,
+                    'Type' => $aItem['Type'],
+                    'FullPath' => $aItem['Path'] . '/' . $aItem['Name'],
+                ];
+            }
+        }
+
+        if (count($where) > 0) {
+            $mResult = Models\FavoriteFile::where($where)->delete();
+        }
+
+        return $mResult;
+    }
+    /**
+     * Summary of GetFavorites
+     * @param int $UserId
+     * @return mixed|\Aurora\System\Classes\Model[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function GetFavorites($UserId)
+    {
+        return Models\FavoriteFile::where('IdUser', $UserId)->get()->toArray();
     }
     /***** public functions might be called with web API *****/
 }
