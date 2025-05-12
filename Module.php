@@ -1292,7 +1292,9 @@ class Module extends \Aurora\System\Module\AbstractModule
             $favorites = $this->GetFavorites($UserId);
             foreach ($favorites as $favorite) {
                 list($sPath, $sName) = \Sabre\Uri\split($favorite['FullPath']);
-                $files[] = \Aurora\Modules\PersonalFiles\Module::getInstance()->getManager()->getFileInfo($sUserPiblicId, $favorite['Type'], $sPath, $sName);
+                $file = \Aurora\Modules\PersonalFiles\Module::getInstance()->getManager()->getFileInfo($sUserPiblicId, $favorite['Type'], $sPath, $sName);
+                $file->Name = $favorite['DisplayName'];
+                $files[] = $file;
             }
 
             $mResult = array_merge(
@@ -2545,7 +2547,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     'IdUser' => $UserId,
                     'Type' => $aItem['Type'],
                     'FullPath' => $aItem['Path'] . '/' . $aItem['Name'],
-                    'DisplayName' => $aItem['Name']
+                    'DisplayName' => $this->getNonExistentFavoriteName($UserId, basename($aItem['Name']))
                 ];
             }
         }
@@ -2596,4 +2598,32 @@ class Module extends \Aurora\System\Module\AbstractModule
         return Models\FavoriteFile::where('IdUser', $UserId)->get()->toArray();
     }
     /***** public functions might be called with web API *****/
+
+    /**
+    * @param int $iUserId
+    * @param string $sDisplayName
+    *
+    * @return string
+    */
+    protected function getNonExistentFavoriteName($iUserId, $sDisplayName)
+    {
+        $iIndex = 1;
+        $sFileNamePathInfo = pathinfo($sDisplayName);
+        $sNameExt = '';
+        $sNameWOExt = $sDisplayName;
+        if (isset($sFileNamePathInfo['extension'])) {
+            $sNameExt = '.' . $sFileNamePathInfo['extension'];
+        }
+
+        if (isset($sFileNamePathInfo['filename'])) {
+            $sNameWOExt = $sFileNamePathInfo['filename'];
+        }
+
+        while (Models\FavoriteFile::where('IdUser', $iUserId)->where('DisplayName', $sDisplayName)->first()) {
+            $sDisplayName = $sNameWOExt . ' (' . $iIndex . ')' . $sNameExt;
+            $iIndex++;
+        }
+
+        return $sDisplayName;
+    }
 }
