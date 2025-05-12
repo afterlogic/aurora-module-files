@@ -72,6 +72,7 @@ class FileItem
     public $Shared = false;
     public $GroupId = null;
     public $Initiator = null;
+    public $IsFavorite = false;
 
     /**
      *
@@ -134,6 +135,7 @@ class FileItem
         $aResult['Shared'] = $this->Shared;
         $aResult['GroupId'] = $this->GroupId === null ? 0 : $this->GroupId;
         $aResult['Initiator'] = $this->Initiator === null ? '' : $this->Initiator;
+        $aResult['IsFavorite'] = $this->IsFavorite;
 
         if ($this->Thumb) {
             if (empty($this->ThumbnailUrl) && $this->GetActionUrl('download')) {

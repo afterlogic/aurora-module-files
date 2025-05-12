@@ -14,6 +14,7 @@ use Aurora\Modules\Core\Models\User;
 use Aurora\Modules\Core\Models\Tenant;
 use Aurora\Modules\Core\Module as CoreModule;
 use Aurora\Modules\Files\Enums\ErrorCodes;
+use Aurora\Modules\Files\Models\FavoriteFile;
 use Aurora\System\Classes\InheritedAttributes;
 use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
@@ -88,6 +89,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function init()
     {
         $this->subscribeEvent('Files::GetItems', array($this, 'onGetItems'));
+        $this->subscribeEvent('Files::GetItems::after', array($this, 'onAfterGetItems'), 10000);
         $this->subscribeEvent('Files::GetStorages::after', array($this, 'onAfterGetStorages'), 1000);
         $this->subscribeEvent('Core::CreateUser::after', array($this, 'onAfterCreateUser'), 1000);
         $this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'), 1000);
@@ -1297,6 +1299,32 @@ class Module extends \Aurora\System\Module\AbstractModule
                 $mResult,
                 $files
             );
+        }
+    }
+
+        /**
+     * @ignore
+     * @param array $aArgs Arguments of event.
+     * @param mixed $mResult Is passed by reference.
+     */
+    public function onAfterGetItems($aArgs, &$mResult)
+    {
+        if (is_array($mResult) && count($mResult) > 0) {
+            $query = FavoriteFile::where('IdUser', $aArgs['UserId']);
+            foreach ($mResult as $item) {
+                $query->orWhere(function ($subQuery) use ($item) {
+                    $subQuery->where('Type', $item->TypeStr)
+                        ->where('FullPath', $item->FullPath);
+                });
+            }
+
+            $favorites = $query->get()->map(function ($item) {
+                return $item->Type . $item->FullPath;
+            });
+
+            foreach ($mResult as $item) {
+                $item->IsFavorite = in_array($item->TypeStr . $item->FullPath, $favorites->toArray());
+            }
         }
     }
 
