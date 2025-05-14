@@ -2564,26 +2564,29 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param int $UserId
      * @param string $Type
      * @param array $Items
-     * @return void
+     * @return bool
      */
     public function RemoveFromFavorites($UserId, $Items)
     {
         $mResult = false;
         $sPublicUserId = Api::getUserPublicIdById($UserId);
-        $where = [];
+        $query = Models\FavoriteFile::query();
+        $itemsCount = 0;
         foreach ($Items as $aItem) {
             $oItem = Server::getNodeForPath('files/' . $aItem['Type'] . $aItem['Path'] . '/' . $aItem['Name'], $sPublicUserId);
             if ($oItem) {
-                $where[] = [
-                    'IdUser' => $UserId,
-                    'Type' => $aItem['Type'],
-                    'FullPath' => $aItem['Path'] . '/' . $aItem['Name'],
-                ];
+                $itemsCount++;
+                $query->orWhere(function ($subQuery) use ($UserId, $aItem) {
+                    $subQuery
+                        ->where('IdUser', $UserId)
+                        ->where('Type', $aItem['Type'])
+                        ->where('FullPath', $aItem['Path'] . '/' . $aItem['Name']);
+                });
             }
         }
 
-        if (count($where) > 0) {
-            $mResult = Models\FavoriteFile::where($where)->delete();
+        if ($itemsCount > 0) {
+            $mResult = !!$query->delete();
         }
 
         return $mResult;
