@@ -1289,6 +1289,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
             $sUserPiblicId = Api::getUserPublicIdById($UserId);
 
+            $files = [];
             $favorites = $this->GetFavorites($UserId);
             foreach ($favorites as $favorite) {
                 list($sPath, $sName) = \Sabre\Uri\split($favorite['FullPath']);
