@@ -501,7 +501,8 @@ class Module extends \Aurora\System\Module\AbstractModule
             'EnableUploadSizeLimit' => $this->oModuleSettings->EnableUploadSizeLimit,
             'UploadSizeLimitMb' => min([$iPostMaxSizeMb, $iUploadMaxFilesizeMb, $this->oModuleSettings->UploadSizeLimitMb]),
             'UserSpaceLimitMb' => $this->oModuleSettings->UserSpaceLimitMb,
-            'TenantSpaceLimitMb' => $this->oModuleSettings->TenantSpaceLimitMb
+            'TenantSpaceLimitMb' => $this->oModuleSettings->TenantSpaceLimitMb,
+            'AllowTrash' => $this->oModuleSettings->AllowTrash,
         );
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
