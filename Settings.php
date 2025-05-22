@@ -16,6 +16,7 @@ use Aurora\System\SettingsProperty;
  * @property int $UserSpaceLimitMb
  * @property int $TenantSpaceLimitMb
  * @property bool $AllowTrash
+  * @property bool $AllowFavorites
  */
 
 class Settings extends \Aurora\System\Module\Settings

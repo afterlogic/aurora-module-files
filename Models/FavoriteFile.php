@@ -4,6 +4,11 @@ namespace Aurora\Modules\Files\Models;
 
 use Aurora\System\Classes\Model;
 
+/**
+ * Summary of FavoriteFile
+ * 
+ * @method static bool insert(array $values)
+ */
 class FavoriteFile extends Model
 {
     protected $table = 'files_favorites';
