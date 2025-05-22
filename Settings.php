@@ -59,6 +59,12 @@ class Settings extends \Aurora\System\Module\Settings
                 null,
                 "Setting to true show Trash storage",
             ),
+            "AllowFavorites" => new SettingsProperty(
+                true,
+                "bool",
+                null,
+                "Setting to true show Favorites storage",
+            ),
         ];
     }
 }

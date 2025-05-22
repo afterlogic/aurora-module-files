@@ -503,6 +503,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             'UserSpaceLimitMb' => $this->oModuleSettings->UserSpaceLimitMb,
             'TenantSpaceLimitMb' => $this->oModuleSettings->TenantSpaceLimitMb,
             'AllowTrash' => $this->oModuleSettings->AllowTrash,
+            'AllowFavorites' => $this->oModuleSettings->AllowFavorites,
         );
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
@@ -1295,8 +1296,10 @@ class Module extends \Aurora\System\Module\AbstractModule
             foreach ($favorites as $favorite) {
                 list($sPath, $sName) = \Sabre\Uri\split($favorite['FullPath']);
                 $file = \Aurora\Modules\PersonalFiles\Module::getInstance()->getManager()->getFileInfo($sUserPiblicId, $favorite['Type'], $sPath, $sName);
-                $file->Name = $favorite['DisplayName'];
-                $files[] = $file;
+                if ($file) {
+                    $file->Name = $favorite['DisplayName'];
+                    $files[] = $file;
+                }
             }
 
             $mResult = array_merge(
@@ -1306,7 +1309,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
     }
 
-        /**
+    /**
      * @ignore
      * @param array $aArgs Arguments of event.
      * @param mixed $mResult Is passed by reference.
@@ -2533,7 +2536,6 @@ class Module extends \Aurora\System\Module\AbstractModule
     /**
      * Summary of AddToFavorites
      * @param int $UserId
-     * @param string $Type
      * @param array $Items
      * @return bool
      */
@@ -2564,7 +2566,6 @@ class Module extends \Aurora\System\Module\AbstractModule
     /**
      * Summary of RemoveFromFavorites
      * @param int $UserId
-     * @param string $Type
      * @param array $Items
      * @return bool
      */
