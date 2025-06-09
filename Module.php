@@ -1689,6 +1689,21 @@ class Module extends \Aurora\System\Module\AbstractModule
     }
 
     /**
+     * Restore files and folder specified with list from Trash.
+     *
+     * @param int $UserId User identifier.
+     * @param array $Items Array of items to delete.
+     * @return bool
+     * @throws \Aurora\System\Exceptions\ApiException
+     */
+    public function Restore($UserId, $Items)
+    {
+        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+        return false;
+    }
+
+    /**
      * @api {post} ?/Api/ LeaveShare
      * @apiDescription leave shared files and folder specified with list.
      * @apiName LeaveShare
