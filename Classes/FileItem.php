@@ -116,12 +116,12 @@ class FileItem
         $aResult['Path'] = $this->Path;
         $aResult['FullPath'] = $this->FullPath;
         $aResult['Name'] = $this->Name;
-        $aResult['Size'] = $this->Size;
+        $aResult['Size'] = (int)$this->Size;
         $aResult['IsFolder'] = $this->IsFolder;
         $aResult['IsLink'] = $this->IsLink;
         $aResult['LinkType'] = $this->LinkType;
         $aResult['LinkUrl'] = $this->LinkUrl;
-        $aResult['LastModified'] = $this->LastModified;
+        $aResult['LastModified'] = $this->LastModified ? (int)$this->LastModified : 0;
         $aResult['ContentType'] = $this->ContentType;
         $aResult['OembedHtml'] = $this->OembedHtml;
         $aResult['Published'] = $this->Published;
