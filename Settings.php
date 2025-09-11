@@ -15,6 +15,7 @@ use Aurora\System\SettingsProperty;
  * @property int $UploadSizeLimitMb
  * @property int $UserSpaceLimitMb
  * @property int $TenantSpaceLimitMb
+ * @property bool $ShowUserSpaceLimit
  * @property bool $AllowTrash
   * @property bool $AllowFavorites
  */
@@ -53,6 +54,12 @@ class Settings extends \Aurora\System\Module\Settings
                 "int",
                 null,
                 "With multitenancy enabled, default tenant space quota; with multitenancy disabled, total disk space quota for the installation",
+            ),
+            "ShowUserSpaceLimit" => new SettingsProperty(
+                true,
+                "bool",
+                null,
+                "If true, UserSpaceLimitMb setting is shown in admin settings UI",
             ),
             "AllowTrash" => new SettingsProperty(
                 true,
