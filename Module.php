@@ -1318,13 +1318,15 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function onAfterGetItems($aArgs, &$mResult)
     {
         if (is_array($mResult) && count($mResult) > 0) {
-            $query = FavoriteFile::where('IdUser', $aArgs['UserId']);
-            foreach ($mResult as $item) {
-                $query->orWhere(function ($subQuery) use ($item) {
-                    $subQuery->where('Type', $item->TypeStr)
-                        ->where('FullPath', $item->FullPath);
+            $query = FavoriteFile::where('IdUser', $aArgs['UserId'])
+                ->where(function ($subQuery) use ($mResult) {
+                    foreach ($mResult as $item) {
+                        $subQuery->orWhere(function ($q) use ($item) {
+                            $q->where('Type', $item->TypeStr)
+                            ->where('FullPath', $item->FullPath);
+                        });
+                    }
                 });
-            }
 
             $favorites = $query->get()->map(function ($item) {
                 return $item->Type . $item->FullPath;
