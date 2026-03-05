@@ -19,7 +19,7 @@ use Aurora\System\Classes\InheritedAttributes;
 use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
 use Aurora\System\Utils;
-
+use Aurora\System\Facades\Route;
 /**
  * Main Files module. It provides PHP and Web APIs for managing files.
  *
@@ -95,12 +95,14 @@ class Module extends \Aurora\System\Module\AbstractModule
         $this->subscribeEvent('Files::Rename::after', array($this, 'onAfterRename'), 1000);
         $this->subscribeEvent('Files::Move::after', array($this, 'onAfterMove'), 1000);
 
-        $this->AddEntries(
-            array(
+        Route::add(
+            $this,
+            [
                 'upload' => 'UploadFileData',
                 'download-file' => 'EntryDownloadFile'
-            )
+            ]
         );
+
         $this->denyMethodsCallByWebApi(['getRawFile', 'getRawFileData', 'GetItems']);
 
         $this->aErrors = [
