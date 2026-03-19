@@ -276,12 +276,12 @@ class Module extends \Aurora\System\Module\AbstractModule
         $oModuleDecorator = $this->getMinModuleDecorator();
         $mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
 
-        $iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
+        $iUserId = (!empty($mMin['__hash__'])) ? Api::getUserIdByPublicId($mMin['UserId']) : $iUserId;
 
         try {
             if ($iUserId && $SharedHash !== null) {
                 \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
-                \Afterlogic\DAV\Server::setUser($iUserId);
+                \Afterlogic\DAV\Server::setUser(Api::getUserPublicIdById($iUserId));
             } else {
                 \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
                 if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId()) {
