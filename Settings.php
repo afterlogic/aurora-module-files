@@ -17,7 +17,8 @@ use Aurora\System\SettingsProperty;
  * @property int $TenantSpaceLimitMb
  * @property bool $ShowUserSpaceLimit
  * @property bool $AllowTrash
-  * @property bool $AllowFavorites
+ * @property bool $AllowFavorites
+ * @property bool $DisableShortcuts
  */
 
 class Settings extends \Aurora\System\Module\Settings
@@ -72,6 +73,12 @@ class Settings extends \Aurora\System\Module\Settings
                 "bool",
                 null,
                 "Setting to true show Favorites storage",
+            ),
+            "DisableShortcuts" => new SettingsProperty(
+                false,
+                "bool",
+                null,
+                "Setting to true disable shortcuts",
             ),
         ];
     }

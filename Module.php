@@ -507,6 +507,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             'TenantSpaceLimitMb' => $this->oModuleSettings->TenantSpaceLimitMb,
             'AllowTrash' => $this->oModuleSettings->AllowTrash,
             'AllowFavorites' => $this->oModuleSettings->AllowFavorites,
+            'DisableShortcuts' => $this->oModuleSettings->DisableShortcuts,
         );
 
         $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
@@ -2215,6 +2216,13 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function CheckUrl($Url)
     {
         \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+        if ($this->getConfig('DisableShortcuts')) {
+            throw new \Aurora\System\Exceptions\ApiException(
+                \Aurora\System\Notifications::AccessDenied
+            );
+        }
+
         $mResult = false;
 
         if (substr($Url, 0, 11) === 'javascript:') {
