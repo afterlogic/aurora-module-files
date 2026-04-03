@@ -736,7 +736,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                         }
                     }
 
-                    $sUploadName = $UploadData['name'];
+                    $sUploadName = strip_tags($UploadData['name']);
                     $sMimeType = \MailSo\Base\Utils::MimeContentType($sUploadName);
 
                     $sSavedName = 'upload-post-' . md5($UploadData['name'] . $UploadData['tmp_name']);
