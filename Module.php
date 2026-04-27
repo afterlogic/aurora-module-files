@@ -20,6 +20,7 @@ use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
 use Aurora\System\Utils;
 use Aurora\System\Facades\Route;
+
 /**
  * Main Files module. It provides PHP and Web APIs for managing files.
  *
