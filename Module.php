@@ -519,6 +519,11 @@ class Module extends \Aurora\System\Module\AbstractModule
             $aAppData['Storages'] = \Aurora\Modules\Files\Module::Decorator()->GetStorages();
         }
 
+        // If the URL contains a public hash (router index 1), expose it
+        // to the client AppData and attempt to resolve minimal info for
+        // the referenced public item. When the resolved item exists and
+        // represents a folder, add its `Name` as `PublicFolderName` so
+        // the frontend can show a friendly folder name in public views.
         $sPublicHash = \Aurora\System\Router::getItemByIndex(1);
         if (isset($sPublicHash)) {
             $aAppData['PublicHash'] = $sPublicHash;
