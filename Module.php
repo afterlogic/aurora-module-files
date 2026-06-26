@@ -16,6 +16,7 @@ use Aurora\Modules\Core\Module as CoreModule;
 use Aurora\Modules\Files\Enums\ErrorCodes;
 use Aurora\Modules\Files\Models\FavoriteFile;
 use Aurora\System\Classes\InheritedAttributes;
+use Aurora\System\Enums\UserRole;
 use Aurora\System\EventEmitter;
 use Aurora\System\Exceptions\ApiException;
 use Aurora\System\Utils;
@@ -34,10 +35,13 @@ use Aurora\System\Facades\Route;
  */
 class Module extends \Aurora\System\Module\AbstractModule
 {
+    /**
+     * @var string
+     */
     protected static $sStorageType = '';
 
-    /*
-     * @var $oApiFileCache \Aurora\System\Managers\Filecache
+    /**
+     * @var \Aurora\System\Managers\Filecache
      */
     public $oApiFileCache = null;
 
@@ -47,6 +51,9 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     protected $oMinModuleDecorator = null;
 
+    /**
+     * @return \Aurora\System\Managers\Filecache|null
+     */
     public function getFilecacheManager()
     {
         if ($this->oApiFileCache === null) {
@@ -62,14 +69,6 @@ class Module extends \Aurora\System\Module\AbstractModule
     public static function getInstance()
     {
         return parent::getInstance();
-    }
-
-    /**
-     * @return Module
-     */
-    public static function Decorator()
-    {
-        return parent::Decorator();
     }
 
     /**
@@ -104,7 +103,14 @@ class Module extends \Aurora\System\Module\AbstractModule
             ]
         );
 
-        $this->denyMethodsCallByWebApi(['getRawFile', 'getRawFileData', 'GetItems']);
+        $this->denyMethodsCallByWebApi([
+            'getRawFile',
+            'getRawFileData',
+            'GetItems',
+            'PopulateFileItem',
+            'PopulateFileItems',
+            'GetSubModules',
+        ]);
 
         $this->aErrors = [
             Enums\ErrorCodes::NotFound	=> $this->i18N('INFO_NOTFOUND'),
@@ -122,11 +128,11 @@ class Module extends \Aurora\System\Module\AbstractModule
     /**
     * Returns Min module decorator.
     *
-    * @return \Aurora\Modules\Min\Module
+    * @return \Aurora\System\Module\Decorator|\Aurora\Modules\Min\Module
     */
     private function getMinModuleDecorator()
     {
-        return \Aurora\System\Api::GetModuleDecorator('Min');
+        return Api::GetModuleDecorator('Min');
     }
 
     /**
@@ -140,6 +146,17 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $Type === static::$sStorageType;
     }
 
+    /**
+     * @param int $iUserId
+     * @param string $sType
+     * @param string $sPath
+     * @param string $sFileName
+     * @param string $SharedHash
+     * @param string $sAction
+     * @param int $iOffset
+     * @param int $iChunkSize
+     * @throws ApiException
+     */
     public function getRawFileData($iUserId, $sType, $sPath, $sFileName, $SharedHash = null, $sAction = '', $iOffset = 0, $iChunkSize = 0)
     {
         $bDownload = true;
@@ -180,21 +197,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         try {
             if ($iUserId && $SharedHash !== null) {
-                \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
-                \Afterlogic\DAV\Server::setUser($iUserId);
+                Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
+                Server::setUser($iUserId);
             } else {
-                \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-                if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId()) {
-                    throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::AccessDenied);
+                Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+                if ($iUserId !== Api::getAuthenticatedUserId()) {
+                    throw new ApiException(\Aurora\System\Notifications::AccessDenied);
                 }
             }
-        } catch (\Aurora\System\Exceptions\ApiException $oEx) {
+        } catch (ApiException $oEx) {
             echo 'Access denied';
             exit();
         }
 
-        if (isset($sType, $sPath, $sFileName)) {
-            $sContentType = (empty($sFileName)) ? 'text/plain' : \MailSo\Base\Utils::MimeContentType($sFileName);
+        if (!empty($sType) && !empty($sPath) && !empty($sFileName)) {
 
             $mResult = false;
             if ($bThumbnail) {
@@ -283,15 +299,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         try {
             if ($iUserId && $SharedHash !== null) {
-                \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
-                \Afterlogic\DAV\Server::setUser(Api::getUserPublicIdById($iUserId));
+                Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
+                Server::setUser(Api::getUserPublicIdById($iUserId));
             } else {
-                \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-                if ($iUserId !== \Aurora\System\Api::getAuthenticatedUserId()) {
-                    throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::AccessDenied);
+                Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+                if ($iUserId !== Api::getAuthenticatedUserId()) {
+                    throw new ApiException(\Aurora\System\Notifications::AccessDenied);
                 }
             }
-        } catch (\Aurora\System\Exceptions\ApiException $oEx) {
+        } catch (ApiException $oEx) {
             //			echo(\Aurora\System\Managers\Response::GetJsonFromObject('Json', \Aurora\System\Managers\Response::FalseResponse(__METHOD__, 403, 'Access denied')));
             $this->oHttp->StatusHeader(403);
             exit;
@@ -380,11 +396,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      * Uploads file from client side.
      *
      * echo string "true" or "false"
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function UploadFileData()
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         $mResult = false;
         $aPaths = \Aurora\System\Application::GetPaths();
         if (isset($aPaths[1]) && strtolower($aPaths[1]) === strtolower(self::GetName())) {
@@ -399,10 +415,10 @@ class Module extends \Aurora\System\Module\AbstractModule
                 $bOverwrite = false;
             }
 
-            $iUserId = \Aurora\System\Api::getAuthenticatedUserId(
-                \Aurora\System\Api::getAuthTokenFromHeaders()
+            $iUserId = Api::getAuthenticatedUserId(
+                Api::getAuthTokenFromHeaders()
             );
-            $oUser = \Aurora\System\Api::getAuthenticatedUser($iUserId);
+            $oUser = Api::getAuthenticatedUser($iUserId);
             if ($oUser) {
                 if ($rData) {
                     $aArgs = array(
@@ -495,7 +511,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetSettings()
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+        Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
 
         $iPostMaxSizeMb = Utils::getSizeFromIni('post_max_size') / 1024 / 1024;
         $iUploadMaxFilesizeMb = Utils::getSizeFromIni('upload_max_filesize') / 1024 / 1024;
@@ -511,12 +527,12 @@ class Module extends \Aurora\System\Module\AbstractModule
             'DisableShortcuts' => $this->oModuleSettings->DisableShortcuts,
         );
 
-        $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
+        $oAuthenticatedUser = Api::getAuthenticatedUser();
         if ($oAuthenticatedUser instanceof User
-                && ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::NormalUser
-                || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin
-                || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)) {
-            $aAppData['Storages'] = \Aurora\Modules\Files\Module::Decorator()->GetStorages();
+                && ($oAuthenticatedUser->Role === UserRole::NormalUser
+                || $oAuthenticatedUser->Role === UserRole::TenantAdmin
+                || $oAuthenticatedUser->Role === UserRole::SuperAdmin)) {
+            $aAppData['Storages'] = self::Decorator()->GetStorages();
         }
 
         // If the URL contains a public hash (router index 1), expose it
@@ -536,25 +552,30 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $aAppData;
     }
 
+    /**
+     * @param mixed $EntityType
+     * @param mixed $EntityId
+     * @return array|array{AllocatedSpace: float|int, TenantSpaceLimitMb: mixed, UserSpaceLimitMb: mixed|array{UserSpaceLimitMb: mixed}}
+     */
     public function GetSettingsForEntity($EntityType, $EntityId)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+        Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
 
         $aResult = [];
         if ($EntityType === 'Tenant') {
-            \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-            $oTenant = \Aurora\Api::getTenantById($EntityId);
+            Api::checkUserRoleIsAtLeast(UserRole::TenantAdmin);
+            $oTenant = Api::getTenantById($EntityId);
             if ($oTenant instanceof Tenant) {
                 $aResult = [
                     'TenantSpaceLimitMb' => $oTenant->getExtendedProp(self::GetName() . '::TenantSpaceLimitMb'),
                     'UserSpaceLimitMb' => $oTenant->getExtendedProp(self::GetName() . '::UserSpaceLimitMb'),
-                    'AllocatedSpace' => $this->GetAllocatedSpaceForUsersInTenant($oTenant->Id)
+                    'AllocatedSpace' => $this->getAllocatedSpaceForUsersInTenant($oTenant->Id)
                 ];
             }
         }
         if ($EntityType === 'User') {
-            \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-            $oUser = \Aurora\Api::getUserById($EntityId);
+            Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+            $oUser = Api::getUserById($EntityId);
             if ($oUser instanceof User) {
                 $aResult = [
                     'UserSpaceLimitMb' => $oUser->getExtendedProp(self::GetName() . '::UserSpaceLimitMb'),
@@ -622,7 +643,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function UpdateSettings($EnableUploadSizeLimit, $UploadSizeLimitMb)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
+        Api::checkUserRoleIsAtLeast(UserRole::TenantAdmin);
 
         $this->setConfig('EnableUploadSizeLimit', $EnableUploadSizeLimit);
         $this->setConfig('UploadSizeLimitMb', $UploadSizeLimitMb);
@@ -702,13 +723,13 @@ class Module extends \Aurora\System\Module\AbstractModule
      *		*int* **Size** File size.
      *		*string* **Hash** Hash used for file download, file view or getting file thumbnail.
      * }
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function UploadFile($UserId, $Type, $Path, $UploadData, $SubPath = '', $Overwrite = true, $RangeType = 0, $Offset = 0, $ExtendedProps = [])
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
-        $sUserPublicId = \Aurora\System\Api::getUserPublicIdById($UserId);
+        $sUserPublicId = Api::getUserPublicIdById($UserId);
 
         $sError = '';
         $mResponse = array();
@@ -723,11 +744,11 @@ class Module extends \Aurora\System\Module\AbstractModule
                     $iSize = (int) $UploadData['size'];
                     $iUploadSizeLimitMb = $this->oModuleSettings->UploadSizeLimitMb;
                     if ($iUploadSizeLimitMb > 0 && $iSize / (1024 * 1024) > $iUploadSizeLimitMb) {
-                        throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
+                        throw new ApiException(\Aurora\System\Notifications::CanNotUploadFileLimit);
                     }
 
                     if (!self::Decorator()->CheckQuota($UserId, $Type, $iSize)) {
-                        throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
+                        throw new ApiException(\Aurora\System\Notifications::CanNotUploadFileQuota);
                     }
 
                     if ($SubPath !== '' && !self::Decorator()->IsFileExists($UserId, $Type, $Path, $SubPath)) {
@@ -782,11 +803,11 @@ class Module extends \Aurora\System\Module\AbstractModule
                             $mResponse = false;
                         }
                     } else {
-                        throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::CanNotUploadFileErrorData);
+                        throw new ApiException(\Aurora\System\Notifications::CanNotUploadFileErrorData);
                     }
                 }
             } else {
-                throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
+                throw new ApiException(\Aurora\System\Notifications::InvalidInputParameter);
             }
         } else {
             $sError = 'auth';
@@ -808,7 +829,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         $iOffset = (int) \Aurora\System\Router::getItemByIndex(3, '');
         $iChunkSize = (int) \Aurora\System\Router::getItemByIndex(4, '');
 
-        $aValues = \Aurora\System\Api::DecodeKeyValues($sHash);
+        $aValues = Api::DecodeKeyValues($sHash);
 
         $iUserId = isset($aValues['UserId']) ? (int) $aValues['UserId'] : 0;
         $sType = isset($aValues['Type']) ? $aValues['Type'] : '';
@@ -866,7 +887,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         // checkUserRoleIsAtLeast is called in getRawFile
         $this->getRawFile(
-            \Aurora\System\Api::getUserPublicIdById($UserId),
+            Api::getUserPublicIdById($UserId),
             $Type,
             $Path,
             $Name,
@@ -919,19 +940,9 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetFileThumbnail($UserId, $Type, $Path, $Name, $SharedHash)
     {
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
         return false;
-        // checkUserRoleIsAtLeast is called in getRawFile
-        // return \base64_encode(
-        // 	$this->getRawFile(
-        // 		\Aurora\System\Api::getUserPublicIdById($UserId),
-        // 		$Type,
-        // 		$Path,
-        // 		$Name,
-        // 		$SharedHash,
-        // 		false,
-        // 		true
-        // 	)
-        // );
     }
 
     /**
@@ -993,7 +1004,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetStorages()
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         return [];
     }
 
@@ -1065,6 +1076,8 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetQuota($UserId, $Type)
     {
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
         return [
             'Limit' => 0,
             'Used' => 0
@@ -1073,9 +1086,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function CheckQuota($UserId, $Type, $Size)
     {
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
         return false;
     }
 
+    /**
+     * @param mixed $UserId
+     * @param mixed $Type
+     * @param mixed $Path
+     * @param mixed $Pattern
+     * @param mixed $PublicHash
+     * @param mixed $Shared
+     * @return array
+     */
     public function GetItems($UserId, $Type, $Path, $Pattern, $PublicHash = null, $Shared = false)
     {
         $aArgs = [
@@ -1170,11 +1194,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      *		*array* **Items** Array of files objects.
      *		*array* **Quota** Array of items with fields Used, Limit.
      * }
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function GetFiles($UserId, $Type, $Path, $Pattern, $Shared = false)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         return [
             'Items' => self::Decorator()->GetItems($UserId, $Type, $Path, $Pattern, null, $Shared),
             'Quota' => self::Decorator()->GetQuota($UserId, $Type)
@@ -1225,9 +1249,21 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $aData;
     }
 
+    /**
+     * Summary of updateMinHash
+     * @param int $iUserId
+     * @param string $sType
+     * @param string $sPath
+     * @param string $sName
+     * @param string $sNewType
+     * @param string $sNewPath
+     * @param string $sNewName
+     * @param bool $bIsFolder
+     * @return void
+     */
     protected function updateMinHash($iUserId, $sType, $sPath, $sName, $sNewType, $sNewPath, $sNewName, $bIsFolder)
     {
-        $sUserPublicId = \Aurora\Api::getUserPublicIdById($iUserId);
+        $sUserPublicId = Api::getUserPublicIdById($iUserId);
         $sID = \Aurora\Modules\Min\Module::generateHashId([$sUserPublicId, $sType, $sPath, $sName]);
         $sNewID = \Aurora\Modules\Min\Module::generateHashId([$sUserPublicId, $sNewType, $sNewPath, $sNewName]);
 
@@ -1253,6 +1289,11 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
     }
 
+    /**
+     * @param array $aArgs
+     * @param mixed $mResult
+     * @return void
+     */
     public function onAfterMove($aArgs, &$mResult)
     {
         if ($mResult && isset($aArgs['Files']) && is_array($aArgs['Files']) && count($aArgs['Files']) > 0) {
@@ -1279,9 +1320,9 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function onAfterCreateUser($aArgs, &$mResult)
     {
         if ($mResult) {
-            $oUser = \Aurora\Api::getUserById($mResult);
+            $oUser = Api::getUserById($mResult);
             if ($oUser) {
-                $oTenant = \Aurora\Api::getTenantById($oUser->IdTenant);
+                $oTenant = Api::getTenantById($oUser->IdTenant);
                 $oUser->setExtendedProp($this->GetName() . '::UserSpaceLimitMb', $oTenant->getExtendedProp($this->GetName() . '::UserSpaceLimitMb'));
                 $oUser->save();
             }
@@ -1381,7 +1422,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetFileContent($UserId, $Type, $Path, $Name)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         // File content is obtained in subscribers methods
     }
 
@@ -1392,11 +1433,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $Type
      * @param string $Path
      * @param string $Id
-     * @return \Aurora\Modules\Files\Classes\FileItem
+     * @return \Aurora\Modules\Files\Classes\FileItem|null
      */
     public function GetFileInfo($UserId, $Type, $Path, $Id)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         return null;
     }
@@ -1457,11 +1498,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      *		*array* **Items** Array of files objects.
      *		*array* **Quota** Array of items with fields Used, Limit.
      * }
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function GetPublicFiles($Hash, $Path)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::Anonymous);
+        Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
 
         $mResult = [];
 
@@ -1473,7 +1514,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                 if ($sUserPublicId) {
                     $oUser = CoreModule::Decorator()->GetUserByPublicId($sUserPublicId);
                     if ($oUser) {
-                        $bPrevState = \Aurora\System\Api::skipCheckUserRole(true);
+                        $bPrevState = Api::skipCheckUserRole(true);
                         $sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
                         $mPos = strpos($Path, $sMinPath);
                         if ($mPos === 0 || $Path === '') {
@@ -1485,7 +1526,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                                 'Items' => self::Decorator()->GetItems($oUser->Id, $mMin['Type'], $Path, '', $Hash)
                             ];
                         }
-                        \Aurora\System\Api::skipCheckUserRole($bPrevState);
+                        Api::skipCheckUserRole($bPrevState);
                     }
                 }
             }
@@ -1552,11 +1593,15 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $Path Path to new folder.
      * @param string $FolderName New folder name.
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function CreateFolder($UserId, $Type, $Path, $FolderName)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        if (trim($FolderName) === '') {
+            throw new ApiException(\Aurora\System\Notifications::InvalidInputParameter);
+        }
+
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         return false;
     }
@@ -1626,11 +1671,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $Link Link value.
      * @param string $Name Link name.
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function CreateLink($UserId, $Type, $Path, $Link, $Name)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         return false;
     }
 
@@ -1691,11 +1736,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $Type Type of storage - personal, corporate.
      * @param array $Items Array of items to delete.
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function Delete($UserId, $Type, $Items)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         return false;
     }
@@ -1706,11 +1751,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param int $UserId User identifier.
      * @param array $Items Array of items to delete.
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function Restore($UserId, $Items)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         return false;
     }
@@ -1772,10 +1817,12 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $Type Type of storage - personal, corporate.
      * @param array $Items Array of items to leave.
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function LeaveShare($UserId, $Type, $Items)
     {
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
         $aArgs = [
             'UserId' => $UserId,
             'Type' => $Type,
@@ -1787,8 +1834,6 @@ class Module extends \Aurora\System\Module\AbstractModule
         $Type = $aArgs['Type'];
         $Items = $aArgs['Items'];
 
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-        $aNodes = [];
         $aItems = [];
         foreach ($Items as $aItem) {
             try {
@@ -1888,14 +1933,14 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $NewName New name of the item.
      * @param bool $IsLink Indicates if the item is link or not.
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function Rename($UserId, $Type, $Path, $Name, $NewName, $IsLink)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         if ($Name === '') {
-            throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
+            throw new ApiException(\Aurora\System\Notifications::InvalidInputParameter);
         }
 
         $oItem = new Classes\FileItem();
@@ -1977,12 +2022,13 @@ class Module extends \Aurora\System\Module\AbstractModule
      *		*bool* **IsFolder** Indicates if the item to copy is folder or not.
      * }
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function Copy($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-        return null;
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
+        return false;
     }
 
     /**
@@ -2052,11 +2098,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      *		*bool* **IsFolder** Indicates if the item to copy is folder or not.
      * }
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function Move($UserId, $FromType, $ToType, $FromPath, $ToPath, $Files)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         foreach ($Files as $aFile) {
             if (!$aFile['IsFolder']) {
                 $oItem = new Classes\FileItem();
@@ -2134,11 +2180,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param int $Size Size of the file.
      * @param bool $IsFolder Indicates if the item is folder or not.
      * @return string|false Public link to the item.
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function CreatePublicLink($UserId, $Type, $Path, $Name, $Size, $IsFolder)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         return false;
     }
 
@@ -2200,11 +2246,11 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $Path Path to the item.
      * @param string $Name Name of the item.
      * @return bool
-     * @throws \Aurora\System\Exceptions\ApiException
+     * @throws ApiException
      */
     public function DeletePublicLink($UserId, $Type, $Path, $Name)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         return false;
     }
 
@@ -2221,10 +2267,10 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function CheckUrl($Url)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         if ($this->getConfig('DisableShortcuts')) {
-            throw new \Aurora\System\Exceptions\ApiException(
+            throw new ApiException(
                 \Aurora\System\Notifications::AccessDenied
             );
         }
@@ -2248,18 +2294,21 @@ class Module extends \Aurora\System\Module\AbstractModule
     }
 
     /**
+     * @param int $UserId
+     * @param array $Hashes
+     *
      * @return array
      */
-    public function GetFilesForUpload($UserId, $Hashes = array())
+    public function GetFilesForUpload($UserId, $Hashes = [])
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-        $sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+        $sUUID = Api::getUserUUIDById($UserId);
 
         $mResult = false;
         if (is_array($Hashes) && 0 < count($Hashes)) {
             $mResult = array();
             foreach ($Hashes as $sHash) {
-                $aData = \Aurora\System\Api::DecodeKeyValues($sHash);
+                $aData = Api::DecodeKeyValues($sHash);
                 if (\is_array($aData) && 0 < \count($aData)) {
                     $oFileInfo = self::Decorator()->GetFileInfo($UserId, $aData['Type'], $aData['Path'], $aData['Id']);
 
@@ -2289,7 +2338,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                         );
 
                         $aItem['MimeType'] = \MailSo\Base\Utils::MimeContentType($aItem['Name']);
-                        $aItem['NewHash'] = \Aurora\System\Api::EncodeKeyValues(array(
+                        $aItem['NewHash'] = Api::EncodeKeyValues(array(
                             'TempFile' => true,
                             'UserId' => $UserId,
                             'Name' => $aItem['Name'],
@@ -2315,7 +2364,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                 }
             }
         } else {
-            throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
+            throw new ApiException(\Aurora\System\Notifications::InvalidInputParameter);
         }
 
         return $mResult;
@@ -2331,7 +2380,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function IsFileExists($UserId, $Type, $Path, $Name)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         return true;
     }
 
@@ -2344,7 +2393,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetNonExistentFileName($UserId, $Type, $Path, $Name, $WithoutGroup = false)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
         return $Name;
     }
 
@@ -2355,7 +2404,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function SaveFilesAsTempFiles($UserId, $Files)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         $mResult = false;
 
@@ -2385,7 +2434,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                 );
 
                 if (is_resource($mFileResource)) {
-                    $sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
+                    $sUUID = Api::getUserUUIDById($UserId);
                     try {
                         $sTempName = md5($sUUID . $Storage . $Path . $Name);
 
@@ -2394,7 +2443,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                         }
 
                         if ($this->getFilecacheManager()->isFileExists($sUUID, $sTempName)) {
-                            $mResult[] = \Aurora\System\Utils::GetClientFileResponse(
+                            $mResult[] = Utils::GetClientFileResponse(
                                 null,
                                 $UserId,
                                 $Name,
@@ -2403,7 +2452,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                             );
                         }
                     } catch (\Exception $oException) {
-                        throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::FilesNotAllowed, $oException);
+                        throw new ApiException(\Aurora\System\Notifications::FilesNotAllowed, $oException);
                     }
                 }
             }
@@ -2412,33 +2461,42 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $mResult;
     }
 
+    /**
+     * Summary of UpdateSettingsForEntity
+     * @param string $EntityType
+     * @param int $EntityId
+     * @param int $UserSpaceLimitMb
+     * @param int $TenantSpaceLimitMb
+     * @throws ApiException
+     * @return bool
+     */
     public function UpdateSettingsForEntity($EntityType, $EntityId, $UserSpaceLimitMb, $TenantSpaceLimitMb)
     {
         $bResult = false;
-        $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
+        $oAuthenticatedUser = Api::getAuthenticatedUser();
 
         if ($EntityType === '') {
-            \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
+            Api::checkUserRoleIsAtLeast(UserRole::SuperAdmin);
             $this->setConfig('TenantSpaceLimitMb', $TenantSpaceLimitMb);
             $this->setConfig('UserSpaceLimitMb', $UserSpaceLimitMb);
             return $this->saveModuleConfig();
         }
         if ($EntityType === 'Tenant') {
-            \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-            $oTenant = \Aurora\Api::getTenantById($EntityId);
+            Api::checkUserRoleIsAtLeast(UserRole::TenantAdmin);
+            $oTenant = Api::getTenantById($EntityId);
 
             if ($oTenant instanceof Tenant
                     && $oAuthenticatedUser instanceof User
-                    && (($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oTenant->Id === $oAuthenticatedUser->IdTenant)
-                    || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)) {
-                if ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin) {
+                    && (($oAuthenticatedUser->Role === UserRole::TenantAdmin && $oTenant->Id === $oAuthenticatedUser->IdTenant)
+                    || $oAuthenticatedUser->Role === UserRole::SuperAdmin)) {
+                if ($oAuthenticatedUser->Role === UserRole::SuperAdmin) {
                     $oTenant->setExtendedProp(self::GetName() . '::TenantSpaceLimitMb', $TenantSpaceLimitMb);
                 }
                 if (is_int($UserSpaceLimitMb)) {
                     if ($UserSpaceLimitMb <= $TenantSpaceLimitMb || $TenantSpaceLimitMb === 0) {
                         $oTenant->setExtendedProp(self::GetName() . '::UserSpaceLimitMb', $UserSpaceLimitMb);
                     } else {
-                        throw new \Aurora\System\Exceptions\ApiException(1, null, 'User space limit must be less then tenant space limit');
+                        throw new ApiException(1, null, 'User space limit must be less then tenant space limit');
                     }
                 }
 
@@ -2446,85 +2504,100 @@ class Module extends \Aurora\System\Module\AbstractModule
             }
         }
         if ($EntityType === 'User') {
-            \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-            $oUser = \Aurora\Api::getUserById($EntityId);
+            Api::checkUserRoleIsAtLeast(UserRole::TenantAdmin);
+            $oUser = Api::getUserById($EntityId);
 
-            if ($oUser instanceof \Aurora\Modules\Core\Models\User
-                    && $oAuthenticatedUser instanceof \Aurora\Modules\Core\Models\User
-                    && (($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant)
-                    || $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin)) {
-                $oTenant = \Aurora\Api::getTenantById($oUser->IdTenant);
+            if ($oUser instanceof User
+                    && $oAuthenticatedUser instanceof User
+                    && (($oAuthenticatedUser->Role === UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant)
+                    || $oAuthenticatedUser->Role === UserRole::SuperAdmin)) {
+                $oTenant = Api::getTenantById($oUser->IdTenant);
 
                 $iTenantSpaceLimitMb = $oTenant->getExtendedProp(self::GetName() . '::TenantSpaceLimitMb');
                 if ($iTenantSpaceLimitMb > 0) {
-                    $iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oUser->IdTenant);
+                    $iAllocatedSpaceForUsersInTenant = $this->getAllocatedSpaceForUsersInTenant($oUser->IdTenant);
                     $iNewAllocatedSpaceForUsersInTenant = $iAllocatedSpaceForUsersInTenant - $oUser->getExtendedProp(self::GetName() . '::UserSpaceLimitMb') + $UserSpaceLimitMb;
                     if ($iNewAllocatedSpaceForUsersInTenant > $iTenantSpaceLimitMb) {
-                        throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
+                        throw new ApiException(1, null, 'Over quota');
                     }
                 }
 
                 $oUser->setExtendedProp(self::GetName() . '::UserSpaceLimitMb', $UserSpaceLimitMb);
 
-                $bResult = \Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
+                $bResult = CoreModule::Decorator()->UpdateUserObject($oUser);
             }
         }
 
         return $bResult;
     }
 
+    /**
+     * @param int $UserId
+     * @param int $Limit
+     * @return bool
+     */
     public function UpdateUserSpaceLimit($UserId, $Limit)
     {
         $mResult = false;
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
+        Api::checkUserRoleIsAtLeast(UserRole::TenantAdmin);
 
-        $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-        $oUser = \Aurora\Api::getUserById($UserId);
+        $oAuthenticatedUser = Api::getAuthenticatedUser();
+        $oUser = Api::getUserById($UserId);
 
-        if ($oUser instanceof \Aurora\Modules\Core\Models\User && $oAuthenticatedUser instanceof \Aurora\Modules\Core\Models\User && (
-            ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant) ||
-                $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin
+        if ($oUser instanceof User && $oAuthenticatedUser instanceof User && (
+            ($oAuthenticatedUser->Role === UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant) ||
+                $oAuthenticatedUser->Role === UserRole::SuperAdmin
         )
         ) {
             $oUser->setExtendedProp(self::GetName() . '::UserSpaceLimitMb', $Limit);
-            $mResult = \Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oUser);
+            $mResult = CoreModule::Decorator()->UpdateUserObject($oUser);
         }
 
         return $mResult;
     }
 
+    /**
+     * Summary of UpdateTenantSpaceLimit
+     * @param int $TenantId
+     * @param int $Limit
+     * @return bool
+     */
     public function UpdateTenantSpaceLimit($TenantId, $Limit)
     {
         $mResult = false;
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
+        Api::checkUserRoleIsAtLeast(UserRole::SuperAdmin);
 
-        $oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-        $oTenant = \Aurora\Api::getTenantById($TenantId);
+        $oAuthenticatedUser = Api::getAuthenticatedUser();
+        $oTenant = Api::getTenantById($TenantId);
 
         if ($oTenant instanceof Tenant && $oAuthenticatedUser instanceof User && (
-            ($oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oTenant->Id === $oAuthenticatedUser->IdTenant) ||
-                $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::SuperAdmin
+            ($oAuthenticatedUser->Role === UserRole::TenantAdmin && $oTenant->Id === $oAuthenticatedUser->IdTenant) ||
+                $oAuthenticatedUser->Role === UserRole::SuperAdmin
         )
         ) {
             $oTenant->setExtendedProp(self::GetName() . '::UserSpaceLimitMb', $Limit);
-            $mResult = \Aurora\Modules\Core\Module::Decorator()->UpdateUserObject($oTenant);
+            $mResult = CoreModule::Decorator()->UpdateTenantObject($oTenant);
         }
 
         return $mResult;
     }
 
-    public function GetAllocatedSpaceForUsersInTenant($TenantId)
-    {
-        return User::where('IdTenant', $TenantId)->sum('Properties->' . 'PersonalFiles::UsedSpace') / 1024 / 1024;
-    }
-
+    /**
+     * Summary of CheckAllocatedSpaceLimitForUsersInTenant
+     * @param Tenant $oTenant
+     * @param int $UserSpaceLimitMb
+     * @throws ApiException
+     * @return void
+     */
     public function CheckAllocatedSpaceLimitForUsersInTenant($oTenant, $UserSpaceLimitMb)
     {
+        Api::checkUserRoleIsAtLeast(UserRole::TenantAdmin);
+
         $iTenantSpaceLimitMb = $oTenant->getExtendedProp(self::GetName() . '::TenantSpaceLimitMb');
-        $iAllocatedSpaceForUsersInTenant = $this->GetAllocatedSpaceForUsersInTenant($oTenant->Id);
+        $iAllocatedSpaceForUsersInTenant = $this->getAllocatedSpaceForUsersInTenant($oTenant->Id);
 
         if ($iTenantSpaceLimitMb > 0 && $iAllocatedSpaceForUsersInTenant + $UserSpaceLimitMb > $iTenantSpaceLimitMb) {
-            throw new \Aurora\System\Exceptions\ApiException(1, null, 'Over quota');
+            throw new ApiException(1, null, 'Over quota');
         }
     }
 
@@ -2541,7 +2614,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function UpdateExtendedProps($UserId, $Type, $Path, $Name, $ExtendedProps)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         return false;
         // Actual updating is preceded in subscribed methods. Look for it by "Files::UpdateExtendedProps::after"
@@ -2549,10 +2622,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function GetExtendedProps($UserId = null, $Type = null, $Path = null, $Name = null)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         if ($UserId === null || $Type === null || $Path === null || $Name === null) {
-            throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::InvalidInputParameter);
+            throw new ApiException(\Aurora\System\Notifications::InvalidInputParameter);
         }
 
         return false;
@@ -2561,7 +2634,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function GetAccessInfoForPath($UserId, $Type, $Path)
     {
-        \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+        Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
         // Actual updating is preceded in subscribed methods. Look for it by "Files::GetInfoForPath::after"
         return false;
@@ -2665,5 +2738,14 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
 
         return $sDisplayName;
+    }
+
+    /**
+     * @param int $TenantId
+     * @return float|int
+     */
+    protected function getAllocatedSpaceForUsersInTenant($TenantId)
+    {
+        return User::where('IdTenant', $TenantId)->sum('Properties->' . 'PersonalFiles::UsedSpace') / 1024 / 1024;
     }
 }
