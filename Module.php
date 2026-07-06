@@ -559,13 +559,13 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetSettingsForEntity($EntityType, $EntityId)
     {
-        Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
+        $authUser = Api::getAuthenticatedUser();
 
         $aResult = [];
         if ($EntityType === 'Tenant') {
             Api::checkUserRoleIsAtLeast(UserRole::TenantAdmin);
             $oTenant = Api::getTenantById($EntityId);
-            if ($oTenant instanceof Tenant) {
+            if ($oTenant instanceof Tenant && ($authUser->IdTenant === $oTenant->Id || $authUser->Role === UserRole::SuperAdmin)) {
                 $aResult = [
                     'TenantSpaceLimitMb' => $oTenant->getExtendedProp(self::GetName() . '::TenantSpaceLimitMb'),
                     'UserSpaceLimitMb' => $oTenant->getExtendedProp(self::GetName() . '::UserSpaceLimitMb'),
@@ -576,7 +576,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         if ($EntityType === 'User') {
             Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
             $oUser = Api::getUserById($EntityId);
-            if ($oUser instanceof User) {
+            if ($oUser instanceof User && Api::CheckAccess($oUser->Id)) {
                 $aResult = [
                     'UserSpaceLimitMb' => $oUser->getExtendedProp(self::GetName() . '::UserSpaceLimitMb'),
                 ];
@@ -1078,6 +1078,8 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
+        Api::CheckAccess($UserId);
+
         return [
             'Limit' => 0,
             'Used' => 0
@@ -1087,6 +1089,8 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function CheckQuota($UserId, $Type, $Size)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
+        Api::CheckAccess($UserId);
 
         return false;
     }
@@ -1199,6 +1203,9 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetFiles($UserId, $Type, $Path, $Pattern, $Shared = false)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
+        Api::CheckAccess($UserId);
+
         return [
             'Items' => self::Decorator()->GetItems($UserId, $Type, $Path, $Pattern, null, $Shared),
             'Quota' => self::Decorator()->GetQuota($UserId, $Type)
@@ -1822,6 +1829,8 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function LeaveShare($UserId, $Type, $Items)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
+        Api::CheckAccess($UserId);
 
         $aArgs = [
             'UserId' => $UserId,
@@ -2648,6 +2657,8 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function AddToFavorites($UserId, $Items)
     {
+        Api::CheckAccess($UserId);     
+
         $mResult = false;
         $sPublicUserId = Api::getUserPublicIdById($UserId);
         $insert = [];
@@ -2678,6 +2689,8 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function RemoveFromFavorites($UserId, $Items)
     {
+        Api::CheckAccess($UserId);  
+
         $mResult = false;
         $sPublicUserId = Api::getUserPublicIdById($UserId);
         $query = Models\FavoriteFile::query();
@@ -2708,6 +2721,8 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetFavorites($UserId)
     {
+        Api::CheckAccess($UserId);  
+
         return Models\FavoriteFile::where('IdUser', $UserId)->get()->toArray();
     }
     /***** public functions might be called with web API *****/
