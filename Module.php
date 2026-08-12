@@ -941,6 +941,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetFileThumbnail($UserId, $Type, $Path, $Name, $SharedHash)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+        Api::CheckAccess($UserId);
 
         return false;
     }
@@ -1430,6 +1431,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetFileContent($UserId, $Type, $Path, $Name)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+        Api::CheckAccess($UserId);
         // File content is obtained in subscribers methods
     }
 
@@ -1445,6 +1447,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetFileInfo($UserId, $Type, $Path, $Id)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+        Api::CheckAccess($UserId);
 
         return null;
     }
@@ -1522,18 +1525,21 @@ class Module extends \Aurora\System\Module\AbstractModule
                     $oUser = CoreModule::Decorator()->GetUserByPublicId($sUserPublicId);
                     if ($oUser) {
                         $bPrevState = Api::skipCheckUserRole(true);
-                        $sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
-                        $mPos = strpos($Path, $sMinPath);
-                        if ($mPos === 0 || $Path === '') {
-                            if ($mPos !== 0) {
-                                $Path =  $sMinPath . $Path;
+                        try {
+                            $sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
+                            $mPos = strpos($Path, $sMinPath);
+                            if ($mPos === 0 || $Path === '') {
+                                if ($mPos !== 0) {
+                                    $Path =  $sMinPath . $Path;
+                                }
+                                $Path = str_replace('.', '', $Path);
+                                $mResult = [
+                                    'Items' => self::Decorator()->GetItems($oUser->Id, $mMin['Type'], $Path, '', $Hash)
+                                ];
                             }
-                            $Path = str_replace('.', '', $Path);
-                            $mResult = [
-                                'Items' => self::Decorator()->GetItems($oUser->Id, $mMin['Type'], $Path, '', $Hash)
-                            ];
+                        } finally {
+                            Api::skipCheckUserRole($bPrevState);
                         }
-                        Api::skipCheckUserRole($bPrevState);
                     }
                 }
             }
@@ -2311,6 +2317,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetFilesForUpload($UserId, $Hashes = [])
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+        Api::CheckAccess($UserId);
         $sUUID = Api::getUserUUIDById($UserId);
 
         $mResult = false;
