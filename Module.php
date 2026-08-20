@@ -1352,7 +1352,14 @@ class Module extends \Aurora\System\Module\AbstractModule
             $files = [];
             $favorites = $this->GetFavorites($UserId);
             foreach ($favorites as $favorite) {
-                list($sPath, $sName) = \Sabre\Uri\split($favorite['FullPath']);
+                $sFullPath = $favorite['FullPath'];
+                $sTrashPath = '/' . \Aurora\Modules\PersonalFiles\Module::$sTrashFolder;
+                $bIsInTrash = strpos($sFullPath, $sTrashPath . '/') === 0 || $sFullPath === $sTrashPath;
+                $bAllowTrash = self::getInstance()->getConfig('AllowTrash', true);
+                if (!$bAllowTrash && $bIsInTrash) {
+                    continue;
+                }
+                list($sPath, $sName) = \Sabre\Uri\split($sFullPath);
                 $file = \Aurora\Modules\PersonalFiles\Module::getInstance()->getManager()->getFileInfo($sUserPiblicId, $favorite['Type'], $sPath, $sName);
                 if ($file) {
                     $file->Name = $favorite['DisplayName'];
@@ -2661,28 +2668,31 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         $mResult = false;
         $sPublicUserId = Api::getUserPublicIdById($UserId);
+        $bAllExist = true;
         $insert = [];
         foreach ($Items as $aItem) {
-            $sFullPath = $aItem['Path'] . '/' . $aItem['Name'];
+            $sFullPath = isset($aItem['Name']) ? $aItem['Path'] . '/' . $aItem['Name'] : $aItem['Path'];
+            $sFullPath = preg_replace('#/+#', '/', $sFullPath);
+            $sFullPath = $sFullPath === '/' ? '' : rtrim($sFullPath, '/');
             $bExists = Models\FavoriteFile::where('IdUser', $UserId)
                 ->where('Type', $aItem['Type'])
                 ->where('FullPath', $sFullPath)
                 ->exists();
             if (!$bExists) {
-                $oItem = Server::getNodeForPath('files/' . $aItem['Type'] . $aItem['Path'] . '/' . $aItem['Name'], $sPublicUserId);
-                if ($oItem) {
-                    $insert[] = [
-                        'IdUser' => $UserId,
-                        'Type' => $aItem['Type'],
-                        'FullPath' => $sFullPath,
-                        'DisplayName' => $this->getNonExistentFavoriteName($UserId, basename($aItem['Name']))
-                    ];
-                }
+                $bAllExist = false;
+                $insert[] = [
+                    'IdUser' => $UserId,
+                    'Type' => $aItem['Type'],
+                    'FullPath' => $sFullPath,
+                    'DisplayName' => $this->getNonExistentFavoriteName($UserId, basename($sFullPath) ?: $sFullPath)
+                ];
             }
         }
 
         if (count($insert) > 0) {
             $mResult = Models\FavoriteFile::insert($insert);
+        } elseif ($bAllExist && count($Items) > 0) {
+            $mResult = true;
         }
 
         return $mResult;
@@ -2703,16 +2713,16 @@ class Module extends \Aurora\System\Module\AbstractModule
         $query = Models\FavoriteFile::query();
         $itemsCount = 0;
         foreach ($Items as $aItem) {
-            $oItem = Server::getNodeForPath('files/' . $aItem['Type'] . $aItem['Path'] . '/' . $aItem['Name'], $sPublicUserId);
-            if ($oItem) {
-                $itemsCount++;
-                $query->orWhere(function ($subQuery) use ($UserId, $aItem) {
-                    $subQuery
-                        ->where('IdUser', $UserId)
-                        ->where('Type', $aItem['Type'])
-                        ->where('FullPath', $aItem['Path'] . '/' . $aItem['Name']);
-                });
-            }
+            $itemsCount++;
+            $sFullPath = isset($aItem['Name']) ? $aItem['Path'] . '/' . $aItem['Name'] : $aItem['Path'];
+            $sFullPath = preg_replace('#/+#', '/', $sFullPath);
+            $sFullPath = $sFullPath === '/' ? '' : rtrim($sFullPath, '/');
+            $query->orWhere(function ($subQuery) use ($UserId, $aItem, $sFullPath) {
+                $subQuery
+                    ->where('IdUser', $UserId)
+                    ->where('Type', $aItem['Type'])
+                    ->where('FullPath', $sFullPath);
+            });
         }
 
         if ($itemsCount > 0) {
