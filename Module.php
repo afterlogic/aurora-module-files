@@ -2664,7 +2664,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function AddToFavorites($UserId, $Items)
     {
-        Api::CheckAccess($UserId);     
+        Api::CheckAccess($UserId);
 
         $mResult = false;
         $sPublicUserId = Api::getUserPublicIdById($UserId);
@@ -2706,7 +2706,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function RemoveFromFavorites($UserId, $Items)
     {
-        Api::CheckAccess($UserId);  
+        Api::CheckAccess($UserId);
 
         $mResult = false;
         $sPublicUserId = Api::getUserPublicIdById($UserId);
@@ -2738,7 +2738,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetFavorites($UserId)
     {
-        Api::CheckAccess($UserId);  
+        Api::CheckAccess($UserId);
 
         return Models\FavoriteFile::where('IdUser', $UserId)->get()->toArray();
     }
