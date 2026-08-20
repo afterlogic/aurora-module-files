@@ -2663,14 +2663,21 @@ class Module extends \Aurora\System\Module\AbstractModule
         $sPublicUserId = Api::getUserPublicIdById($UserId);
         $insert = [];
         foreach ($Items as $aItem) {
-            $oItem = Server::getNodeForPath('files/' . $aItem['Type'] . $aItem['Path'] . '/' . $aItem['Name'], $sPublicUserId);
-            if ($oItem) {
-                $insert[] = [
-                    'IdUser' => $UserId,
-                    'Type' => $aItem['Type'],
-                    'FullPath' => $aItem['Path'] . '/' . $aItem['Name'],
-                    'DisplayName' => $this->getNonExistentFavoriteName($UserId, basename($aItem['Name']))
-                ];
+            $sFullPath = $aItem['Path'] . '/' . $aItem['Name'];
+            $bExists = Models\FavoriteFile::where('IdUser', $UserId)
+                ->where('Type', $aItem['Type'])
+                ->where('FullPath', $sFullPath)
+                ->exists();
+            if (!$bExists) {
+                $oItem = Server::getNodeForPath('files/' . $aItem['Type'] . $aItem['Path'] . '/' . $aItem['Name'], $sPublicUserId);
+                if ($oItem) {
+                    $insert[] = [
+                        'IdUser' => $UserId,
+                        'Type' => $aItem['Type'],
+                        'FullPath' => $sFullPath,
+                        'DisplayName' => $this->getNonExistentFavoriteName($UserId, basename($aItem['Name']))
+                    ];
+                }
             }
         }
 
