@@ -1772,13 +1772,15 @@ class Module extends \Aurora\System\Module\AbstractModule
      * Restore files and folder specified with list from Trash.
      *
      * @param int $UserId User identifier.
-     * @param array $Items Array of items to delete.
-     * @return bool
+     * @param array $Items Array of items to restore.
+     * @return array|false List of restored file info or false on failure.
      * @throws ApiException
      */
     public function Restore($UserId, $Items)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+
+        Api::CheckAccess($UserId);
 
         return false;
     }
