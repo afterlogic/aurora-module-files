@@ -1769,6 +1769,69 @@ class Module extends \Aurora\System\Module\AbstractModule
     }
 
     /**
+     * @api {post} ?/Api/ Restore
+     * @apiDescription Restores files and folders from Trash.
+     * @apiName Restore
+     * @apiGroup Files
+     *
+     * @apiHeader {string} Authorization "Bearer " + Authentication token which was received as the result of Core.Login method.
+     * @apiHeaderExample {json} Header-Example:
+     *	{
+     *		"Authorization": "Bearer 32b2ecd4a4016fedc4abee880425b6b8"
+     *	}
+     *
+     * @apiParam {string=Files} Module Module name
+     * @apiParam {string=Restore} Method Method name
+     * @apiParam {string} Parameters JSON.stringified object <br>
+     * {<br>
+     * &emsp; **Items** *array* Array of item names in Trash to restore.<br>
+     * }
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *	Module: 'Files',
+     *	Method: 'Restore',
+     *	Parameters: '{ Items: ["to_trash.txt", "document.pdf"] }'
+     * }
+     *
+     * @apiSuccess {object[]} Result List of restored file info objects.
+     * @apiSuccess {string} Result.Module Module name
+     * @apiSuccess {string} Result.Method Method name
+     * @apiSuccess {object[]} Result.Result Array of restored file info.
+     * @apiSuccess {string} Result.Result.FromPath Path in Trash where the file was located (e.g. "/.trash").
+     * @apiSuccess {string} Result.Result.FromName Name of the file in Trash.
+     * @apiSuccess {string} Result.Result.ToPath Path where the file was restored to.
+     * @apiSuccess {string} Result.Result.ToName Name of the file after restoration (may include suffix if name conflict).
+     * @apiSuccess {string} Result.Result.ToOriginalName Original name of the file before deletion.
+     * @apiSuccess {string} Result.Result.ToType Type of storage the file was restored to (e.g. "personal").
+     * @apiSuccess {int} [Result.ErrorCode] Error code
+     *
+     * @apiSuccessExample {json} Success response example:
+     * {
+     *	Module: 'Files',
+     *	Method: 'Restore',
+     *	Result: [
+     *		{
+     *			FromPath: "/.trash",
+     *			FromName: "to_trash.txt",
+     *			ToPath: "",
+     *			ToName: "to_trash.txt",
+     *			ToOriginalName: "to_trash.txt",
+     *			ToType: "personal"
+     *		}
+     *	]
+     * }
+     *
+     * @apiSuccessExample {json} Error response example:
+     * {
+     *	Module: 'Files',
+     *	Method: 'Restore',
+     *	Result: false,
+     *	ErrorCode: 102
+     * }
+     */
+
+    /**
      * Restore files and folder specified with list from Trash.
      *
      * @param int $UserId User identifier.
