@@ -2506,6 +2506,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function SaveFilesAsTempFiles($UserId, $Files)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
+        Api::CheckAccess($UserId);
 
         $mResult = false;
 
