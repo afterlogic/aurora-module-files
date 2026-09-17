@@ -1539,6 +1539,14 @@ class Module extends \Aurora\System\Module\AbstractModule
                 $sUserPublicId = $mMin['UserId'];
                 if ($sUserPublicId) {
                     $oUser = CoreModule::Decorator()->GetUserByPublicId($sUserPublicId);
+                    if ($oUser instanceof User) {
+                        $oAuthenticatedUser = Api::getAuthenticatedUser();
+                        $bIsSuperAdmin = $oAuthenticatedUser instanceof User && $oAuthenticatedUser->Role === UserRole::SuperAdmin;
+                        $oCurrentTenant = Api::getCurrentTenant();
+                        if (!$bIsSuperAdmin && $oCurrentTenant instanceof Tenant && (int) $oCurrentTenant->Id !== (int) $oUser->IdTenant) {
+                            $oUser = null;
+                        }
+                    }
                     if ($oUser) {
                         $bPrevState = Api::skipCheckUserRole(true);
                         try {
