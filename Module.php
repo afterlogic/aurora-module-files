@@ -1364,15 +1364,16 @@ class Module extends \Aurora\System\Module\AbstractModule
             foreach ($favorites as $favorite) {
                 $sFullPath = $favorite['FullPath'];
                 $sTrashPath = '/' . \Aurora\Modules\PersonalFiles\Module::$sTrashFolder;
+                // Items in trash are deleted items, they are not shown in favorites
                 $bIsInTrash = strpos($sFullPath, $sTrashPath . '/') === 0 || $sFullPath === $sTrashPath;
-                $bAllowTrash = self::getInstance()->getConfig('AllowTrash', true);
-                if (!$bAllowTrash && $bIsInTrash) {
+                if ($bIsInTrash) {
                     continue;
                 }
                 list($sPath, $sName) = \Sabre\Uri\split($sFullPath);
                 $file = \Aurora\Modules\PersonalFiles\Module::getInstance()->getManager()->getFileInfo($sUserPiblicId, $favorite['Type'], $sPath, $sName);
                 if ($file) {
-                    $file->Name = $favorite['DisplayName'];
+                    // The item keeps its actual name. DisplayName is saved once when the item is
+                    // added to favorites and is not updated on rename, so it may be outdated.
                     $files[] = $file;
                 }
             }
