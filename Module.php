@@ -1844,7 +1844,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      *	Result: false,
      *	ErrorCode: 102
      * }
-     * 
+     *
      * @param int $UserId User identifier.
      * @param array $Items Array of items to restore.
      * @return array|false List of restored file info or false on failure.

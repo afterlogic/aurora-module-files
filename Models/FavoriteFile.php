@@ -7,6 +7,12 @@ use Aurora\System\Classes\Model;
 /**
  * Summary of FavoriteFile
  *
+ * @property int $Id
+ * @property int $IdUser
+ * @property string $Type
+ * @property string $FullPath
+ * @property string $DisplayName
+ *
  * @method static bool insert(array $values)
  */
 class FavoriteFile extends Model
