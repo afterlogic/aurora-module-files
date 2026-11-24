@@ -135,6 +135,91 @@ class Module extends \Aurora\System\Module\AbstractModule
         return Api::GetModuleDecorator('Min');
     }
 
+    private function getPublicFileShare($sHash)
+    {
+        if (!is_string($sHash) || $sHash === '') {
+            return null;
+        }
+
+        $oMinDecorator = $this->getMinModuleDecorator();
+        $aShare = $oMinDecorator ? $oMinDecorator->GetMinByHash($sHash) : false;
+        if (empty($aShare['__hash__']) || empty($aShare['UserId']) || empty($aShare['Type'])
+            || !isset($aShare['Path'], $aShare['Name']) || !is_string($aShare['Path'])
+            || !is_string($aShare['Name']) || $aShare['Name'] === '' || strpos($aShare['Name'], '/') !== false
+            || (!empty($aShare['ExpireDate']) && (int) $aShare['ExpireDate'] < time())
+        ) {
+            return null;
+        }
+
+        return $aShare;
+    }
+
+    private function normalizePublicFilePath($sPath)
+    {
+        if (!is_string($sPath) || strpbrk($sPath, "\\\0") !== false) {
+            return null;
+        }
+
+        $sPath = trim(preg_replace('~/+~', '/', $sPath), '/');
+        foreach (explode('/', $sPath) as $sSegment) {
+            if ($sSegment === '.' || $sSegment === '..'
+                || (DIRECTORY_SEPARATOR === '\\' && $sSegment !== '' && rtrim($sSegment, ' .') === '')
+            ) {
+                return null;
+            }
+        }
+
+        return $sPath === '' ? '' : '/' . $sPath;
+    }
+
+    private function getSharedFolderPath(array $aShare)
+    {
+        if (empty($aShare['IsFolder'])) {
+            return null;
+        }
+
+        $sFolderPath = $this->normalizePublicFilePath($aShare['Path'] . '/' . $aShare['Name']);
+        // The ZIP handler treats paths containing this marker as archive entries.
+        return $sFolderPath !== null && strpos($sFolderPath, '$ZIP:') === false ? $sFolderPath : null;
+    }
+
+    private function isWithinSharedFolder($sFolderPath, $sPath)
+    {
+        return $sFolderPath !== null && $sPath !== null
+            && ($sPath === $sFolderPath || strpos($sPath, $sFolderPath . '/') === 0);
+    }
+
+    private function isPublicFileAllowed(array $aShare, $sType, $sPath, $sName)
+    {
+        if ($sType !== $aShare['Type'] || $sPath === null || !is_string($sName) || $sName === ''
+            || strpos($sName, '/') !== false || $this->normalizePublicFilePath($sName) === null
+        ) {
+            return false;
+        }
+
+        if (empty($aShare['IsFolder'])) {
+            return $sName === $aShare['Name'] && $sPath === $this->normalizePublicFilePath($aShare['Path'])
+                && strpos($sPath, '$ZIP:') === false;
+        }
+
+        return $this->isWithinSharedFolder($this->getSharedFolderPath($aShare), $sPath);
+    }
+
+    private function resolvePublicFileOwner($sHash, $sType, &$sPath, $sName)
+    {
+        Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
+        $aShare = $this->getPublicFileShare($sHash);
+        $sPath = $this->normalizePublicFilePath($sPath);
+        if ($aShare && $this->isPublicFileAllowed($aShare, $sType, $sPath, $sName)) {
+            $iUserId = Api::getUserIdByPublicId($aShare['UserId']);
+            if ($iUserId) {
+                return $iUserId;
+            }
+        }
+
+        throw new ApiException(\Aurora\System\Notifications::AccessDenied);
+    }
+
     /**
      * Checks if storage type is personal or corporate.
      *
@@ -190,15 +275,10 @@ class Module extends \Aurora\System\Module\AbstractModule
             $iOffset = $iChunkSize * $iOffset;
         }
 
-        $oModuleDecorator = $this->getMinModuleDecorator();
-        $mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
-
-        $iUserId = (!empty($mMin['__hash__'])) ? $mMin['UserId'] : $iUserId;
-
         try {
-            if ($iUserId && $SharedHash !== null) {
-                Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
-                Server::setUser($iUserId);
+            if ($SharedHash !== null) {
+                $iUserId = $this->resolvePublicFileOwner($SharedHash, $sType, $sPath, $sFileName);
+                Server::setUser(Api::getUserPublicIdById($iUserId));
             } else {
                 Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
                 if ($iUserId !== Api::getAuthenticatedUserId()) {
@@ -210,7 +290,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             exit();
         }
 
-        if (!empty($sType) && !empty($sPath) && !empty($sFileName)) {
+        if ($SharedHash !== null || (!empty($sType) && !empty($sPath) && !empty($sFileName))) {
 
             $mResult = false;
             if ($bThumbnail) {
@@ -292,23 +372,13 @@ class Module extends \Aurora\System\Module\AbstractModule
             $iOffset = $iChunkSize * $iOffset;
         }
 
-        $oModuleDecorator = $this->getMinModuleDecorator();
-        $mMin = ($oModuleDecorator && $SharedHash !== null) ? $oModuleDecorator->GetMinByHash($SharedHash) : array();
-
-        if ($SharedHash !== null && empty($mMin)) {
-            $this->oHttp->StatusHeader(403);
-            exit;
-        }
-
-        $iUserId = (!empty($mMin['__hash__'])) ? Api::getUserIdByPublicId($mMin['UserId']) : $iUserId;
-
         try {
-            if ($iUserId && $SharedHash !== null) {
+            if ($SharedHash !== null) {
+                $iUserId = $this->resolvePublicFileOwner($SharedHash, $sType, $sPath, $sFileName);
                 $authenticatedUserId = Api::getAuthenticatedUserId();
                 if ($authenticatedUserId) {
                     Api::CheckAccess($iUserId);
                 }
-                Api::checkUserRoleIsAtLeast(UserRole::Anonymous);
                 Server::setUser(Api::getUserPublicIdById($iUserId));
             } else {
                 Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
@@ -745,7 +815,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         if ($sUserPublicId) {
             if (is_array($UploadData)) {
-                if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && self::Decorator()->IsFileExists($UserId, $Type, $Path, $UploadData['name'])) {// It is forbidden to write first сhunk to the end of a existing file
+                if (isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && self::Decorator()->IsFileExists($UserId, $Type, $Path, $UploadData['name'])) {// It is forbidden to write first chunk to the end of a existing file
                     $sError = \Aurora\System\Notifications::FileAlreadyExists;
                 } elseif (!isset($ExtendedProps['FirstChunk']) && $RangeType == 1 && !self::Decorator()->IsFileExists($UserId, $Type, $Path, $UploadData['name'])) { // It is forbidden to write to the end of a nonexistent file
                     $sError = \Aurora\System\Notifications::FileNotFound;
@@ -1533,41 +1603,32 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         $mResult = [];
 
-        $oMinDecorator =  $this->getMinModuleDecorator();
-        if ($oMinDecorator) {
-            $mMin = $oMinDecorator->GetMinByHash($Hash);
-            if (!empty($mMin['__hash__'])) {
-                $sUserPublicId = $mMin['UserId'];
-                if ($sUserPublicId) {
-                    $oUser = CoreModule::Decorator()->GetUserByPublicId($sUserPublicId);
-                    if ($oUser instanceof User) {
-                        $oAuthenticatedUser = Api::getAuthenticatedUser();
-                        $bIsSuperAdmin = $oAuthenticatedUser instanceof User && $oAuthenticatedUser->Role === UserRole::SuperAdmin;
-                        $oCurrentTenant = Api::getCurrentTenant();
-                        if (!$bIsSuperAdmin && $oCurrentTenant instanceof Tenant && (int) $oCurrentTenant->Id !== (int) $oUser->IdTenant) {
-                            $oUser = null;
-                        }
-                    }
-                    if ($oUser) {
-                        $bPrevState = Api::skipCheckUserRole(true);
-                        try {
-                            $sMinPath = implode('/', array($mMin['Path'], $mMin['Name']));
-                            $mPos = strpos($Path, $sMinPath);
-                            if ($mPos === 0 || $Path === '') {
-                                if ($mPos !== 0) {
-                                    $Path =  $sMinPath . $Path;
-                                }
-                                $Path = str_replace('.', '', $Path);
-                                $mResult = [
-                                    'Items' => self::Decorator()->GetItems($oUser->Id, $mMin['Type'], $Path, '', $Hash)
-                                ];
-                            }
-                        } finally {
-                            Api::skipCheckUserRole($bPrevState);
-                        }
-                    }
-                }
-            }
+        $aShare = $this->getPublicFileShare($Hash);
+        $sFolderPath = $aShare ? $this->getSharedFolderPath($aShare) : null;
+        $sPath = $Path === '' ? $sFolderPath : $this->normalizePublicFilePath($Path);
+        if (!$this->isWithinSharedFolder($sFolderPath, $sPath)) {
+            return $mResult;
+        }
+
+        $oUser = CoreModule::Decorator()->GetUserByPublicId($aShare['UserId']);
+        if (!$oUser instanceof User) {
+            return $mResult;
+        }
+
+        $oAuthenticatedUser = Api::getAuthenticatedUser();
+        $bIsSuperAdmin = $oAuthenticatedUser instanceof User && $oAuthenticatedUser->Role === UserRole::SuperAdmin;
+        $oCurrentTenant = Api::getCurrentTenant();
+        if (!$bIsSuperAdmin && $oCurrentTenant instanceof Tenant && (int) $oCurrentTenant->Id !== (int) $oUser->IdTenant) {
+            return $mResult;
+        }
+
+        $bPrevState = Api::skipCheckUserRole(true);
+        try {
+            $mResult = [
+                'Items' => self::Decorator()->GetItems($oUser->Id, $aShare['Type'], $sPath, '', $Hash)
+            ];
+        } finally {
+            Api::skipCheckUserRole($bPrevState);
         }
 
         return $mResult;
