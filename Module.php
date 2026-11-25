@@ -1158,7 +1158,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
-        Api::CheckAccess($UserId);
+        Api::checkUserDataAccess($UserId);
 
         return [
             'Limit' => 0,
@@ -1284,7 +1284,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
 
-        Api::CheckAccess($UserId);
+        Api::checkUserDataAccess($UserId);
 
         return [
             'Items' => self::Decorator()->GetItems($UserId, $Type, $Path, $Pattern, null, $Shared),
@@ -1518,7 +1518,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetFileContent($UserId, $Type, $Path, $Name)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
-        Api::CheckAccess($UserId);
+        Api::checkUserDataAccess($UserId);
         // File content is obtained in subscribers methods
     }
 
@@ -1534,7 +1534,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function GetFileInfo($UserId, $Type, $Path, $Id)
     {
         Api::checkUserRoleIsAtLeast(UserRole::NormalUser);
-        Api::CheckAccess($UserId);
+        Api::checkUserDataAccess($UserId);
 
         return null;
     }
@@ -2886,7 +2886,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      */
     public function GetFavorites($UserId)
     {
-        Api::CheckAccess($UserId);
+        Api::checkUserDataAccess($UserId);
 
         return Models\FavoriteFile::where('IdUser', $UserId)->get()->toArray();
     }
